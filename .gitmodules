@@ -1,0 +1,3 @@
+[submodule "dependencies/afterburner-engine"]
+	path = dependencies/afterburner-engine
+	url = https://github.com/x6herbius/afterburner-engine.git

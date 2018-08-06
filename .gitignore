@@ -17,3 +17,10 @@ cmake_install.cmake
 *.vsxproj
 *.vsproj
 *.sln
+
+# Annoying system files
+._DS_Store
+.DS_Store
+Thumbs.db
+
+.vscode
