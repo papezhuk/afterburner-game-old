@@ -6,24 +6,15 @@ import glob
 import shutil
 from subprocess import call
 
-SUPPORTED_PLATFORMS = {
-	"Darwin": True,
-	"Linux": True
-}
+SUPPORTED_PLATFORMS = [
+	"Darwin",
+	"Linux"
+]
 
 LIBRARY_EXTENSIONS = {
 	"Darwin": "dylib",
 	"Linux": "so"
 }
-
-DEBUGINFO_EXTENSIONS = {
-	"Darwin": "dSYM"
-}
-
-BUILD_TARGETS = [
-	"hl_cdll",
-	"hl"
-]
 
 def callProcess(args):
 	print("Calling: `" + " ".join(args) + "`")
@@ -44,8 +35,12 @@ def parseCommandLineArguments():
 						default="release",
 						choices=["debug", "release"])
 
-	parser.add_argument("--clean",
-						help="Force a clean of the build directory",
+	parser.add_argument("--rebuild-game",
+						help="Cleans and rebuilds game libraries.",
+						action="store_true")
+
+	parser.add_argument("--rebuild-engine",
+						help="Cleans and rebuilds engine libraries.",
 						action="store_true")
 
 	# TODO: A better way of doing this would be to import the engine build scripts
@@ -55,22 +50,18 @@ def parseCommandLineArguments():
 						help="Name of Python executable, if different from 'python', eg. 'python3'.",
 						default="python")
 
-	parser.add_argument("--reconfigure",
-						help="Forces Cmake to be re-run for the engine.",
-						action="store_true")
-
 	return parser.parse_args()
 
-def buildEngine(enginePath, buildDirectory, pythonExecutable, buildConfig, forceConfigure):
+def buildEngine(enginePath, buildDirectory, pythonExecutable, buildConfig, forceRebuild):
 	print("Building engine located in:", enginePath)
 	print("Build output:", buildDirectory)
 
 	configureScriptPath = os.path.join(enginePath, "build-util", "create-build.py")
 	makeScriptPath = os.path.join(enginePath, "build-util", "make-and-install.py")
 
-	# Run cmake if no directory exists yet for the engine, or if we're forcibly reconfiguring.
-	if forceConfigure or not os.path.isdir(buildDirectory):
-		configureCallArgs = [pythonExecutable, configureScriptPath, "--build-dir", buildDirectory]
+	# Run cmake if no directory exists yet for the engine, or if we're forcibly rebuilding.
+	if forceRebuild or not os.path.isdir(buildDirectory):
+		configureCallArgs = [pythonExecutable, configureScriptPath, "--no-vgui", "--build-dir", buildDirectory]
 
 		if buildConfig == "debug":
 			configureCallArgs.append("--debug")
@@ -86,30 +77,27 @@ def buildEngine(enginePath, buildDirectory, pythonExecutable, buildConfig, force
 	print("*** Engine build complete.")
 	print()
 
-def generateGameDebugInfo(gameMakefilePath, buildDirectory):
-	print("Generating debug info for libraries...")
-
-	libExtension = LIBRARY_EXTENSIONS[platform.system()]
-	allLibs = glob.glob(os.path.join(buildDirectory, "*." + libExtension))
-
-	for lib in allLibs:
-		callProcess([gameMakefilePath + "/gendbg.sh", lib])
-
-def buildGame(gameMakefilePath, buildDirectory, config, shouldClean):
-	print("Building game via Makefile located in:", gameMakefilePath)
+def buildGame(gamePath, buildDirectory, config, forceRebuild):
+	print("Building game located in:", gamePath)
 	print("Build output:", buildDirectory)
+
+	if forceRebuild and os.path.exists(buildDirectory):
+		shutil.rmtree(buildDirectory)
 
 	os.makedirs(buildDirectory, exist_ok=True)
 
 	oldPath = os.getcwd()
-	os.chdir(gameMakefilePath)
+	os.chdir(buildDirectory)
 
-	callProcess(["make", "CFG=" + config, "BUILD_DIR=\"" + buildDirectory + "\""] +
-				(["clean"] if shouldClean else []) +
-				BUILD_TARGETS)
+	cmakeArgs = ["cmake"]
 
 	if config == "debug":
-		generateGameDebugInfo(gameMakefilePath, buildDirectory)
+		cmakeArgs.append("-DCMAKE_BUILD_TYPE=Debug")
+
+	cmakeArgs.append(gamePath)
+	callProcess(cmakeArgs)
+
+	callProcess(["make", "-j8"])
 
 	os.chdir(oldPath)
 	print("*** Game build complete.")
@@ -121,6 +109,16 @@ def ensureIsDirectory(path):
 			os.remove(path)
 
 		os.makedirs(path, exist_ok=True)
+
+def copyLibraries(sourcePath, destinationPath, extension):
+	allLibs = glob.glob(os.path.join(sourcePath, "*." + extension))
+
+	ensureIsDirectory(destinationPath)
+
+	for lib in allLibs:
+		if os.path.isfile(lib):
+			print("Copying library", lib, "to", destinationPath)
+			shutil.copy2(lib, destinationPath)
 
 def copyGameContent(gameBuildPath, gameContentPath, engineGameLaunchPath, config):
 	gameContentPathInEngine = os.path.join(engineGameLaunchPath, "afterburner")
@@ -142,41 +140,8 @@ def copyGameContent(gameBuildPath, gameContentPath, engineGameLaunchPath, config
 
 	libExtension = LIBRARY_EXTENSIONS[platform.system()]
 
-	allLibs = glob.glob(os.path.join(gameBuildPath, "*." + libExtension))
-	clientLibs = [lib for lib in allLibs if os.path.basename(lib).startswith("client")]
-	serverLibs = [lib for lib in allLibs if not os.path.basename(lib).startswith("client")]
-
-	clientLibDest = os.path.join(gameContentPathInEngine, "cl_dlls")
-	ensureIsDirectory(clientLibDest)
-
-	serverLibDest = os.path.join(gameContentPathInEngine, "dlls")
-	ensureIsDirectory(serverLibDest)
-
-	for lib in clientLibs:
-		if os.path.isfile(lib):
-			print("Copying client library", lib, "to", clientLibDest)
-			shutil.copy2(lib, clientLibDest)
-
-	for lib in serverLibs:
-		if os.path.isfile(lib):
-			print("Copying server library", lib, "to", serverLibDest)
-			shutil.copy2(lib, serverLibDest)
-
-	if config == "debug" and platform.system() in DEBUGINFO_EXTENSIONS:
-
-		allDebugInfo = glob.glob(os.path.join(gameBuildPath, "*." + libExtension + "." + DEBUGINFO_EXTENSIONS[platform.system()]))
-		clientDebugInfo = [item for item in allDebugInfo if os.path.basename(item).startswith("client")]
-		serverDebugInfo = [item for item in allDebugInfo if not os.path.basename(item).startswith("client")]
-
-		for item in clientDebugInfo:
-			if os.path.isfile(item):
-				print("Copying client debug info", item, "to", clientLibDest)
-				shutil.copy2(item, clientLibDest)
-
-		for item in serverDebugInfo:
-			if os.path.isfile(item):
-				print("Copying server debug info", item, "to", serverLibDest)
-				shutil.copy2(item, serverLibDest)
+	copyLibraries(os.path.join(gameBuildPath, "cl_dll"), os.path.join(gameContentPathInEngine, "cl_dlls"), libExtension)
+	copyLibraries(os.path.join(gameBuildPath, "dlls"), os.path.join(gameContentPathInEngine, "dlls"), libExtension)
 
 	print("*** Game content copy complete.")
 	print()
@@ -194,14 +159,13 @@ engineGameLaunchPath = os.path.join(engineBuildPath, "game_launch")
 gameBuildPath = os.path.join(buildBasePath, "game")
 gameContentPath = os.path.join(scriptPath, "content", "afterburner")
 enginePath = os.path.join(scriptPath, "dependencies", "afterburner-engine")
-gameMakefilePath = os.path.join(scriptPath, "linux")
 
 os.makedirs(buildBasePath, exist_ok=True)
 
 args = parseCommandLineArguments()
 
-buildEngine(enginePath, engineBuildPath, args.python_executable, args.config, args.reconfigure)
-buildGame(gameMakefilePath, gameBuildPath, args.config, args.clean or args.reconfigure)
+buildEngine(enginePath, engineBuildPath, args.python_executable, args.config, args.rebuild_engine)
+buildGame(scriptPath, gameBuildPath, args.config, args.rebuild_engine or args.rebuild_game)
 copyGameContent(gameBuildPath, gameContentPath, engineGameLaunchPath, args.config)
 
 sys.exit(0)
