@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -32,6 +32,8 @@
 #include "../com_weapons.h"
 #include "../demo.h"
 
+#include "weapon_p99.h"
+
 extern globalvars_t *gpGlobals;
 extern int g_iUser1;
 
@@ -43,7 +45,7 @@ static int num_ents = 0;
 static CBasePlayer player;
 
 // Local version of game .dll global variables ( time, etc. )
-static globalvars_t Globals; 
+static globalvars_t Globals;
 
 static CBasePlayerWeapon *g_pWpns[32];
 
@@ -67,6 +69,8 @@ CHandGrenade g_HandGren;
 CSatchel g_Satchel;
 CTripmine g_Tripmine;
 CSqueak g_Snark;
+
+CWeaponP99 g_WeaponP99;
 
 /*
 ======================
@@ -172,7 +176,7 @@ BOOL CBasePlayerWeapon::DefaultReload( int iClipSize, int iAnim, float fDelay, i
 CBasePlayerWeapon::CanDeploy
 =====================
 */
-BOOL CBasePlayerWeapon::CanDeploy( void ) 
+BOOL CBasePlayerWeapon::CanDeploy( void )
 {
 	BOOL bHasAmmo = 0;
 
@@ -259,10 +263,10 @@ Put away weapon
 =====================
 */
 void CBasePlayerWeapon::Holster( int skiplocal /* = 0 */ )
-{ 
+{
 	m_fInReload = FALSE; // cancel any reload in progress.
 	g_irunninggausspred = false;
-	m_pPlayer->pev->viewmodel = 0; 
+	m_pPlayer->pev->viewmodel = 0;
 }
 
 /*
@@ -308,7 +312,7 @@ Vector CBaseEntity::FireBulletsPlayer ( ULONG cShots, Vector vecSrc, Vector vecD
 			x = UTIL_SharedRandomFloat( shared_rand + iShot, -0.5, 0.5 ) + UTIL_SharedRandomFloat( shared_rand + ( 1 + iShot ) , -0.5, 0.5 );
 			y = UTIL_SharedRandomFloat( shared_rand + ( 2 + iShot ), -0.5, 0.5 ) + UTIL_SharedRandomFloat( shared_rand + ( 3 + iShot ), -0.5, 0.5 );
 			z = x * x + y * y;
-		}			
+		}
 	}
 
 	return Vector( x * vecSpread.x, y * vecSpread.y, 0.0 );
@@ -326,7 +330,7 @@ void CBasePlayerWeapon::ItemPostFrame( void )
 	if( ( m_fInReload ) && ( m_pPlayer->m_flNextAttack <= 0.0 ) )
 	{
 #if 0 // FIXME, need ammo on client to make this work right
-		// complete the reload. 
+		// complete the reload.
 		int j = min( iMaxClip() - m_iClip, m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] );
 
 		// Add them to the clip
@@ -528,7 +532,7 @@ void UTIL_ParticleBoxes( void )
 
 	player = gEngfuncs.GetLocalPlayer();
 	// Now add in all of the players.
-	gEngfuncs.pEventAPI->EV_SetSolidPlayers ( player->index - 1 );	
+	gEngfuncs.pEventAPI->EV_SetSolidPlayers ( player->index - 1 );
 
 	for( idx = 1; idx < 100; idx++ )
 	{
@@ -616,6 +620,8 @@ void HUD_InitClientWeapons( void )
 	HUD_PrepEntity( &g_Satchel, &player );
 	HUD_PrepEntity( &g_Tripmine, &player );
 	HUD_PrepEntity( &g_Snark, &player );
+
+	HUD_PrepEntity(&g_WeaponP99, &player);
 }
 
 /*
@@ -721,6 +727,10 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		case WEAPON_SNARK:
 			pWeapon = &g_Snark;
 			break;
+
+		case WEAPON_P99:
+			pWeapon = &g_WeaponP99;
+			break;
 	}
 
 	// Store pointer to our destination entity_state_t so we can get our origin, etc. from it
@@ -789,7 +799,7 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 
 	// Debounced button codes for pressed/released
 	// The changed ones still down are "pressed"
-	player.m_afButtonPressed =  buttonsChanged & cmd->buttons;	
+	player.m_afButtonPressed =  buttonsChanged & cmd->buttons;
 	// The ones not down are "released"
 	player.m_afButtonReleased = buttonsChanged & ( ~cmd->buttons );
 
@@ -814,7 +824,7 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	player.ammo_357 = (int)from->client.vuser1[1];
 	player.ammo_argrens = (int)from->client.vuser1[2];
 	player.ammo_bolts = (int)from->client.ammo_nails; //is an int anyways...
-	player.ammo_buckshot = (int)from->client.ammo_shells; 
+	player.ammo_buckshot = (int)from->client.ammo_shells;
 	player.ammo_uranium = (int)from->client.ammo_cells;
 	player.ammo_hornets = (int)from->client.vuser2[0];
 	player.ammo_rockets = (int)from->client.ammo_rockets;
@@ -833,7 +843,7 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 
 	// Don't go firing anything if we have died.
 	// Or if we don't have a weapon model deployed
-	if( ( player.pev->deadflag != ( DEAD_DISCARDBODY + 1 ) ) && 
+	if( ( player.pev->deadflag != ( DEAD_DISCARDBODY + 1 ) ) &&
 		 !CL_IsDead() && player.pev->viewmodel && !g_iUser1 )
 	{
 		if( player.m_flNextAttack <= 0 )
@@ -932,7 +942,7 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		pto->m_fInReload = pCurrent->m_fInReload;
 		pto->m_fInSpecialReload = pCurrent->m_fInSpecialReload;
 		//pto->m_flPumpTime = pCurrent->m_flPumpTime;
-		pto->m_iClip = pCurrent->m_iClip; 
+		pto->m_iClip = pCurrent->m_iClip;
 		pto->m_flNextPrimaryAttack = pCurrent->m_flNextPrimaryAttack;
 		pto->m_flNextSecondaryAttack = pCurrent->m_flNextSecondaryAttack;
 		pto->m_flTimeWeaponIdle = pCurrent->m_flTimeWeaponIdle;
@@ -1050,7 +1060,7 @@ void _DLLEXPORT HUD_PostRunCmd( struct local_state_s *from, struct local_state_s
 	{
 		Vector forward;
 		gEngfuncs.pfnAngleVectors( v_angles, forward, NULL, NULL );
-		to->client.velocity = to->client.velocity - forward * g_flApplyVel * 5; 
+		to->client.velocity = to->client.velocity - forward * g_flApplyVel * 5;
 		g_irunninggausspred = false;
 	}
 

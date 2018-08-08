@@ -61,6 +61,7 @@ set (CLDLL_SOURCES
 	../dlls/squeakgrenade.cpp
 	../dlls/tripmine.cpp
 	../dlls/glock.cpp
+	../dlls/weapons/weapon_p99.cpp
 	ev_hldm.cpp
 	hl/hl_baseentity.cpp
 	hl/hl_events.cpp
@@ -111,7 +112,7 @@ set (CLDLL_SOURCES
 	scoreboard.cpp
 	MOTD.cpp)
 
-include_directories (. hl/ ../dlls ../dlls/wpn_shared ../common ../engine ../pm_shared ../game_shared ../public ../utils/false_vgui/include)
+include_directories (. hl/ ../dlls ../dlls/weapons ../common ../engine ../pm_shared ../game_shared ../public ../utils/false_vgui/include)
 
 if(USE_VOICEMGR)
 	#set(CLDLL_SOURCES

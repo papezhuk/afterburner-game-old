@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -39,6 +39,9 @@ void EV_HornetGunFire( struct event_args_s *args );
 void EV_TripmineFire( struct event_args_s *args );
 void EV_SnarkFire( struct event_args_s *args );
 
+void EV_FireP991( struct event_args_s *args  );
+void EV_FireP992( struct event_args_s *args  );
+
 void EV_TrainPitchAdjust( struct event_args_s *args );
 }
 
@@ -59,6 +62,8 @@ void Game_HookEvents( void )
 {
 	gEngfuncs.pfnHookEvent( "events/glock1.sc", EV_FireGlock1 );
 	gEngfuncs.pfnHookEvent( "events/glock2.sc", EV_FireGlock2 );
+	gEngfuncs.pfnHookEvent( "events/p991.sc", EV_FireP991 );
+	gEngfuncs.pfnHookEvent( "events/p992.sc", EV_FireP992 );
 	gEngfuncs.pfnHookEvent( "events/shotgun1.sc", EV_FireShotGunSingle );
 	gEngfuncs.pfnHookEvent( "events/shotgun2.sc", EV_FireShotGunDouble );
 	gEngfuncs.pfnHookEvent( "events/mp5.sc", EV_FireMP5 );

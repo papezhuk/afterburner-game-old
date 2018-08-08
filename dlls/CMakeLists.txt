@@ -140,9 +140,10 @@ set (SVDLL_SOURCES
 	../pm_shared/pm_debug.c
 	../pm_shared/pm_math.c
 	../pm_shared/pm_shared.c
+	weapons/weapon_p99.cpp
 )
 
-include_directories (. wpn_shared ../common ../engine ../pm_shared ../game_shared ../public)
+include_directories (. ../common ../engine ../pm_shared ../game_shared ../public weapons)
 
 if(USE_VOICEMGR)
 	set(SVDLL_SOURCES
