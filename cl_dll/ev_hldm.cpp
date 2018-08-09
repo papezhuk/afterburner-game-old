@@ -38,8 +38,6 @@
 
 extern engine_studio_api_t IEngineStudio;
 
-static int g_tracerCount[32];
-
 extern "C" char PM_FindTextureType( char *name );
 
 void V_PunchAxis( int axis, float punch );
@@ -328,47 +326,37 @@ void EV_HLDM_DecalGunshot( pmtrace_t *pTrace, int iBulletType )
 	}
 }
 
-int EV_HLDM_CheckTracer( int idx, float *vecSrc, float *end, float *forward, float *right, int iBulletType, int iTracerFreq, int *tracerCount )
+int EV_HLDM_CheckTracer( int idx, float *vecSrc, float *end, float *forward, float *right, int iBulletType )
 {
-	int tracer = 0;
-	int i;
+	vec3_t vecTracerSrc;
 	qboolean player = idx >= 1 && idx <= gEngfuncs.GetMaxClients() ? true : false;
 
-	if( iTracerFreq != 0 && ( (*tracerCount)++ % iTracerFreq ) == 0 )
+	if( player )
 	{
-		vec3_t vecTracerSrc;
+		int i;
+		vec3_t offset( 0, 0, -4 );
 
-		if( player )
+		// adjust tracer position for player
+		for( i = 0; i < 3; i++ )
 		{
-			vec3_t offset( 0, 0, -4 );
-
-			// adjust tracer position for player
-			for( i = 0; i < 3; i++ )
-			{
-				vecTracerSrc[i] = vecSrc[i] + offset[i] + right[i] * 2 + forward[i] * 16;
-			}
-		}
-		else
-		{
-			VectorCopy( vecSrc, vecTracerSrc );
-		}
-
-		if( iTracerFreq != 1 )		// guns that always trace also always decal
-			tracer = 1;
-
-		switch( iBulletType )
-		{
-		case BULLET_PLAYER_MP5:
-		case BULLET_MONSTER_MP5:
-		case BULLET_MONSTER_9MM:
-		case BULLET_MONSTER_12MM:
-		default:
-			EV_CreateTracer( vecTracerSrc, end );
-			break;
+			vecTracerSrc[i] = vecSrc[i] + offset[i] + right[i] * 2 + forward[i] * 16;
 		}
 	}
+	else
+	{
+		VectorCopy( vecSrc, vecTracerSrc );
+	}
 
-	return tracer;
+	switch( iBulletType )
+	{
+	case BULLET_PLAYER_MP5:
+	case BULLET_MONSTER_MP5:
+	case BULLET_MONSTER_9MM:
+	case BULLET_MONSTER_12MM:
+	default:
+		EV_CreateTracer( vecTracerSrc, end );
+		break;
+	}
 }
 
 /*
@@ -378,17 +366,17 @@ FireBullets
 Go to the trouble of combining multiple pellets into a single damage call.
 ================
 */
-void EV_HLDM_FireBullets( int idx, float *forward, float *right, float *up, int cShots, float *vecSrc, float *vecDirShooting, float flDistance, int iBulletType, int iTracerFreq, int *tracerCount, float flSpreadX, float flSpreadY )
+void EV_HLDM_FireBullets( int idx, float *forward, float *right, float *up, int cShots, float *vecSrc, float *vecDirShooting, float flDistance, int iBulletType, int iTracerFreq, float flSpreadX, float flSpreadY )
 {
 	int i;
 	pmtrace_t tr;
 	int iShot;
-	int tracer;
 
 	for( iShot = 1; iShot <= cShots; iShot++ )
 	{
 		vec3_t vecDir, vecEnd;
 		float x, y, z;
+		const qboolean tracer = (iShot % iTracerFreq) == 0;
 
 		//We randomize for the Shotgun.
 		if( iBulletType == BULLET_PLAYER_BUCKSHOT )
@@ -425,7 +413,10 @@ void EV_HLDM_FireBullets( int idx, float *forward, float *right, float *up, int 
 		gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
 		gEngfuncs.pEventAPI->EV_PlayerTrace( vecSrc, vecEnd, PM_STUDIO_BOX, -1, &tr );
 
-		tracer = EV_HLDM_CheckTracer( idx, vecSrc, tr.endpos, forward, right, iBulletType, iTracerFreq, tracerCount );
+		if ( tracer )
+		{
+			EV_HLDM_CheckTracer( idx, vecSrc, tr.endpos, forward, right, iBulletType);
+		}
 
 		// do damage, paint decals
 		if( tr.fraction != 1.0 )
@@ -438,11 +429,8 @@ void EV_HLDM_FireBullets( int idx, float *forward, float *right, float *up, int 
 				EV_HLDM_DecalGunshot( &tr, iBulletType );
 				break;
 			case BULLET_PLAYER_MP5:
-				if( !tracer )
-				{
-					EV_HLDM_PlayTextureSound( idx, &tr, vecSrc, vecEnd, iBulletType );
-					EV_HLDM_DecalGunshot( &tr, iBulletType );
-				}
+				EV_HLDM_PlayTextureSound( idx, &tr, vecSrc, vecEnd, iBulletType );
+				EV_HLDM_DecalGunshot( &tr, iBulletType );
 				break;
 			case BULLET_PLAYER_BUCKSHOT:
 				EV_HLDM_DecalGunshot( &tr, iBulletType );
@@ -503,7 +491,7 @@ void EV_FireGlock1( event_args_t *args )
 
 	VectorCopy( forward, vecAiming );
 
-	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_9MM, 0, 0, args->fparam1, args->fparam2 );
+	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_9MM, 1, args->fparam1, args->fparam2 );
 }
 
 void EV_FireGlock2( event_args_t *args )
@@ -549,7 +537,7 @@ void EV_FireGlock2( event_args_t *args )
 
 	VectorCopy( forward, vecAiming );
 
-	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_9MM, 0, &g_tracerCount[idx - 1], args->fparam1, args->fparam2 );
+	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_9MM, 1, args->fparam1, args->fparam2 );
 }
 //======================
 //	   GLOCK END
@@ -597,7 +585,7 @@ void EV_FireP991( event_args_t *args )
 
 	VectorCopy( forward, vecAiming );
 
-	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_9MM, 0, 0, args->fparam1, args->fparam2 );
+	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_9MM, 1, args->fparam1, args->fparam2 );
 }
 
 void EV_FireP992( event_args_t *args )
@@ -643,7 +631,7 @@ void EV_FireP992( event_args_t *args )
 
 	VectorCopy( forward, vecAiming );
 
-	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_9MM, 0, &g_tracerCount[idx - 1], args->fparam1, args->fparam2 );
+	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_9MM, 2, args->fparam1, args->fparam2 );
 }
 
 //======================
@@ -696,11 +684,11 @@ void EV_FireShotGunDouble( event_args_t *args )
 
 	if( gEngfuncs.GetMaxClients() > 1 )
 	{
-		EV_HLDM_FireBullets( idx, forward, right, up, 8, vecSrc, vecAiming, 2048, BULLET_PLAYER_BUCKSHOT, 0, &g_tracerCount[idx - 1], 0.17365, 0.04362 );
+		EV_HLDM_FireBullets( idx, forward, right, up, 8, vecSrc, vecAiming, 2048, BULLET_PLAYER_BUCKSHOT, 1, 0.17365, 0.04362 );
 	}
 	else
 	{
-		EV_HLDM_FireBullets( idx, forward, right, up, 12, vecSrc, vecAiming, 2048, BULLET_PLAYER_BUCKSHOT, 0, &g_tracerCount[idx - 1], 0.08716, 0.08716 );
+		EV_HLDM_FireBullets( idx, forward, right, up, 12, vecSrc, vecAiming, 2048, BULLET_PLAYER_BUCKSHOT, 1, 0.08716, 0.08716 );
 	}
 }
 
@@ -748,11 +736,11 @@ void EV_FireShotGunSingle( event_args_t *args )
 
 	if( gEngfuncs.GetMaxClients() > 1 )
 	{
-		EV_HLDM_FireBullets( idx, forward, right, up, 4, vecSrc, vecAiming, 2048, BULLET_PLAYER_BUCKSHOT, 0, &g_tracerCount[idx - 1], 0.08716, 0.04362 );
+		EV_HLDM_FireBullets( idx, forward, right, up, 4, vecSrc, vecAiming, 2048, BULLET_PLAYER_BUCKSHOT, 1, 0.08716, 0.04362 );
 	}
 	else
 	{
-		EV_HLDM_FireBullets( idx, forward, right, up, 6, vecSrc, vecAiming, 2048, BULLET_PLAYER_BUCKSHOT, 0, &g_tracerCount[idx - 1], 0.08716, 0.08716 );
+		EV_HLDM_FireBullets( idx, forward, right, up, 6, vecSrc, vecAiming, 2048, BULLET_PLAYER_BUCKSHOT, 1, 0.08716, 0.08716 );
 	}
 }
 //======================
@@ -813,11 +801,11 @@ void EV_FireMP5( event_args_t *args )
 
 	if( gEngfuncs.GetMaxClients() > 1 )
 	{
-		EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_MP5, 2, &g_tracerCount[idx - 1], args->fparam1, args->fparam2 );
+		EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_MP5, 1, args->fparam1, args->fparam2 );
 	}
 	else
 	{
-		EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_MP5, 2, &g_tracerCount[idx - 1], args->fparam1, args->fparam2 );
+		EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_MP5, 1, args->fparam1, args->fparam2 );
 	}
 }
 
@@ -899,7 +887,7 @@ void EV_FirePython( event_args_t *args )
 
 	VectorCopy( forward, vecAiming );
 
-	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_357, 0, 0, args->fparam1, args->fparam2 );
+	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_357, 1, args->fparam1, args->fparam2 );
 }
 //======================
 //	    PHYTON END
