@@ -80,7 +80,7 @@ int CWeaponP99::AddToPlayer( CBasePlayer *pPlayer )
 BOOL CWeaponP99::Deploy()
 {
 	// pev->body = 1;
-	return DefaultDeploy( "models/v_p99.mdl", "models/p_p99.mdl", GLOCK_DRAW, "onehanded", /*UseDecrement() ? 1 : 0*/ 0 );
+	return DefaultDeploy( "models/v_p99.mdl", "models/p_p99.mdl", GLOCK_DRAW, "onehanded" );
 }
 
 void CWeaponP99::SecondaryAttack( void )
@@ -206,6 +206,6 @@ void CWeaponP99::WeaponIdle( void )
 			iAnim = GLOCK_IDLE2;
 			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 40.0 / 16.0;
 		}
-		SendWeaponAnim( iAnim, 1 );
+		SendWeaponAnim( iAnim );
 	}
 }
