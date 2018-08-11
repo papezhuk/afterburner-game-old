@@ -328,7 +328,15 @@ public:
 	virtual void RetireWeapon( void );
 	virtual BOOL ShouldWeaponIdle( void ) {return FALSE; };
 	virtual void Holster( int skiplocal = 0 );
-	virtual BOOL UseDecrement( void ) { return FALSE; };
+
+	inline BOOL UseDecrement( void )
+	{
+#if defined( CLIENT_WEAPONS )
+		return TRUE;
+#else
+		return FALSE;
+#endif
+	};
 
 	int	PrimaryAmmoIndex();
 	int	SecondaryAmmoIndex();
@@ -476,15 +484,6 @@ public:
 	void Reload( void );
 	void WeaponIdle( void );
 
-	virtual BOOL UseDecrement( void )
-	{
-#if defined( CLIENT_WEAPONS )
-		return TRUE;
-#else
-		return FALSE;
-#endif
-	}
-
 private:
 	int m_iShell;
 
@@ -513,14 +512,6 @@ public:
 	int m_iSwing;
 	TraceResult m_trHit;
 
-	virtual BOOL UseDecrement( void )
-	{
-#if defined( CLIENT_WEAPONS )
-		return TRUE;
-#else
-		return FALSE;
-#endif
-	}
 private:
 	unsigned short m_usCrowbar;
 };
@@ -542,15 +533,6 @@ public:
 	float m_flSoundDelay;
 
 	BOOL m_fInZoom;// don't save this.
-
-	virtual BOOL UseDecrement( void )
-	{
-#if defined( CLIENT_WEAPONS )
-		return TRUE;
-#else
-		return FALSE;
-#endif
-	}
 
 private:
 	unsigned short m_usFirePython;
@@ -574,15 +556,6 @@ public:
 	BOOL IsUseable();
 	float m_flNextAnimTime;
 	int m_iShell;
-
-	virtual BOOL UseDecrement( void )
-	{
-#if defined( CLIENT_WEAPONS )
-		return TRUE;
-#else
-		return FALSE;
-#endif
-	}
 
 private:
 	unsigned short m_usMP5;
@@ -608,15 +581,6 @@ public:
 	void WeaponIdle( void );
 
 	int m_fInZoom; // don't save this
-
-	virtual BOOL UseDecrement( void )
-	{
-#if defined( CLIENT_WEAPONS )
-		return TRUE;
-#else
-		return FALSE;
-#endif
-	}
 
 private:
 	unsigned short m_usCrossbow;
@@ -646,15 +610,6 @@ public:
 	int m_fInReload;
 	float m_flNextReload;
 	int m_iShell;
-
-	virtual BOOL UseDecrement( void )
-	{
-#if defined( CLIENT_WEAPONS )
-		return TRUE;
-#else
-		return FALSE;
-#endif
-	}
 
 private:
 	float m_flPumpTime;
@@ -705,15 +660,6 @@ public:
 	CLaserSpot *m_pSpot;
 	int m_fSpotActive;
 	int m_cActiveRockets;// how many missiles in flight from this launcher right now?
-
-	virtual BOOL UseDecrement( void )
-	{
-#if defined( CLIENT_WEAPONS )
-		return TRUE;
-#else
-		return FALSE;
-#endif
-	}
 
 private:
 	unsigned short m_usRpg;
@@ -770,15 +716,6 @@ public:
 	// we need to know so we can pick the right set of effects.
 	BOOL m_fPrimaryFire;
 
-	virtual BOOL UseDecrement( void )
-	{
-#if defined( CLIENT_WEAPONS )
-		return TRUE;
-#else
-		return FALSE;
-#endif
-	}
-
 private:
 	unsigned short m_usGaussFire;
 	unsigned short m_usGaussSpin;
@@ -828,15 +765,6 @@ public:
 	CBeam				*m_pNoise;
 	CSprite				*m_pSprite;
 
-	virtual BOOL UseDecrement( void )
-	{
-#if defined( CLIENT_WEAPONS )
-		return TRUE;
-#else
-		return FALSE;
-#endif
-	}
-
 	unsigned short m_usEgonStop;
 
 private:
@@ -876,15 +804,6 @@ public:
 	float m_flRechargeTime;
 
 	int m_iFirePhase;// don't save me.
-
-	virtual BOOL UseDecrement( void )
-	{
-#if defined( CLIENT_WEAPONS )
-		return TRUE;
-#else
-		return FALSE;
-#endif
-	}
 private:
 	unsigned short m_usHornetFire;
 };
@@ -902,15 +821,6 @@ public:
 	BOOL CanHolster( void );
 	void Holster( int skiplocal = 0 );
 	void WeaponIdle( void );
-
-	virtual BOOL UseDecrement( void )
-	{
-#if defined( CLIENT_WEAPONS )
-		return TRUE;
-#else
-		return FALSE;
-#endif
-	}
 };
 
 class CSatchel : public CBasePlayerWeapon
@@ -936,15 +846,6 @@ public:
 	void Holster( int skiplocal = 0 );
 	void WeaponIdle( void );
 	void Throw( void );
-
-	virtual BOOL UseDecrement( void )
-	{
-#if defined( CLIENT_WEAPONS )
-		return TRUE;
-#else
-		return FALSE;
-#endif
-	}
 };
 
 class CTripmine : public CBasePlayerWeapon
@@ -966,15 +867,6 @@ public:
 	void Holster( int skiplocal = 0 );
 	void WeaponIdle( void );
 
-	virtual BOOL UseDecrement( void )
-	{
-#if defined( CLIENT_WEAPONS )
-		return TRUE;
-#else
-		return FALSE;
-#endif
-	}
-
 private:
 	unsigned short m_usTripFire;
 };
@@ -993,15 +885,6 @@ public:
 	void Holster( int skiplocal = 0 );
 	void WeaponIdle( void );
 	int m_fJustThrown;
-
-	virtual BOOL UseDecrement( void )
-	{
-#if defined( CLIENT_WEAPONS )
-		return TRUE;
-#else
-		return FALSE;
-#endif
-	}
 
 private:
 	unsigned short m_usSnarkFire;

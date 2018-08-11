@@ -21,15 +21,6 @@ public:
 	void Reload( void );
 	void WeaponIdle( void );
 
-	virtual BOOL UseDecrement( void )
-	{
-#if defined( CLIENT_WEAPONS )
-		return TRUE;
-#else
-		return FALSE;
-#endif
-	}
-
 private:
 	int m_iShell;
 
