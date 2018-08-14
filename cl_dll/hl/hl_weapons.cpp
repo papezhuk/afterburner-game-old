@@ -33,6 +33,7 @@
 #include "../demo.h"
 
 #include "weapon_p99.h"
+#include "weapon_generictest.h"
 
 extern globalvars_t *gpGlobals;
 extern int g_iUser1;
@@ -56,6 +57,7 @@ vec3_t previousorigin;
 
 // HLDM Weapon placeholder entities.
 CGlock g_Glock;
+CWeaponGenericTest g_GenericTest;
 CCrowbar g_Crowbar;
 CPython g_Python;
 CMP5 g_Mp5;
@@ -607,6 +609,7 @@ void HUD_InitClientWeapons( void )
 
 	// Allocate slot(s) for each weapon that we are going to be predicting
 	HUD_PrepEntity( &g_Glock, &player );
+	HUD_PrepEntity( &g_GenericTest, &player );
 	HUD_PrepEntity( &g_Crowbar, &player );
 	HUD_PrepEntity( &g_Python, &player );
 	HUD_PrepEntity( &g_Mp5, &player );
@@ -691,6 +694,8 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		case WEAPON_GLOCK:
 			pWeapon = &g_Glock;
 			break;
+		case static_cast<int>(WeaponId_e::WeaponGenericTest):
+			pWeapon = &g_GenericTest;
 		case WEAPON_PYTHON:
 			pWeapon = &g_Python;
 			break;

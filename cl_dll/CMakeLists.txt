@@ -62,6 +62,8 @@ set (CLDLL_SOURCES
 	../dlls/tripmine.cpp
 	../dlls/glock.cpp
 	../dlls/weapons/weapon_p99.cpp
+	../dlls/weapons/genericweapon.cpp
+	../dlls/weapons/weapon_generictest.cpp
 	ev_hldm.cpp
 	hl/hl_baseentity.cpp
 	hl/hl_events.cpp

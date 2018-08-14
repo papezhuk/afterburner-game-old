@@ -22,6 +22,8 @@ extern "C"
 // HLDM
 void EV_FireGlock1( struct event_args_s *args  );
 void EV_FireGlock2( struct event_args_s *args  );
+void EV_FireGenericTest1( struct event_args_s *args  );
+void EV_FireGenericTest2( struct event_args_s *args  );
 void EV_FireShotGunSingle( struct event_args_s *args  );
 void EV_FireShotGunDouble( struct event_args_s *args  );
 void EV_FireMP5( struct event_args_s *args  );
@@ -62,6 +64,8 @@ void Game_HookEvents( void )
 {
 	gEngfuncs.pfnHookEvent( "events/glock1.sc", EV_FireGlock1 );
 	gEngfuncs.pfnHookEvent( "events/glock2.sc", EV_FireGlock2 );
+	gEngfuncs.pfnHookEvent( "events/weapon_generictest_fire01.sc", EV_FireGenericTest1 );
+	gEngfuncs.pfnHookEvent( "events/weapon_generictest_fire02.sc", EV_FireGenericTest2 );
 	gEngfuncs.pfnHookEvent( "events/p991.sc", EV_FireP991 );
 	gEngfuncs.pfnHookEvent( "events/p992.sc", EV_FireP992 );
 	gEngfuncs.pfnHookEvent( "events/shotgun1.sc", EV_FireShotGunSingle );

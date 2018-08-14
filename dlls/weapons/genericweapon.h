@@ -5,133 +5,7 @@
 #include "cbase.h"
 #include "player.h"
 #include "weapons.h"
-#include <memory>
-
-enum class e_WeaponId
-{
-	WeaponNone = 0,
-	WeaponGenericTest
-};
-
-#define BASE_ATTR(outerClass, type, name, defaultVal) \
-private: \
-	type m_##name = defaultVal; \
-public: \
-	inline type name() const { return m_##name; } \
-	inline outerClass& name(type val) { m_##name = val; return *this; }
-
-class CGenericWeaponAtts_Core
-{
-public:
-#define ATTR(type, name, defaultVal) BASE_ATTR(CGenericWeaponAtts_Core, type, name, defaultVal)
-	ATTR(e_WeaponId, Id, e_WeaponId::WeaponNone);
-	ATTR(const char*, Classname, NULL);
-	ATTR(int, WeaponSlot, -1);
-	ATTR(int, WeaponSlotPosition, -1);
-	ATTR(int, Flags, 0);
-	ATTR(int, SwitchWeight, 0);
-	ATTR(int, AmmoOnFirstPickup, 0);
-	ATTR(int, MaxClip, 0);
-	ATTR(const char*, ViewModelName, NULL);
-	ATTR(const char*, PlayerModelName, NULL);
-	ATTR(const char*, WorldModelName, NULL);
-#undef ATTR
-};
-
-class CGenericWeaponAtts_BaseFireMode
-{
-public:
-	enum e_FireMode
-	{
-		Hitscan = 0
-	};
-
-	virtual e_FireMode Id() const = 0;
-	virtual CGenericWeaponAtts_BaseFireMode* Clone() const = 0;
-
-	template<typename T>
-	T* Mode()
-	{
-		return dynamic_cast<T*>(this);
-	}
-
-	template<typename T>
-	const T* Mode() const
-	{
-		return dynamic_cast<const T*>(this);
-	}
-};
-
-class CGenericWeaponAtts_HitscanFireMode : public CGenericWeaponAtts_BaseFireMode
-{
-public:
-	virtual e_FireMode Id() const override { return CGenericWeaponAtts_BaseFireMode::e_FireMode::Hitscan; }
-	virtual CGenericWeaponAtts_BaseFireMode* Clone() const override { return new CGenericWeaponAtts_HitscanFireMode(*this); }
-
-#define ATTR(type, name, defaultVal) BASE_ATTR(CGenericWeaponAtts_HitscanFireMode, type, name, defaultVal)
-	ATTR(float, FireRate, 1.0f);	// Cycles per second
-	ATTR(uint8_t, BulletsPerShot, 1);
-	ATTR(float, Accuracy, 0.01f);
-	ATTR(bool, FullAuto, false);
-	ATTR(float, AutoAim, 0.0f);
-	ATTR(int, Volume, NORMAL_GUN_VOLUME);
-	ATTR(int, MuzzleFlashBrightness, NORMAL_GUN_FLASH);
-#undef ATTR
-};
-
-#undef BASE_ATTR
-
-class CGenericWeaponAttributes
-{
-public:
-	CGenericWeaponAttributes(const CGenericWeaponAtts_Core& core)
-		: m_Core(core),
-		  m_FireModes{}
-	{
-	}
-
-	CGenericWeaponAttributes(const CGenericWeaponAttributes& other)
-		: m_Core(other.m_Core),
-		  m_FireModes{}
-	{
-		for ( int mode = 0; mode < 2; ++mode )
-		{
-			CGenericWeaponAtts_BaseFireMode* modePtr = other.m_FireModes[mode].get();
-			if ( modePtr )
-			{
-				m_FireModes[mode].reset(modePtr->Clone());
-			}
-		}
-	}
-
-	const CGenericWeaponAtts_Core& Core() const
-	{
-		return m_Core;
-	}
-
-	const CGenericWeaponAtts_BaseFireMode* FireMode(uint8_t mode) const
-	{
-		return mode < 2 ? m_FireModes[mode].get() : NULL;
-	}
-
-	CGenericWeaponAttributes& FireMode(uint8_t mode, CGenericWeaponAtts_BaseFireMode* value)
-	{
-		BaseFireModePtr ptr(value);
-
-		if ( mode < 2 )
-		{
-			m_FireModes[mode].swap(ptr);
-		}
-
-		return *this;
-	}
-
-private:
-	typedef std::unique_ptr<CGenericWeaponAtts_BaseFireMode> BaseFireModePtr;
-
-	CGenericWeaponAtts_Core m_Core;
-	BaseFireModePtr m_FireModes[2];
-};
+#include "genericweaponattributes.h"
 
 // Interface for generic weapon commands.
 // Ideally we'd build a class that doesn't depend on CBasePlayerWeapon,
@@ -178,5 +52,24 @@ class CGenericWeapon : public CBasePlayerWeapon,
 					   public virtual IGenericWeapon
 {
 public:
-	void Spawn() override;
+	virtual void Spawn() override;
+	virtual void Precache() override;
+	virtual int GetItemInfo(ItemInfo *p) override;
+	virtual int AddToPlayer(CBasePlayer *pPlayer) override;
+	virtual BOOL Deploy() override;
+	virtual void PrimaryAttack() override;
+	virtual void SecondaryAttack() override;
+	virtual void Reload() override;
+	virtual void WeaponIdle() override;
+	virtual int iItemSlot() override;
+
+	inline IGenericWeapon* GenericWeapon() { return this; }
+	inline const IGenericWeapon* GenericWeapon() const { return this; }
+
+protected:
+	void Fire(int index, const CGenericWeaponAtts_BaseFireMode* fireMode);
+	void HitscanFire(int index, const CGenericWeaponAtts_HitscanFireMode* fireMode);
+
+private:
+	unsigned short m_FireEvents[2];
 };
