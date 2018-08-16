@@ -1,8 +1,6 @@
 #pragma once
 
-#include "extdll.h"
-#include "util.h"
-#include "cbase.h"
+#include "standard_includes.h"
 #include "weapons.h"
 
 class CWeaponP99 : public CBasePlayerWeapon

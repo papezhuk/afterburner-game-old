@@ -1,4 +1,5 @@
 #include "weapon_generictest.h"
+#include "weaponregistry.h"
 
 enum Weapon_GenericTest_Animations_e
 {
@@ -12,7 +13,11 @@ enum Weapon_GenericTest_Animations_e
 	W_GENERICTEST_DRAW
 };
 
-const CGenericWeaponAttributes CWeaponGenericTest::m_StaticWeaponAttributes = CGenericWeaponAttributes(
+#ifdef CLIENT_DLL
+static CWeaponGenericTest PredictionWeapon;
+#endif
+
+static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAttributes(
 	CGenericWeaponAtts_Core()
 	.Id(WeaponId_e::WeaponGenericTest)
 	.Classname("weapon_generictest")
@@ -27,6 +32,9 @@ const CGenericWeaponAttributes CWeaponGenericTest::m_StaticWeaponAttributes = CG
 	.ViewModelName("models/v_p99.mdl")
 	.PlayerModelName("models/p_p99.mdl")
 	.WorldModelName("models/w_p99.mdl")
+#ifdef CLIENT_DLL
+	.ClientPredictionWeapon(&PredictionWeapon)
+#endif
 )
 .FireMode(0, &((*new CGenericWeaponAtts_HitscanFireMode("events/weapon_generictest_fire01.sc"))
 	.FireRate(1.33f)
@@ -65,4 +73,9 @@ void CWeaponGenericTest::Precache()
 	PRECACHE_SOUND("weapons/pl_gun1.wav");//silenced handgun
 	PRECACHE_SOUND("weapons/pl_gun2.wav");//silenced handgun
 	PRECACHE_SOUND("weapons/pl_gun3.wav");//handgun
+}
+
+const CGenericWeaponAttributes& CWeaponGenericTest::WeaponAttributes() const
+{
+	return StaticWeaponAttributes;
 }

@@ -1,17 +1,11 @@
 #pragma once
 
-#include "extdll.h"
-#include "util.h"
-#include "cbase.h"
+#include "standard_includes.h"
 #include "genericweapon.h"
 
-class CWeaponGenericTest : public CGenericWeapon,
-							public IGenericWeaponStatics<CWeaponGenericTest>
+class CWeaponGenericTest : public CGenericWeapon
 {
 public:
 	virtual void Precache() override;
-private:
-	friend class IGenericWeaponStatics<CWeaponGenericTest>;
-
-	static const CGenericWeaponAttributes m_StaticWeaponAttributes;
+	virtual const CGenericWeaponAttributes& WeaponAttributes() const override;
 };

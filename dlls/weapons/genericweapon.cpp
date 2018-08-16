@@ -1,5 +1,9 @@
 #include "genericweapon.h"
 
+CGenericWeapon::~CGenericWeapon()
+{
+}
+
 void CGenericWeapon::Spawn()
 {
 	const CGenericWeaponAtts_Core& core = WeaponAttributes().Core();

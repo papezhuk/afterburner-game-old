@@ -34,6 +34,7 @@
 
 #include "weapon_p99.h"
 #include "weapon_generictest.h"
+#include "weaponregistry.h"
 
 extern globalvars_t *gpGlobals;
 extern int g_iUser1;
@@ -57,7 +58,6 @@ vec3_t previousorigin;
 
 // HLDM Weapon placeholder entities.
 CGlock g_Glock;
-CWeaponGenericTest g_GenericTest;
 CCrowbar g_Crowbar;
 CPython g_Python;
 CMP5 g_Mp5;
@@ -607,9 +607,14 @@ void HUD_InitClientWeapons( void )
 	// Allocate a slot for the local player
 	HUD_PrepEntity( &player, NULL );
 
+	CWeaponRegistry::StaticInstance.ForEach([](const CGenericWeaponAttributes& atts)
+	{
+		ASSERTSZ(atts.Core().ClientPredictionWeapon(), "Expected a valid prediction weapon.");
+		HUD_PrepEntity(atts.Core().ClientPredictionWeapon(), &player);
+	});
+
 	// Allocate slot(s) for each weapon that we are going to be predicting
 	HUD_PrepEntity( &g_Glock, &player );
-	HUD_PrepEntity( &g_GenericTest, &player );
 	HUD_PrepEntity( &g_Crowbar, &player );
 	HUD_PrepEntity( &g_Python, &player );
 	HUD_PrepEntity( &g_Mp5, &player );
@@ -684,58 +689,64 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	// Get current clock
 	gpGlobals->time = time;
 
-	// Fill in data based on selected weapon
-	// FIXME, make this a method in each weapon?  where you pass in an entity_state_t *?
-	switch( from->client.m_iId )
+	const CGenericWeaponAttributes* atts = CWeaponRegistry::StaticInstance.Get(from->client.m_iId);
+	if ( atts )
 	{
-		case WEAPON_CROWBAR:
-			pWeapon = &g_Crowbar;
-			break;
-		case WEAPON_GLOCK:
-			pWeapon = &g_Glock;
-			break;
-		case static_cast<int>(WeaponId_e::WeaponGenericTest):
-			pWeapon = &g_GenericTest;
-		case WEAPON_PYTHON:
-			pWeapon = &g_Python;
-			break;
-		case WEAPON_MP5:
-			pWeapon = &g_Mp5;
-			break;
-		case WEAPON_CROSSBOW:
-			pWeapon = &g_Crossbow;
-			break;
-		case WEAPON_SHOTGUN:
-			pWeapon = &g_Shotgun;
-			break;
-		case WEAPON_RPG:
-			pWeapon = &g_Rpg;
-			break;
-		case WEAPON_GAUSS:
-			pWeapon = &g_Gauss;
-			break;
-		case WEAPON_EGON:
-			pWeapon = &g_Egon;
-			break;
-		case WEAPON_HORNETGUN:
-			pWeapon = &g_HGun;
-			break;
-		case WEAPON_HANDGRENADE:
-			pWeapon = &g_HandGren;
-			break;
-		case WEAPON_SATCHEL:
-			pWeapon = &g_Satchel;
-			break;
-		case WEAPON_TRIPMINE:
-			pWeapon = &g_Tripmine;
-			break;
-		case WEAPON_SNARK:
-			pWeapon = &g_Snark;
-			break;
+		pWeapon = atts->Core().ClientPredictionWeapon();
+	}
 
-		case WEAPON_P99:
-			pWeapon = &g_WeaponP99;
-			break;
+	if ( !pWeapon )
+	{
+		// Once all weapons use attributes, this can go.
+		switch( from->client.m_iId )
+		{
+			case WEAPON_CROWBAR:
+				pWeapon = &g_Crowbar;
+				break;
+			case WEAPON_GLOCK:
+				pWeapon = &g_Glock;
+				break;
+			case WEAPON_PYTHON:
+				pWeapon = &g_Python;
+				break;
+			case WEAPON_MP5:
+				pWeapon = &g_Mp5;
+				break;
+			case WEAPON_CROSSBOW:
+				pWeapon = &g_Crossbow;
+				break;
+			case WEAPON_SHOTGUN:
+				pWeapon = &g_Shotgun;
+				break;
+			case WEAPON_RPG:
+				pWeapon = &g_Rpg;
+				break;
+			case WEAPON_GAUSS:
+				pWeapon = &g_Gauss;
+				break;
+			case WEAPON_EGON:
+				pWeapon = &g_Egon;
+				break;
+			case WEAPON_HORNETGUN:
+				pWeapon = &g_HGun;
+				break;
+			case WEAPON_HANDGRENADE:
+				pWeapon = &g_HandGren;
+				break;
+			case WEAPON_SATCHEL:
+				pWeapon = &g_Satchel;
+				break;
+			case WEAPON_TRIPMINE:
+				pWeapon = &g_Tripmine;
+				break;
+			case WEAPON_SNARK:
+				pWeapon = &g_Snark;
+				break;
+
+			case WEAPON_P99:
+				pWeapon = &g_WeaponP99;
+				break;
+		}
 	}
 
 	// Store pointer to our destination entity_state_t so we can get our origin, etc. from it

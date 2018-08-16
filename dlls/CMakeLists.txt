@@ -140,6 +140,8 @@ set (SVDLL_SOURCES
 	../pm_shared/pm_debug.c
 	../pm_shared/pm_math.c
 	../pm_shared/pm_shared.c
+	weapons/genericweaponattributes.cpp
+	weapons/weaponregistry.cpp
 	weapons/genericweapon.cpp
 	weapons/weapon_generictest.cpp
 	weapons/weapon_p99.cpp

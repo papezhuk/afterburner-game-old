@@ -1,9 +1,11 @@
 #pragma once
 
 #include <memory>
-#include "util.h"
-#include "weaponids.h"
 #include <vector>
+
+#include "standard_includes.h"
+#include "weapons.h"
+#include "weaponids.h"
 
 template<typename T>
 class WeightedValueList
@@ -109,6 +111,7 @@ public:
 #define ATTR(type, name, defaultVal) BASE_ATTR(CGenericWeaponAtts_Core, type, name, defaultVal)
 	ATTR(WeaponId_e, Id, WeaponId_e::WeaponNone);
 	ATTR(const char*, Classname, NULL);
+	ATTR(CBasePlayerWeapon*, ClientPredictionWeapon, NULL);
 	ATTR(int, WeaponSlot, -1);
 	ATTR(int, WeaponSlotPosition, -1);
 	ATTR(int, Flags, 0);
@@ -229,7 +232,6 @@ private:
 
 #undef BASE_ATTR
 
-// TODO: Move params instead of copying?
 class CGenericWeaponAttributes
 {
 public:
@@ -239,6 +241,7 @@ public:
 		  m_Animations(),
 		  m_IdleAnimations()
 	{
+		Register();
 	}
 
 	CGenericWeaponAttributes(const CGenericWeaponAttributes& other)
@@ -255,7 +258,12 @@ public:
 				m_FireModes[mode].reset(modePtr->Clone());
 			}
 		}
+
+		Register();
 	}
+
+	// Implemented in .cpp to remove cyclic dependencies.
+	void Register();
 
 	const CGenericWeaponAtts_Core& Core() const
 	{
