@@ -47,25 +47,25 @@ endif()
 
 
 set (CLDLL_SOURCES
-	../dlls/crossbow.cpp
-	../dlls/crowbar.cpp
-	../dlls/egon.cpp
-	../dlls/gauss.cpp
-	../dlls/handgrenade.cpp
-	../dlls/hornetgun.cpp
-	../dlls/mp5.cpp
-	../dlls/python.cpp
-	../dlls/rpg.cpp
-	../dlls/satchel.cpp
-	../dlls/shotgun.cpp
-	../dlls/squeakgrenade.cpp
-	../dlls/tripmine.cpp
-	../dlls/glock.cpp
-	../dlls/weapons/weapon_p99.cpp
-	../dlls/weapons/weaponregistry.cpp
-	../dlls/weapons/genericweapon.cpp
-	../dlls/weapons/genericweaponattributes.cpp
-	../dlls/weapons/weapon_generictest.cpp
+	../game_shared/weapons/crossbow.cpp
+	../game_shared/weapons/crowbar.cpp
+	../game_shared/weapons/egon.cpp
+	../game_shared/weapons/gauss.cpp
+	../game_shared/weapons/handgrenade.cpp
+	../game_shared/weapons/hornetgun.cpp
+	../game_shared/weapons/mp5.cpp
+	../game_shared/weapons/python.cpp
+	../game_shared/weapons/rpg.cpp
+	../game_shared/weapons/satchel.cpp
+	../game_shared/weapons/shotgun.cpp
+	../game_shared/weapons/squeakgrenade.cpp
+	../game_shared/weapons/tripmine.cpp
+	../game_shared/weapons/glock.cpp
+	../game_shared/weapons/weapon_p99.cpp
+	../game_shared/weapons/weaponregistry.cpp
+	../game_shared/weapons/genericweapon.cpp
+	../game_shared/weapons/genericweaponattributes.cpp
+	../game_shared/weapons/weapon_generictest.cpp
 	ev_hldm.cpp
 	hl/hl_baseentity.cpp
 	hl/hl_events.cpp
@@ -116,7 +116,7 @@ set (CLDLL_SOURCES
 	scoreboard.cpp
 	MOTD.cpp)
 
-include_directories (. hl/ ../dlls ../dlls/weapons ../common ../engine ../pm_shared ../game_shared ../public ../utils/false_vgui/include)
+include_directories (. hl/ ../dlls ../dlls/weapons ../common ../engine ../pm_shared ../game_shared ../public ../utils/false_vgui/include ../game_shared/weapons)
 
 if(USE_VOICEMGR)
 	#set(CLDLL_SOURCES

@@ -55,12 +55,9 @@ set (SVDLL_SOURCES
 	client.cpp
 	combat.cpp
 	controller.cpp
-	crossbow.cpp
-	crowbar.cpp
 	defaultai.cpp
 	doors.cpp
 	effects.cpp
-	egon.cpp
 	explode.cpp
 	flyingmonster.cpp
 	func_break.cpp
@@ -68,24 +65,20 @@ set (SVDLL_SOURCES
 	game.cpp
 	gamerules.cpp
 	gargantua.cpp
-	gauss.cpp
 	genericmonster.cpp
 	ggrenade.cpp
 	globals.cpp
-	glock.cpp
 	gman.cpp
 	h_ai.cpp
 	h_battery.cpp
 	h_cine.cpp
 	h_cycler.cpp
 	h_export.cpp
-	handgrenade.cpp
 	hassassin.cpp
 	headcrab.cpp
 	healthkit.cpp
 	hgrunt.cpp
 	hornet.cpp
-	hornetgun.cpp
 	houndeye.cpp
 	ichthyosaur.cpp
 	islave.cpp
@@ -97,7 +90,6 @@ set (SVDLL_SOURCES
 	monsters.cpp
 	monsterstate.cpp
 	mortar.cpp
-	mp5.cpp
 	multiplay_gamerules.cpp
 	nihilanth.cpp
 	nodes.cpp
@@ -108,29 +100,23 @@ set (SVDLL_SOURCES
 	plats.cpp
 	player.cpp
 	playermonster.cpp
-	python.cpp
 	rat.cpp
 	roach.cpp
-	rpg.cpp
-	satchel.cpp
 	schedule.cpp
 	scientist.cpp
 	scripted.cpp
-	shotgun.cpp
 	singleplay_gamerules.cpp
 	skill.cpp
 	sound.cpp
 	soundent.cpp
 	spectator.cpp
 	squadmonster.cpp
-	squeakgrenade.cpp
 	subs.cpp
 	talkmonster.cpp
 	teamplay_gamerules.cpp
 	tempmonster.cpp
 	tentacle.cpp
 	triggers.cpp
-	tripmine.cpp
 	turret.cpp
 	util.cpp
 	weapons.cpp
@@ -140,14 +126,28 @@ set (SVDLL_SOURCES
 	../pm_shared/pm_debug.c
 	../pm_shared/pm_math.c
 	../pm_shared/pm_shared.c
-	weapons/genericweaponattributes.cpp
-	weapons/weaponregistry.cpp
-	weapons/genericweapon.cpp
-	weapons/weapon_generictest.cpp
-	weapons/weapon_p99.cpp
+	../game_shared/weapons/crossbow.cpp
+	../game_shared/weapons/crowbar.cpp
+	../game_shared/weapons/egon.cpp
+	../game_shared/weapons/gauss.cpp
+	../game_shared/weapons/glock.cpp
+	../game_shared/weapons/handgrenade.cpp
+	../game_shared/weapons/hornetgun.cpp
+	../game_shared/weapons/mp5.cpp
+	../game_shared/weapons/python.cpp
+	../game_shared/weapons/rpg.cpp
+	../game_shared/weapons/satchel.cpp
+	../game_shared/weapons/shotgun.cpp
+	../game_shared/weapons/squeakgrenade.cpp
+	../game_shared/weapons/tripmine.cpp
+	../game_shared/weapons/genericweaponattributes.cpp
+	../game_shared/weapons/weaponregistry.cpp
+	../game_shared/weapons/genericweapon.cpp
+	../game_shared/weapons/weapon_generictest.cpp
+	../game_shared/weapons/weapon_p99.cpp
 )
 
-include_directories (. ../common ../engine ../pm_shared ../game_shared ../public weapons)
+include_directories (. ../common ../engine ../pm_shared ../game_shared ../public ../game_shared/weapons)
 
 if(USE_VOICEMGR)
 	set(SVDLL_SOURCES
