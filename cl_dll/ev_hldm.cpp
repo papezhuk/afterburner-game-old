@@ -37,6 +37,7 @@
 
 #include "r_studioint.h"
 #include "com_model.h"
+#include "genericweaponattributes.h"
 
 extern engine_studio_api_t IEngineStudio;
 
@@ -962,7 +963,6 @@ void EV_FirePython( event_args_t *args )
 //======================
 //	   GAUSS START
 //======================
-#define SND_CHANGE_PITCH	(1 << 7)		// duplicated in protocol.h change sound pitch
 
 void EV_SpinGauss( event_args_t *args )
 {
@@ -1480,19 +1480,6 @@ void EV_FireCrossbow( event_args_t *args )
 //======================
 //	    RPG START
 //======================
-enum rpg_e
-{
-	RPG_IDLE = 0,
-	RPG_FIDGET,
-	RPG_RELOAD,		// to reload
-	RPG_FIRE2,		// to empty
-	RPG_HOLSTER1,	// loaded
-	RPG_DRAW1,		// loaded
-	RPG_HOLSTER2,	// unloaded
-	RPG_DRAW_UL,	// unloaded
-	RPG_IDLE_UL,	// unloaded idle
-	RPG_FIDGET_UL	// unloaded fidget
-};
 
 void EV_FireRpg( event_args_t *args )
 {
@@ -1556,8 +1543,6 @@ enum EGON_FIREMODE
 #define EGON_SOUND_OFF			"weapons/egon_off1.wav"
 #define EGON_SOUND_RUN			"weapons/egon_run3.wav"
 #define EGON_SOUND_STARTUP		"weapons/egon_windup2.wav"
-
-#define ARRAYSIZE(p)		( sizeof(p) /sizeof(p[0]) )
 
 BEAM *pBeam;
 BEAM *pBeam2;

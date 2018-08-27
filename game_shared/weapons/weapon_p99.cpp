@@ -1,18 +1,19 @@
 #include "weapon_p99.h"
 #include "player.h"
 
-enum glock_e
+// TODO: Make these public when all fixed up
+enum p99_e
 {
-	GLOCK_IDLE1 = 0,
-	GLOCK_IDLE2,
-	GLOCK_IDLE3,
-	GLOCK_SHOOT,
-	GLOCK_SHOOT_EMPTY,
-	GLOCK_RELOAD,
-	GLOCK_RELOAD_NOT_EMPTY,
-	GLOCK_DRAW,
-	GLOCK_HOLSTER,
-	GLOCK_ADD_SILENCER
+	P99_IDLE1 = 0,
+	P99_IDLE2,
+	P99_IDLE3,
+	P99_SHOOT,
+	P99_SHOOT_EMPTY,
+	P99_RELOAD,
+	P99_RELOAD_NOT_EMPTY,
+	P99_DRAW,
+	P99_HOLSTER,
+	P99_ADD_SILENCER
 };
 
 LINK_ENTITY_TO_CLASS( weapon_p99, CWeaponP99 )
@@ -80,7 +81,7 @@ int CWeaponP99::AddToPlayer( CBasePlayer *pPlayer )
 BOOL CWeaponP99::Deploy()
 {
 	// pev->body = 1;
-	return DefaultDeploy( "models/v_p99.mdl", "models/p_p99.mdl", GLOCK_DRAW, "onehanded" );
+	return DefaultDeploy( "models/v_p99.mdl", "models/p_p99.mdl", P99_DRAW, "onehanded" );
 }
 
 void CWeaponP99::SecondaryAttack( void )
@@ -166,9 +167,9 @@ void CWeaponP99::Reload( void )
 	int iResult;
 
 	if( m_iClip == 0 )
-		iResult = DefaultReload( GLOCK_MAX_CLIP, GLOCK_RELOAD, 1.5 );
+		iResult = DefaultReload( GLOCK_MAX_CLIP, P99_RELOAD, 1.5 );
 	else
-		iResult = DefaultReload( GLOCK_MAX_CLIP, GLOCK_RELOAD_NOT_EMPTY, 1.5 );
+		iResult = DefaultReload( GLOCK_MAX_CLIP, P99_RELOAD_NOT_EMPTY, 1.5 );
 
 	if( iResult )
 	{
@@ -193,17 +194,17 @@ void CWeaponP99::WeaponIdle( void )
 
 		if( flRand <= 0.3 + 0 * 0.75 )
 		{
-			iAnim = GLOCK_IDLE3;
+			iAnim = P99_IDLE3;
 			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 49.0 / 16;
 		}
 		else if( flRand <= 0.6 + 0 * 0.875 )
 		{
-			iAnim = GLOCK_IDLE1;
+			iAnim = P99_IDLE1;
 			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 60.0 / 16.0;
 		}
 		else
 		{
-			iAnim = GLOCK_IDLE2;
+			iAnim = P99_IDLE2;
 			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 40.0 / 16.0;
 		}
 		SendWeaponAnim( iAnim );

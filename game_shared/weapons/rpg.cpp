@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -22,20 +22,6 @@
 #include "nodes.h"
 #include "player.h"
 #include "gamerules.h"
-
-enum rpg_e
-{
-	RPG_IDLE = 0,
-	RPG_FIDGET,
-	RPG_RELOAD,		// to reload
-	RPG_FIRE2,		// to empty
-	RPG_HOLSTER1,	// loaded
-	RPG_DRAW1,		// loaded
-	RPG_HOLSTER2,	// unloaded
-	RPG_DRAW_UL,	// unloaded
-	RPG_IDLE_UL,	// unloaded idle
-	RPG_FIDGET_UL	// unloaded fidget
-};
 
 LINK_ENTITY_TO_CLASS( weapon_rpg, CRpg )
 
@@ -72,7 +58,7 @@ void CLaserSpot::Spawn( void )
 }
 
 //=========================================================
-// Suspend- make the laser sight invisible. 
+// Suspend- make the laser sight invisible.
 //=========================================================
 void CLaserSpot::Suspend( float flSuspendTime )
 {
@@ -109,7 +95,7 @@ CRpgRocket *CRpgRocket::CreateRpgRocket( Vector vecOrigin, Vector vecAngles, CBa
 	pRocket->pev->angles = vecAngles;
 	pRocket->Spawn();
 	pRocket->SetTouch( &CRpgRocket::RocketTouch );
-	pRocket->m_hLauncher = pLauncher;// remember what RPG fired me. 
+	pRocket->m_hLauncher = pLauncher;// remember what RPG fired me.
 	pLauncher->m_cActiveRockets++;// register this missile as active for the launcher
 	pRocket->pev->owner = pOwner->edict();
 
@@ -211,7 +197,7 @@ void CRpgRocket::FollowThink( void )
 
 	vecTarget = gpGlobals->v_forward;
 	flMax = 4096;
-	
+
 	// Examine all entities within a reasonable radius
 	while( ( pOther = UTIL_FindEntityByClassname( pOther, "laser_spot" ) ) != NULL )
 	{
@@ -246,8 +232,8 @@ void CRpgRocket::FollowThink( void )
 				pev->velocity = pev->velocity.Normalize() * 300;
 			}
 			UTIL_BubbleTrail( pev->origin - pev->velocity * 0.1, pev->origin, 4 );
-		} 
-		else 
+		}
+		else
 		{
 			if( pev->velocity.Length() > 2000 )
 			{
@@ -288,7 +274,7 @@ void CRpg::Reload( void )
 		return;
 
 	// because the RPG waits to autoreload when no missiles are active while  the LTD is on, the
-	// weapons code is constantly calling into this function, but is often denied because 
+	// weapons code is constantly calling into this function, but is often denied because
 	// a) missiles are in flight, but the LTD is on
 	// or
 	// b) player is totally out of ammo and has nothing to switch to, and should be allowed to
@@ -296,13 +282,13 @@ void CRpg::Reload( void )
 	//
 	// Set the next attack time into the future so that WeaponIdle will get called more often
 	// than reload, allowing the RPG LTD to be updated
-	
+
 	m_flNextPrimaryAttack = GetNextAttackDelay( 0.5 );
 
 	if( m_cActiveRockets && m_fSpotActive )
 	{
 		// no reloading when there are active missiles tracking the designator.
-		// ward off future autoreload attempts by setting next attack time into the future for a bit. 
+		// ward off future autoreload attempts by setting next attack time into the future for a bit.
 		return;
 	}
 
@@ -335,7 +321,7 @@ void CRpg::Spawn()
 	if( g_pGameRules->IsMultiplayer() )
 #endif
 	{
-		// more default ammo in multiplay. 
+		// more default ammo in multiplay.
 		m_iDefaultAmmo = RPG_DEFAULT_GIVE * 2;
 	}
 	else
@@ -461,7 +447,7 @@ void CRpg::PrimaryAttack()
 #endif
 		PLAYBACK_EVENT( flags, m_pPlayer->edict(), m_usRpg );
 
-		m_iClip--; 
+		m_iClip--;
 
 		m_flNextPrimaryAttack = GetNextAttackDelay( 1.5 );
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.5;
@@ -565,8 +551,8 @@ class CRpgAmmo : public CBasePlayerAmmo
 		PRECACHE_MODEL( "models/w_rpgammo.mdl" );
 		PRECACHE_SOUND( "items/9mmclip1.wav" );
 	}
-	BOOL AddAmmo( CBaseEntity *pOther ) 
-	{ 
+	BOOL AddAmmo( CBaseEntity *pOther )
+	{
 		int iGive;
 #ifdef CLIENT_DLL
 	if( bIsMultiplayer() )

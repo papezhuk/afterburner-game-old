@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -25,22 +25,6 @@
 #include "shake.h"
 #include "gamerules.h"
 #include "game.h"
-
-#define	GAUSS_PRIMARY_CHARGE_VOLUME	256// how loud gauss is while charging
-#define GAUSS_PRIMARY_FIRE_VOLUME	450// how loud gauss is when discharged
-
-enum gauss_e
-{
-	GAUSS_IDLE = 0,
-	GAUSS_IDLE2,
-	GAUSS_FIDGET,
-	GAUSS_SPINUP,
-	GAUSS_SPIN,
-	GAUSS_FIRE,
-	GAUSS_FIRE2,
-	GAUSS_HOLSTER,
-	GAUSS_DRAW
-};
 
 LINK_ENTITY_TO_CLASS( weapon_gauss, CGauss )
 
@@ -273,9 +257,9 @@ void CGauss::SecondaryAttack()
 		}
 
 		int pitch = (int)( ( gpGlobals->time - m_pPlayer->m_flStartCharge ) * ( 150 / GetFullChargeTime() ) + 100 );
-		if( pitch > 250 ) 
+		if( pitch > 250 )
 			 pitch = 250;
-		
+
 		// ALERT( at_console, "%d %d %d\n", m_fInAttack, m_iSoundState, pitch );
 
 		if( m_iSoundState == 0 )
@@ -310,10 +294,10 @@ void CGauss::SecondaryAttack()
 }
 
 //=========================================================
-// StartFire- since all of this code has to run and then 
-// call Fire(), it was easier at this point to rip it out 
+// StartFire- since all of this code has to run and then
+// call Fire(), it was easier at this point to rip it out
 // of weaponidle() and make its own function then to try to
-// merge this into Fire(), which has some identical variable names 
+// merge this into Fire(), which has some identical variable names
 //=========================================================
 void CGauss::StartFire( void )
 {
@@ -337,7 +321,7 @@ void CGauss::StartFire( void )
 		// fixed damage on primary attack
 #ifdef CLIENT_DLL
 		flDamage = 20;
-#else 
+#else
 		flDamage = gSkillData.plrDmgGauss;
 #endif
 	}
@@ -387,7 +371,7 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 #else
 	if( m_fPrimaryFire == false )
 		 g_irunninggausspred = true;
-#endif	
+#endif
 	// The main firing event is sent unreliably so it won't be delayed.
 	PLAYBACK_EVENT_FULL( FEV_NOTHOST, m_pPlayer->edict(), m_usGaussFire, 0.0, (float *)&m_pPlayer->pev->origin, (float *)&m_pPlayer->pev->angles, flDamage, 0.0, 0, 0, m_fPrimaryFire ? 1 : 0, 0 );
 
@@ -397,8 +381,8 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 
 	PLAYBACK_EVENT_FULL( FEV_NOTHOST | FEV_RELIABLE, m_pPlayer->edict(), m_usGaussFire, 0.01, (float *)&m_pPlayer->pev->origin, (float *)&m_pPlayer->pev->angles, 0.0, 0.0, 0, 0, 0, 1 );
 
-	/*ALERT( at_console, "%f %f %f\n%f %f %f\n", 
-		vecSrc.x, vecSrc.y, vecSrc.z, 
+	/*ALERT( at_console, "%f %f %f\n%f %f %f\n",
+		vecSrc.x, vecSrc.y, vecSrc.z,
 		vecDest.x, vecDest.y, vecDest.z );*/
 
 	//ALERT( at_console, "%f %f\n", tr.flFraction, flMaxFrac );
@@ -608,7 +592,7 @@ void CGauss::WeaponIdle( void )
 class CGaussAmmo : public CBasePlayerAmmo
 {
 	void Spawn( void )
-	{ 
+	{
 		Precache();
 		SET_MODEL( ENT( pev ), "models/w_gaussammo.mdl" );
 		CBasePlayerAmmo::Spawn();
@@ -618,8 +602,8 @@ class CGaussAmmo : public CBasePlayerAmmo
 		PRECACHE_MODEL( "models/w_gaussammo.mdl" );
 		PRECACHE_SOUND( "items/9mmclip1.wav" );
 	}
-	BOOL AddAmmo( CBaseEntity *pOther ) 
-	{ 
+	BOOL AddAmmo( CBaseEntity *pOther )
+	{
 		if( pOther->GiveAmmo( AMMO_URANIUMBOX_GIVE, "uranium", URANIUM_MAX_CARRY ) != -1 )
 		{
 			EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM );
