@@ -15,6 +15,7 @@
 
 #include "hud.h"
 #include "cl_util.h"
+#include "hulldefs.h"
 #include "const.h"
 #include "entity_state.h"
 #include "cl_entity.h"
@@ -1835,9 +1836,6 @@ enum squeak_e
 	SQUEAK_UP,
 	SQUEAK_THROW
 };
-
-#define VEC_HULL_MIN		Vector( -16, -16, -36 )
-#define VEC_DUCK_HULL_MIN	Vector( -16, -16, -18 )
 
 void EV_SnarkFire( event_args_t *args )
 {

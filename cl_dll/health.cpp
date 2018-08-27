@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -28,6 +28,7 @@
 #include <string.h>
 
 #include "mobility_int.h"
+#include "damagedefs.h"
 
 DECLARE_MESSAGE( m_Health, Health )
 DECLARE_MESSAGE( m_Health, Damage )
@@ -44,7 +45,7 @@ int giDmgFlags[NUM_DMG_TYPES] =
 	DMG_FREEZE|DMG_SLOWFREEZE,
 	DMG_DROWN,
 	DMG_BURN|DMG_SLOWBURN,
-	DMG_NERVEGAS, 
+	DMG_NERVEGAS,
 	DMG_RADIATION,
 	DMG_SHOCK,
 	DMG_CALTROP,
@@ -268,7 +269,7 @@ void CHudHealth::CalcDamageDirection( vec3_t vecFrom )
 	{
 		m_fAttackFront = m_fAttackRear = m_fAttackRight = m_fAttackLeft = 1;
 	}
-	else 
+	else
 	{
 		if( side > 0 )
 		{
@@ -425,7 +426,7 @@ int CHudHealth::DrawDamage( float flTime )
 }
 
 void CHudHealth::UpdateTiles( float flTime, long bitsDamage )
-{	
+{
 	DAMAGE_IMAGE *pdmg;
 
 	// Which types are new?

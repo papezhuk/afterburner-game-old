@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -34,6 +34,8 @@
 #include <ctype.h>
 inline void MESSAGE_BEGIN( int msg_dest, int msg_type, const float *pOrigin, entvars_t *ent );  // implementation later in this file
 
+#include "hulldefs.h"
+
 extern globalvars_t				*gpGlobals;
 
 // Use this instead of ALLOC_STRING on constant strings
@@ -52,18 +54,18 @@ static inline int MAKE_STRING(const char *szValue)
 }
 #endif
 
-inline edict_t *FIND_ENTITY_BY_CLASSNAME(edict_t *entStart, const char *pszName) 
+inline edict_t *FIND_ENTITY_BY_CLASSNAME(edict_t *entStart, const char *pszName)
 {
 	return FIND_ENTITY_BY_STRING(entStart, "classname", pszName);
 }
 
-inline edict_t *FIND_ENTITY_BY_TARGETNAME(edict_t *entStart, const char *pszName) 
+inline edict_t *FIND_ENTITY_BY_TARGETNAME(edict_t *entStart, const char *pszName)
 {
 	return FIND_ENTITY_BY_STRING(entStart, "targetname", pszName);
 }
 
 // for doing a reverse lookup. Say you have a door, and want to find its button.
-inline edict_t *FIND_ENTITY_BY_TARGET(edict_t *entStart, const char *pszName) 
+inline edict_t *FIND_ENTITY_BY_TARGET(edict_t *entStart, const char *pszName)
 {
 	return FIND_ENTITY_BY_STRING(entStart, "target", pszName);
 }
@@ -122,33 +124,33 @@ typedef int BOOL;
 inline edict_t *ENT(edict_t *pent)		{ return pent; }
 inline edict_t *ENT(EOFFSET eoffset)			{ return (*g_engfuncs.pfnPEntityOfEntOffset)(eoffset); }
 inline EOFFSET OFFSET(EOFFSET eoffset)			{ return eoffset; }
-inline EOFFSET OFFSET(const edict_t *pent)	
-{ 
+inline EOFFSET OFFSET(const edict_t *pent)
+{
 #if _DEBUG
 	if ( !pent )
 		ALERT( at_error, "Bad ent in OFFSET()\n" );
 #endif
-	return (*g_engfuncs.pfnEntOffsetOfPEntity)(pent); 
+	return (*g_engfuncs.pfnEntOffsetOfPEntity)(pent);
 }
-inline EOFFSET OFFSET(entvars_t *pev)				
-{ 
+inline EOFFSET OFFSET(entvars_t *pev)
+{
 #if _DEBUG
 	if ( !pev )
 		ALERT( at_error, "Bad pev in OFFSET()\n" );
 #endif
-	return OFFSET(ENT(pev)); 
+	return OFFSET(ENT(pev));
 }
 inline entvars_t *VARS(entvars_t *pev)
 {
 	return pev;
 }
 
-inline entvars_t *VARS(edict_t *pent)			
-{ 
+inline entvars_t *VARS(edict_t *pent)
+{
 	if ( !pent )
 		return NULL;
 
-	return &pent->v; 
+	return &pent->v;
 }
 
 inline entvars_t* VARS(EOFFSET eoffset)				{ return VARS(ENT(eoffset)); }
@@ -172,7 +174,7 @@ inline BOOL FStringNull(int iString)			{ return iString == iStringNull; }
 
 // Dot products for view cone checking
 #define VIEW_FIELD_FULL		(float)-1.0 // +-180 degrees
-#define	VIEW_FIELD_WIDE		(float)-0.7 // +-135 degrees 0.1 // +-85 degrees, used for full FOV checks 
+#define	VIEW_FIELD_WIDE		(float)-0.7 // +-135 degrees 0.1 // +-85 degrees, used for full FOV checks
 #define	VIEW_FIELD_NARROW	(float)0.7 // +-45 degrees, more narrow check used to set up ranged attacks
 #define	VIEW_FIELD_ULTRA_NARROW	(float)0.9 // +-25 degrees, more narrow check used to set up ranged attacks
 
@@ -182,7 +184,7 @@ inline BOOL FStringNull(int iString)			{ return iString == iStringNull; }
 #define		BLOOD_COLOR_YELLOW	(BYTE)195
 #define		BLOOD_COLOR_GREEN	BLOOD_COLOR_YELLOW
 
-typedef enum 
+typedef enum
 {
 	MONSTERSTATE_NONE = 0,
 	MONSTERSTATE_IDLE,
@@ -334,7 +336,7 @@ extern void			UTIL_PrecacheOther( const char *szClassname );
 // prints a message to each client
 extern void			UTIL_ClientPrintAll( int msg_dest, const char *msg_name, const char *param1 = NULL, const char *param2 = NULL, const char *param3 = NULL, const char *param4 = NULL );
 
-inline void			UTIL_CenterPrintAll( const char *msg_name, const char *param1 = NULL, const char *param2 = NULL, const char *param3 = NULL, const char *param4 = NULL ) 
+inline void			UTIL_CenterPrintAll( const char *msg_name, const char *param1 = NULL, const char *param2 = NULL, const char *param3 = NULL, const char *param4 = NULL )
 {
 	UTIL_ClientPrintAll( HUD_PRINTCENTER, msg_name, param1, param2, param3, param4 );
 }
@@ -377,7 +379,7 @@ extern char *UTIL_dtos4( int d );
 // Writes message to console with timestamp and FragLog header.
 extern void			UTIL_LogPrintf( const char *fmt, ... );
 
-// Sorta like FInViewCone, but for nonmonsters. 
+// Sorta like FInViewCone, but for nonmonsters.
 extern float UTIL_DotPoints ( const Vector &vecSrc, const Vector &vecCheck, const Vector &vecDir );
 
 extern void UTIL_StripToken( const char *pKey, char *pDest );// for redundant keynames
@@ -423,7 +425,7 @@ extern DLL_GLOBAL int			g_Language;
 
 #define SPEAKER_START_SILENT			1	// wait for trigger 'on' to start announcements
 
-#define SND_SPAWNING		(1<<8)		// duplicated in protocol.h we're spawing, used in some cases for ambients 
+#define SND_SPAWNING		(1<<8)		// duplicated in protocol.h we're spawing, used in some cases for ambients
 #define SND_STOP			(1<<5)		// duplicated in protocol.h stop sound
 #define SND_CHANGE_VOL		(1<<6)		// duplicated in protocol.h change sound vol
 #define SND_CHANGE_PITCH	(1<<7)		// duplicated in protocol.h change sound pitch
@@ -447,18 +449,6 @@ extern DLL_GLOBAL int			g_Language;
 
 #define PUSH_BLOCK_ONLY_X	1
 #define PUSH_BLOCK_ONLY_Y	2
-
-#define VEC_HULL_MIN		Vector(-16, -16, -36)
-#define VEC_HULL_MAX		Vector( 16,  16,  36)
-#define VEC_HUMAN_HULL_MIN	Vector( -16, -16, 0 )
-#define VEC_HUMAN_HULL_MAX	Vector( 16, 16, 72 )
-#define VEC_HUMAN_HULL_DUCK	Vector( 16, 16, 36 )
-
-#define VEC_VIEW			Vector( 0, 0, 28 )
-
-#define VEC_DUCK_HULL_MIN	Vector(-16, -16, -18 )
-#define VEC_DUCK_HULL_MAX	Vector( 16,  16,  18)
-#define VEC_DUCK_VIEW		Vector( 0, 0, 12 )
 
 #define SVC_TEMPENTITY		23
 #define SVC_INTERMISSION	30
@@ -548,7 +538,7 @@ void EMIT_GROUPNAME_SUIT(edict_t *entity, const char *groupname);
 	{ for (int i = 0; i < (int)ARRAYSIZE( a ); i++ ) PRECACHE_SOUND( a[i] ); }
 
 #define EMIT_SOUND_ARRAY_DYN( chan, array ) \
-	EMIT_SOUND_DYN ( ENT(pev), chan , array [ RANDOM_LONG(0,ARRAYSIZE( array )-1) ], 1.0, ATTN_NORM, 0, RANDOM_LONG(95,105) ); 
+	EMIT_SOUND_DYN ( ENT(pev), chan , array [ RANDOM_LONG(0,ARRAYSIZE( array )-1) ], 1.0, ATTN_NORM, 0, RANDOM_LONG(95,105) );
 
 #define RANDOM_SOUND_ARRAY( array ) (array) [ RANDOM_LONG(0,ARRAYSIZE( (array) )-1) ]
 
