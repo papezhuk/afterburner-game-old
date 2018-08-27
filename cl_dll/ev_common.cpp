@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -121,7 +121,7 @@ void EV_GetGunPosition( event_args_t *args, float *pos, float *origin )
 		}
 		else if( args->ducking == 1 )
 		{
-			view_ofs[2] = VEC_DUCK_VIEW;
+			view_ofs[2] = VEC_DUCK_VIEW_HEIGHT;
 		}
 	}
 
@@ -171,7 +171,7 @@ void EV_GetDefaultShellInfo( event_args_t *args, float *origin, float *velocity,
 		}
 		else if( args->ducking == 1 )
 		{
-			view_ofs[2] = VEC_DUCK_VIEW;
+			view_ofs[2] = VEC_DUCK_VIEW_HEIGHT;
 		}
 	}
 

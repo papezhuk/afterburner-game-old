@@ -1,6 +1,6 @@
 //========= Copyright (c) 1996-2002, Valve LLC, All rights reserved. ============
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 //=============================================================================
@@ -12,7 +12,7 @@
 
 // defaults for clientinfo messages
 #define	DEFAULT_VIEWHEIGHT	28
-#define VEC_DUCK_VIEW 12
+#define VEC_DUCK_VIEW_HEIGHT 12
 
 #define FTENT_FADEOUT			0x00000080
 
