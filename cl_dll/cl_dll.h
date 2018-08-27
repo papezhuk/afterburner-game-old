@@ -35,8 +35,8 @@ typedef int ( *pfnUserMsgHook )( const char *pszName, int iSize, void *pbuf );
 
 #include "vector_classes.h"
 
-#include "../engine/cdll_int.h"
-#include "../dlls/cdll_dll.h"
+#include "cdll_int.h"
+#include "cdll_dll.h"
 
 #ifndef __MSC_VER
 #define _cdecl
@@ -49,6 +49,6 @@ typedef int ( *pfnUserMsgHook )( const char *pszName, int iSize, void *pbuf );
 #endif
 
 extern cl_enginefunc_t gEngfuncs;
-#include "../engine/mobility_int.h"
+#include "mobility_int.h"
 extern mobile_engfuncs_t *gMobileEngfuncs;
 #endif

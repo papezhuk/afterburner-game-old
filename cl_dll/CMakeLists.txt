@@ -116,7 +116,7 @@ set (CLDLL_SOURCES
 	scoreboard.cpp
 	MOTD.cpp)
 
-include_directories (. hl/ ../dlls ../dlls/weapons ../common ../engine ../pm_shared ../game_shared ../public ../utils/false_vgui/include ../game_shared/weapons)
+include_directories (. hl/ ../common ../engine ../pm_shared ../game_shared ../public ../utils/false_vgui/include ../game_shared/weapons)
 
 if(USE_VOICEMGR)
 	#set(CLDLL_SOURCES
