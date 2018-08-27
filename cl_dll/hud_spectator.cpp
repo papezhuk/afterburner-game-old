@@ -1,10 +1,12 @@
 //========= Copyright (c) 1996-2002, Valve LLC, All rights reserved. ============
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 //=============================================================================
 
+#include <stdlib.h>
+#include <stdio.h>
 #include "hud.h"
 #include "cl_util.h"
 #include "cl_entity.h"
@@ -28,7 +30,7 @@
 
 extern "C" int		iJumpSpectator;
 extern "C" float	vJumpOrigin[3];
-extern "C" float	vJumpAngles[3]; 
+extern "C" float	vJumpAngles[3];
 
 extern void V_GetInEyePos( int entity, float * origin, float * angles );
 extern void V_ResetChaseCam();
@@ -107,7 +109,7 @@ void ToggleScores( void )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 int CHudSpectator::Init()
 {
@@ -135,7 +137,7 @@ int CHudSpectator::Init()
 	m_drawstatus = gEngfuncs.pfnRegisterVariable( "spec_drawstatus", "1", 0 );
 	m_autoDirector = gEngfuncs.pfnRegisterVariable( "spec_autodirector", "1", 0 );
 	m_pip = gEngfuncs.pfnRegisterVariable( "spec_pip", "1", 0 );
-	
+
 	if( !m_drawnames || !m_drawcone || !m_drawstatus || !m_autoDirector || !m_pip )
 	{
 		gEngfuncs.Con_Printf( "ERROR! Couldn't register all spectator variables.\n" );
@@ -156,7 +158,7 @@ void UTIL_StringToVector( float * pVector, const char *pString )
 	strcpy( tempString, pString );
 	pstr = pfront = tempString;
 
-	for( j = 0; j < 3; j++ )		
+	for( j = 0; j < 3; j++ )
 	{
 		pVector[j] = atof( pfront );
 
@@ -210,9 +212,9 @@ int UTIL_FindEntityInMap( const char *name, float *origin, float *angle )
 			return 0;
 		}
 
-		// we parse the first { now parse entities properties		
+		// we parse the first { now parse entities properties
 		while( 1 )
-		{	
+		{
 			// parse key
 			data = gEngfuncs.COM_ParseFile( data, token );
 			if( token[0] == '}' )
@@ -234,14 +236,14 @@ int UTIL_FindEntityInMap( const char *name, float *origin, float *angle )
 				n--;
 			}
 
-			// parse value	
+			// parse value
 			data = gEngfuncs.COM_ParseFile( data, token );
 			if( !data )
 			{
 				gEngfuncs.Con_DPrintf( "UTIL_FindEntityInMap: EOF without closing brace\n" );
 				return 0;
 			}
-	
+
 			if( token[0] == '}' )
 			{
 				gEngfuncs.Con_DPrintf( "UTIL_FindEntityInMap: closing brace without data" );
@@ -298,7 +300,7 @@ int UTIL_FindEntityInMap( const char *name, float *origin, float *angle )
 }
 
 //-----------------------------------------------------------------------------
-// SetSpectatorStartPosition(): 
+// SetSpectatorStartPosition():
 // Get valid map position and 'beam' spectator to this position
 //-----------------------------------------------------------------------------
 void CHudSpectator::SetSpectatorStartPosition()
@@ -346,9 +348,9 @@ int CHudSpectator::VidInit()
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : flTime - 
-//			intermission - 
+// Purpose:
+// Input  : flTime -
+//			intermission -
 //-----------------------------------------------------------------------------
 int CHudSpectator::Draw( float flTime )
 {
@@ -366,10 +368,10 @@ int CHudSpectator::Draw( float flTime )
 	{
 		m_mapZoom += m_zoomDelta;
 
-		if( m_mapZoom > 3.0f ) 
+		if( m_mapZoom > 3.0f )
 			m_mapZoom = 3.0f;
 
-		if( m_mapZoom < 0.5f ) 
+		if( m_mapZoom < 0.5f )
 			m_mapZoom = 0.5f;
 	}
 
@@ -385,7 +387,7 @@ int CHudSpectator::Draw( float flTime )
 	}
 
 	// Only draw the icon names only if map mode is in Main Mode
-	if( g_iUser1 < OBS_MAP_FREE ) 
+	if( g_iUser1 < OBS_MAP_FREE )
 		return 1;
 
 	if( !m_drawnames->value )
@@ -407,7 +409,7 @@ int CHudSpectator::Draw( float flTime )
 			if( m_vPlayerPos[i][0] > XRES( m_OverviewData.insetWindowX ) &&
 					m_vPlayerPos[i][1] > YRES( m_OverviewData.insetWindowY ) &&
 					m_vPlayerPos[i][0] < XRES( m_OverviewData.insetWindowX + m_OverviewData.insetWindowWidth ) &&
-					m_vPlayerPos[i][1] < YRES( m_OverviewData.insetWindowY + m_OverviewData.insetWindowHeight) ) 
+					m_vPlayerPos[i][1] < YRES( m_OverviewData.insetWindowY + m_OverviewData.insetWindowHeight) )
 				continue;
 		}
 
@@ -419,7 +421,7 @@ int CHudSpectator::Draw( float flTime )
 		lx = strlen( string ) * 3; // 3 is avg. character length :)
 
 		DrawSetTextColor( color[0], color[1], color[2] );
-		DrawConsoleString( m_vPlayerPos[i][0] - lx,m_vPlayerPos[i][1], string );		
+		DrawConsoleString( m_vPlayerPos[i][0] - lx,m_vPlayerPos[i][1], string );
 	}
 
 	return 1;
@@ -434,26 +436,26 @@ void CHudSpectator::DirectorMessage( int iSize, void *pbuf )
 
 	int cmd = READ_BYTE();
 
-	switch( cmd )	// director command byte 
+	switch( cmd )	// director command byte
 	{
-		case DRC_CMD_START:	
-			// now we have to do some things clientside, since the proxy doesn't know our mod 
+		case DRC_CMD_START:
+			// now we have to do some things clientside, since the proxy doesn't know our mod
 			g_iPlayerClass = 0;
 			g_iTeamNumber = 0;
 
 			// fake a InitHUD & ResetHUD message
 			gHUD.MsgFunc_InitHUD( NULL, 0, NULL );
-			gHUD.MsgFunc_ResetHUD( NULL, 0, NULL );							
+			gHUD.MsgFunc_ResetHUD( NULL, 0, NULL );
 			break;
 		case DRC_CMD_EVENT:
 			m_lastPrimaryObject = READ_WORD();
 			m_lastSecondaryObject = READ_WORD();
 			m_iObserverFlags = READ_LONG();
-														
+
 			if( m_autoDirector->value )
 			{
 				if( ( g_iUser2 != m_lastPrimaryObject) || ( g_iUser3 != m_lastSecondaryObject ) )
-					V_ResetChaseCam();	
+					V_ResetChaseCam();
 
 				g_iUser2 = m_lastPrimaryObject;
 				g_iUser3 = m_lastSecondaryObject;
@@ -497,14 +499,14 @@ void CHudSpectator::DirectorMessage( int iSize, void *pbuf )
 
 				msg->x = READ_FLOAT();	// x pos
 				msg->y = READ_FLOAT();	// y pos
-								
+
 				msg->fadein = READ_FLOAT();	// fadein
 				msg->fadeout = READ_FLOAT();	// fadeout
 				msg->holdtime = READ_FLOAT();	// holdtime
 				msg->fxtime = READ_FLOAT();	// fxtime;
 
 				strncpy( m_HUDMessageText[m_lastHudMessage], READ_STRING(), 128 );
-				m_HUDMessageText[m_lastHudMessage][127] = 0;	// text 
+				m_HUDMessageText[m_lastHudMessage][127] = 0;	// text
 
 				msg->pMessage = m_HUDMessageText[m_lastHudMessage];
 				msg->pName = "HUD_MESSAGE";
@@ -570,7 +572,7 @@ void CHudSpectator::FindNextPlayer( bool bReverse )
 
 	int iCurrent = iStart;
 
-	int iDir = bReverse ? -1 : 1; 
+	int iDir = bReverse ? -1 : 1;
 
 	// make sure we have player info
 	//gViewPort->GetAllPlayersInfo();
@@ -600,7 +602,7 @@ void CHudSpectator::FindNextPlayer( bool bReverse )
 	if( !g_iUser2 )
 	{
 		gEngfuncs.Con_DPrintf( "No observer targets.\n" );
-		// take save camera position 
+		// take save camera position
 		VectorCopy( m_cameraOrigin, vJumpOrigin );
 		VectorCopy( m_cameraAngles, vJumpAngles );
 	}
@@ -632,7 +634,7 @@ void CHudSpectator::HandleButtonsDown( int ButtonPressed )
 	// don't handle buttons during normal demo playback
 	if( gEngfuncs.pDemoAPI->IsPlayingback() && !gEngfuncs.IsSpectateOnly() )
 		return;
-	// Slow down mouse clicks. 
+	// Slow down mouse clicks.
 	if( m_flNextObserverInput > time )
 		return;
 
@@ -670,7 +672,7 @@ void CHudSpectator::HandleButtonsDown( int ButtonPressed )
 
 		// Attack moves to the next player
 		if( ButtonPressed & ( IN_ATTACK | IN_ATTACK2 ) )
-		{ 
+		{
 			FindNextPlayer( ( ButtonPressed & IN_ATTACK2 ) ? true : false );
 
 			if( g_iUser1 == OBS_ROAMING )
@@ -785,7 +787,7 @@ void CHudSpectator::SetModes( int iNewMainMode, int iNewInsetMode )
 				break;
 		}
 
-		if( ( g_iUser1 == OBS_IN_EYE ) || ( g_iUser1 == OBS_ROAMING ) ) 
+		if( ( g_iUser1 == OBS_IN_EYE ) || ( g_iUser1 == OBS_ROAMING ) )
 		{
 			m_crosshairRect.left = 24;
 			m_crosshairRect.top = 0;
@@ -869,7 +871,7 @@ bool CHudSpectator::ParseOverviewFile()
 		{
 			// parse the global data
 			pfile = gEngfuncs.COM_ParseFile( pfile, token );
-			if( stricmp( token, "{" ) ) 
+			if( stricmp( token, "{" ) )
 			{
 				gEngfuncs.Con_Printf( "Error parsing overview file %s. (expected { )\n", filename );
 				return false;
@@ -883,19 +885,19 @@ bool CHudSpectator::ParseOverviewFile()
 				{
 					pfile = gEngfuncs.COM_ParseFile( pfile, token );
 					m_OverviewData.zoom = atof( token );
-				} 
+				}
 				else if( !stricmp( token, "origin" ) )
 				{
-					pfile = gEngfuncs.COM_ParseFile( pfile, token ); 
+					pfile = gEngfuncs.COM_ParseFile( pfile, token );
 					m_OverviewData.origin[0] = atof( token );
 					pfile = gEngfuncs.COM_ParseFile( pfile, token );
 					m_OverviewData.origin[1] = atof( token );
-					pfile = gEngfuncs.COM_ParseFile( pfile, token ); 
+					pfile = gEngfuncs.COM_ParseFile( pfile, token );
 					m_OverviewData.origin[2] = atof( token );
 				}
 				else if( !stricmp( token, "rotated" ) )
 				{
-					pfile = gEngfuncs.COM_ParseFile( pfile, token ); 
+					pfile = gEngfuncs.COM_ParseFile( pfile, token );
 					m_OverviewData.rotated = atoi( token );
 				}
 				else if( !stricmp( token, "inset" ) )
@@ -929,7 +931,7 @@ bool CHudSpectator::ParseOverviewFile()
 
 			pfile = gEngfuncs.COM_ParseFile( pfile, token );
 
-			if( stricmp( token, "{" ) ) 
+			if( stricmp( token, "{" ) )
 			{
 				gEngfuncs.Con_Printf( "Error parsing overview file %s. (expected { )\n", filename );
 				return false;
@@ -943,10 +945,10 @@ bool CHudSpectator::ParseOverviewFile()
 				{
 					pfile = gEngfuncs.COM_ParseFile( pfile, token );
 					strcpy( m_OverviewData.layersImages[m_OverviewData.layers], token );
-				} 
+				}
 				else if ( !stricmp( token, "height" ) )
 				{
-					pfile = gEngfuncs.COM_ParseFile( pfile, token ); 
+					pfile = gEngfuncs.COM_ParseFile( pfile, token );
 					height = atof( token );
 					m_OverviewData.layersHeights[m_OverviewData.layers] = height;
 				}
@@ -1003,12 +1005,12 @@ void CHudSpectator::DrawOverviewLayer()
 		yTiles = 6;
 	}
 
-	screenaspect = 4.0f / 3.0f;	
+	screenaspect = 4.0f / 3.0f;
 
 	xs = m_OverviewData.origin[0];
 	ys = m_OverviewData.origin[1];
-	z  = ( 90.0f - v_angles[0] ) / 90.0f;		
-	z *= m_OverviewData.layersHeights[0]; // gOverviewData.z_min - 32;	
+	z  = ( 90.0f - v_angles[0] ) / 90.0f;
+	z *= m_OverviewData.layersHeights[0]; // gOverviewData.z_min - 32;
 
 	// i = r_overviewTexture + ( layer * OVERVIEW_X_TILES * OVERVIEW_Y_TILES );
 
@@ -1057,7 +1059,7 @@ void CHudSpectator::DrawOverviewLayer()
 
 			y += yStep;
 		}
-	} 
+	}
 	else
 	{
 		xStep = -( 2 * 4096.0f / m_OverviewData.zoom ) / xTiles;
@@ -1067,9 +1069,9 @@ void CHudSpectator::DrawOverviewLayer()
 
 		for( ix = 0; ix < yTiles; ix++ )
 		{
-			y = ys + ( 4096.0f / ( m_OverviewData.zoom ) );	
+			y = ys + ( 4096.0f / ( m_OverviewData.zoom ) );
 
-			for( iy = 0; iy < xTiles; iy++ )	
+			for( iy = 0; iy < xTiles; iy++ )
 			{
 				if( hasMapImage )
 					gEngfuncs.pTriAPI->SpriteTexture( m_MapSprite, frame );
@@ -1121,7 +1123,7 @@ void CHudSpectator::DrawOverviewEntities()
 	gEngfuncs.pTriAPI->CullFace( TRI_NONE );
 
 	for( i = 0; i < MAX_PLAYERS; i++ )
-		m_vPlayerPos[i][2] = -1;	// mark as invisible 
+		m_vPlayerPos[i][2] = -1;	// mark as invisible
 
 	// draw all players
 	for( i = 0; i < MAX_OVERVIEW_ENTITIES; i++ )
@@ -1229,9 +1231,9 @@ void CHudSpectator::DrawOverviewEntities()
 
 		int playerNum = ent->index - 1;
 
-		m_vPlayerPos[playerNum][0] = screen[0];	
-		m_vPlayerPos[playerNum][1] = screen[1] + Length( offset );	
-		m_vPlayerPos[playerNum][2] = 1;	// mark player as visible 
+		m_vPlayerPos[playerNum][0] = screen[0];
+		m_vPlayerPos[playerNum][1] = screen[1] + Length( offset );
+		m_vPlayerPos[playerNum][2] = 1;	// mark player as visible
 	}
 
 	if( !m_pip->value || !m_drawcone->value )
@@ -1270,9 +1272,9 @@ void CHudSpectator::DrawOverviewEntities()
 	AngleVectors( angles, forward, NULL, NULL );
 	VectorScale( forward, 512.0f, forward );
 
-	offset[0] = 0.0f; 
-	offset[1] = 45.0f; 
-	offset[2] = 0.0f; 
+	offset[0] = 0.0f;
+	offset[1] = 45.0f;
+	offset[2] = 0.0f;
 
 	AngleMatrix( offset, rmatrix );
 	VectorTransform( forward, rmatrix, right );
@@ -1300,7 +1302,7 @@ void CHudSpectator::DrawOverview()
 		return;
 
 	// Only draw the overview if Map Mode is selected for this view
-	if( m_iDrawCycle == 0 && ( ( g_iUser1 != OBS_MAP_FREE ) && ( g_iUser1 != OBS_MAP_CHASE ) ) ) 
+	if( m_iDrawCycle == 0 && ( ( g_iUser1 != OBS_MAP_FREE ) && ( g_iUser1 != OBS_MAP_CHASE ) ) )
 		return;
 
 	if ( m_iDrawCycle == 1 && m_pip->value < INSET_MAP_FREE )
@@ -1395,7 +1397,7 @@ void CHudSpectator::CheckSettings()
 {
 	// disallow same inset mode as main mode:
 	m_pip->value = (int)m_pip->value;
-	
+
 	if( ( g_iUser1 < OBS_MAP_FREE ) && ( m_pip->value == INSET_CHASE_FREE || m_pip->value == INSET_IN_EYE ) )
 	{
 		// otherwise both would show in World picures
@@ -1406,7 +1408,7 @@ void CHudSpectator::CheckSettings()
 	{
 		// both would show map views
 		m_pip->value = INSET_CHASE_FREE;
-	} 
+	}
 
 	// disble in intermission screen
 	if( gHUD.m_iIntermission )
@@ -1428,13 +1430,13 @@ void CHudSpectator::CheckSettings()
 	}
 
 	// HL/TFC has no oberserver corsshair, so set it client side
-	if( ( g_iUser1 == OBS_IN_EYE ) || ( g_iUser1 == OBS_ROAMING ) ) 
+	if( ( g_iUser1 == OBS_IN_EYE ) || ( g_iUser1 == OBS_ROAMING ) )
 	{
 		m_crosshairRect.left = 24;
 		m_crosshairRect.top = 0;
 		m_crosshairRect.right = 48;
 		m_crosshairRect.bottom = 24;
-					
+
 		SetCrosshair( m_hCrosshair, m_crosshairRect, 255, 255, 255 );
 	}
 	else
@@ -1462,13 +1464,13 @@ int CHudSpectator::ToggleInset( bool allowOff )
 		if( newInsetMode > INSET_MAP_CHASE )
 		{
 			if( allowOff )
-				newInsetMode = INSET_OFF;	
+				newInsetMode = INSET_OFF;
 			else
 				newInsetMode = INSET_MAP_FREE;
 		}
 
 		if( newInsetMode == INSET_CHASE_FREE )
-			newInsetMode = INSET_MAP_FREE;	
+			newInsetMode = INSET_MAP_FREE;
 	}
 	else
 	{

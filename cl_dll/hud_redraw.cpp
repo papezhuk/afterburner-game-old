@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -16,6 +16,7 @@
 // hud_redraw.cpp
 //
 #include <math.h>
+#include <stdio.h>
 #include "hud.h"
 #include "cl_util.h"
 //#include "triangleapi.h"
@@ -25,8 +26,8 @@
 int grgLogoFrame[MAX_LOGO_FRAMES] =
 {
 	1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 13, 13, 13, 13, 13, 12, 11, 10, 9, 8, 14, 15,
-	16, 17, 18, 19, 20, 20, 20, 20, 20, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 
-	29, 29, 29, 29, 29, 28, 27, 26, 25, 24, 30, 31 
+	16, 17, 18, 19, 20, 20, 20, 20, 20, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+	29, 29, 29, 29, 29, 28, 27, 26, 25, 24, 30, 31
 };
 
 extern int g_iVisibleMouse;
@@ -75,7 +76,7 @@ void CHud::Think( void )
 	if( m_iFOV == 0 )
 	{
 		// only let players adjust up in fov,  and only if they are not overriden by something else
-		m_iFOV = max( default_fov->value, 90 );  
+		m_iFOV = max( default_fov->value, 90 );
 	}
 }
 
@@ -299,7 +300,7 @@ int CHud::DrawHudNumber( int x, int y, int iFlags, int iNumber, int r, int g, in
 {
 	int iWidth = GetSpriteRect( m_HUD_number_0 ).right - GetSpriteRect( m_HUD_number_0 ).left;
 	int k;
-	
+
 	if( iNumber > 0 )
 	{
 		// SPR_Draw 100's
@@ -384,7 +385,7 @@ int CHud::GetNumWidth( int iNumber, int iFlags )
 		return 2;
 
 	return 3;
-}	
+}
 
 void CHud::DrawDarkRectangle( int x, int y, int wide, int tall )
 {

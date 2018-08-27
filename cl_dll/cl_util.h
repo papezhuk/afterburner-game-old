@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -100,9 +100,9 @@ inline client_textmessage_t *TextMessageGet( const char *pName )
 	return gEngfuncs.pfnTextMessageGet( pName );
 }
 
-inline int TextMessageDrawChar( int x, int y, int number, int r, int g, int b ) 
+inline int TextMessageDrawChar( int x, int y, int number, int r, int g, int b )
 {
-	return gEngfuncs.pfnDrawCharacter( x, y, number, r, g, b ); 
+	return gEngfuncs.pfnDrawCharacter( x, y, number, r, g, b );
 }
 
 inline int DrawConsoleString( int x, int y, const char *string )
@@ -148,17 +148,20 @@ inline void CenterPrint( const char *string )
 inline void PlaySound( const char *szSound, float vol ) { gEngfuncs.pfnPlaySoundByName( szSound, vol ); }
 inline void PlaySound( int iSound, float vol ) { gEngfuncs.pfnPlaySoundByIndex( iSound, vol ); }
 
+#ifndef max
 #define max(a, b)  (((a) > (b)) ? (a) : (b))
+#endif
+
+#ifndef min
 #define min(a, b)  (((a) < (b)) ? (a) : (b))
+#endif
+
+#ifndef fabs
 #define fabs(x)	   ((x) > 0 ? (x) : 0 - (x))
+#endif
 
 void ScaleColors( int &r, int &g, int &b, int a );
 
-#define DotProduct(x, y) ((x)[0] * (y)[0] + (x)[1] * (y)[1] + (x)[2] * (y)[2])
-#define VectorSubtract(a, b, c) { (c)[0] = (a)[0] - (b)[0]; (c)[1] = (a)[1] - (b)[1]; (c)[2] = (a)[2] - (b)[2]; }
-#define VectorAdd(a, b, c) { (c)[0] = (a)[0] + (b)[0]; (c)[1] = (a)[1] + (b)[1]; (c)[2] = (a)[2] + (b)[2]; }
-#define VectorCopy(a, b) { (b)[0] = (a)[0]; (b)[1] = (a)[1]; (b)[2] = (a)[2]; }
-inline void VectorClear( float *a ) { a[0] = 0.0; a[1] = 0.0; a[2] = 0.0; }
 float Length( const float *v );
 void VectorMA( const float *veca, float scale, const float *vecb, float *vecc );
 void VectorScale( const float *in, float scale, float *out );

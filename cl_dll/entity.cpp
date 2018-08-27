@@ -1,6 +1,6 @@
 //========= Copyright (c) 1996-2002, Valve LLC, All rights reserved. ============
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 //=============================================================================
@@ -8,6 +8,7 @@
 // Client side entity management functions
 
 #include <memory.h>
+#include <stdlib.h>
 
 #include "hud.h"
 #include "cl_util.h"
@@ -17,7 +18,7 @@
 #include "r_efx.h"
 #include "event_api.h"
 #include "pm_defs.h"
-#include "pmtrace.h"	
+#include "pmtrace.h"
 #include "pm_shared.h"
 
 void Game_AddObjects( void );
@@ -58,7 +59,7 @@ int DLLEXPORT HUD_AddEntity( int type, struct cl_entity_s *ent, const char *mode
 	}
 	// each frame every entity passes this function, so the overview hooks it to filter the overview entities
 	// in spectator mode:
-	// each frame every entity passes this function, so the overview hooks 
+	// each frame every entity passes this function, so the overview hooks
 	// it to filter the overview entities
 
 	if( g_iUser1 )
@@ -121,11 +122,11 @@ void DLLEXPORT HUD_ProcessPlayerState( struct entity_state_s *dst, const struct 
 	dst->movetype				= src->movetype;
 	dst->sequence				= src->sequence;
 	dst->animtime				= src->animtime;
-	
+
 	dst->solid				= src->solid;
-	
+
 	dst->rendermode				= src->rendermode;
-	dst->renderamt				= src->renderamt;	
+	dst->renderamt				= src->renderamt;
 	dst->rendercolor.r			= src->rendercolor.r;
 	dst->rendercolor.g			= src->rendercolor.g;
 	dst->rendercolor.b			= src->rendercolor.b;
@@ -258,7 +259,7 @@ void MoveModel( void )
 
 			mymodel[i * 3 + j].model = mod;
 			mymodel[i * 3 + j].curstate.modelindex = modelindex;
-		
+
 			// Move it out a bit
 			mymodel[i * 3 + j].origin[0] = player->origin[0] + 50 * ( 1 - i );
 			mymodel[i * 3 + j].origin[1] = player->origin[1] + 50 * ( 1 - j );
@@ -500,7 +501,7 @@ void Beams( void )
 /*
 =========================
 HUD_CreateEntities
-	
+
 Gives us a chance to add additional entities to the render this frame
 =========================
 */
@@ -558,7 +559,7 @@ void DLLEXPORT HUD_StudioEvent( const struct mstudioevent_s *event, const struct
 		gEngfuncs.pEfxAPI->R_SparkEffect( (float *)&entity->attachment[0], atoi( event->options ), -100, 100 );
 		break;
 	// Client side sound
-	case 5004:		
+	case 5004:
 		gEngfuncs.pfnPlaySoundByNameAtLocation( (char *)event->options, 1.0, (float *)&entity->attachment[0] );
 		break;
 	default:
@@ -578,7 +579,7 @@ void DLLEXPORT HUD_TempEntUpdate (
 	double client_time, // Absolute time on client
 	double cl_gravity,  // True gravity on client
 	TEMPENTITY **ppTempEntFree,   // List of freed temporary ents
-	TEMPENTITY **ppTempEntActive, // List 
+	TEMPENTITY **ppTempEntActive, // List
 	int		( *Callback_AddVisibleEntity )( cl_entity_t *pEntity ),
 	void	( *Callback_TempEntPlaySound )( TEMPENTITY *pTemp, float damp ) )
 {
@@ -588,11 +589,11 @@ void DLLEXPORT HUD_TempEntUpdate (
 	float		/*freq,*/ gravity, gravitySlow, life, fastFreq;
 
 	// Nothing to simulate
-	if( !*ppTempEntActive )	
+	if( !*ppTempEntActive )
 		return;
 
 	// in order to have tents collide with players, we have to run the player prediction code so
-	// that the client has the player list. We run this code once when we detect any COLLIDEALL 
+	// that the client has the player list. We run this code once when we detect any COLLIDEALL
 	// tent, then set this BOOL to true so the code doesn't get run again if there's more than
 	// one COLLIDEALL ent for this update. (often are).
 	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction( false, true );
@@ -646,7 +647,7 @@ void DLLEXPORT HUD_TempEntUpdate (
 				if( pTemp->entity.curstate.renderamt <= 0 )
 					active = 0;
 			}
-			else 
+			else
 				active = 0;
 		}
 		if( !active )		// Kill it
@@ -717,12 +718,12 @@ void DLLEXPORT HUD_TempEntUpdate (
 				pTemp->entity.origin[1] += pTemp->entity.baseline.origin[1] * frametime + 4 * sin( client_time * 30 + (size_t)pTemp );
 				pTemp->entity.origin[2] += pTemp->entity.baseline.origin[2] * frametime;
 			}
-			else 
+			else
 			{
 				for( i = 0; i < 3; i++ )
 					pTemp->entity.origin[i] += pTemp->entity.baseline.origin[i] * frametime;
 			}
-			
+
 			if( pTemp->flags & FTENT_SPRANIMATE )
 			{
 				pTemp->entity.curstate.frame += frametime * pTemp->entity.curstate.framerate;
@@ -813,7 +814,7 @@ void DLLEXPORT HUD_TempEntUpdate (
 
 							if( Length( pTemp->entity.baseline.origin ) < 10 )
 							{
-								pTemp->entity.baseline.framerate = 0.0;								
+								pTemp->entity.baseline.framerate = 0.0;
 							}
 						}
 
@@ -823,7 +824,7 @@ void DLLEXPORT HUD_TempEntUpdate (
 						}
 					}
 				}
-				
+
 				if( traceFraction != 1 )	// Decent collision now, and damping works
 				{
 					float  proj, damp;
@@ -855,8 +856,8 @@ void DLLEXPORT HUD_TempEntUpdate (
 					if( pTemp->flags & FTENT_COLLIDEKILL )
 					{
 						// die on impact
-						pTemp->flags &= ~FTENT_FADEOUT;	
-						pTemp->die = client_time;			
+						pTemp->flags &= ~FTENT_FADEOUT;
+						pTemp->die = client_time;
 					}
 					else
 					{
@@ -869,7 +870,7 @@ void DLLEXPORT HUD_TempEntUpdate (
 
 							pTemp->entity.angles[1] = -pTemp->entity.angles[1];
 						}
-						
+
 						if( damp != 1 )
 						{
 
@@ -934,7 +935,7 @@ finish:
 HUD_GetUserEntity
 
 If you specify negative numbers for beam start and end point entities, then
-  the engine will call back into this function requesting a pointer to a cl_entity_t 
+  the engine will call back into this function requesting a pointer to a cl_entity_t
   object that describes the entity to attach the beam onto.
 
 Indices must start at 1, not zero.

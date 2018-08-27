@@ -1,6 +1,6 @@
 //========= Copyright (c) 1996-2002, Valve LLC, All rights reserved. ============
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 //=============================================================================
@@ -27,8 +27,9 @@ extern "C"
 //#include "view.h"
 #include <string.h>
 #include <ctype.h>
+#include <stdlib.h>
 
-extern "C" 
+extern "C"
 {
 	struct kbutton_s DLLEXPORT *KB_Find( const char *name );
 	void DLLEXPORT CL_CreateMove( float frametime, struct usercmd_s *cmd, int active );
@@ -240,7 +241,7 @@ Add a kbutton_t * to the list of pointers the engine can retrieve via KB_Find
 */
 void KB_Add( const char *name, kbutton_t *pkb )
 {
-	kblist_t *p;	
+	kblist_t *p;
 	kbutton_t *kb;
 
 	kb = KB_Find( name );
@@ -312,7 +313,7 @@ void KeyDown( kbutton_t *b )
 
 	if( k == b->down[0] || k == b->down[1] )
 		return;		// repeating key
-	
+
 	if( !b->down[0] )
 		b->down[0] = k;
 	else if( !b->down[1] )
@@ -322,7 +323,7 @@ void KeyDown( kbutton_t *b )
 		gEngfuncs.Con_DPrintf( "Three keys down for a button '%c' '%c' '%c'!\n", b->down[0], b->down[1], c );
 		return;
 	}
-	
+
 	if( b->state & 1 )
 		return;		// still down
 	b->state |= 1 + 2;	// down + impulse down
@@ -337,7 +338,7 @@ void KeyUp( kbutton_t *b )
 {
 	int	k;
 	char	*c;
-	
+
 	c = gEngfuncs.Cmd_Argv( 1 );
 	if( c[0] )
 		k = atoi(c);
@@ -376,7 +377,7 @@ Return 1 to allow engine to process the key, otherwise, act on it as needed
 ============
 */
 int DLLEXPORT HUD_Key_Event( int down, int keynum, const char *pszCurrentBinding )
-{	
+{
 	return 1;
 }
 
@@ -699,17 +700,17 @@ float CL_KeyState( kbutton_t *key )
 		if( down )
 		{
 			// released and re-pressed this frame
-			val = 0.75;	
+			val = 0.75;
 		}
 		else
 		{
 			// pressed and released this frame
-			val = 0.25;	
+			val = 0.25;
 		}
 	}
 
 	// clear impulses
-	key->state &= 1;		
+	key->state &= 1;
 	return val;
 }
 
@@ -804,7 +805,7 @@ void DLLEXPORT CL_CreateMove( float frametime, struct usercmd_s *cmd, int active
 		cmd->upmove -= cl_upspeed->value * CL_KeyState( &in_down );
 
 		if( !(in_klook.state & 1 ) )
-		{	
+		{
 			cmd->forwardmove += cl_forwardspeed->value * CL_KeyState( &in_forward );
 			cmd->forwardmove -= cl_backspeed->value * CL_KeyState( &in_back );
 		}
@@ -941,7 +942,7 @@ int CL_ButtonBits( int bResetState )
 	{
 		bits |= IN_LEFT;
 	}
-	
+
 	if( in_right.state & 3 )
 	{
 		bits |= IN_RIGHT;
@@ -951,7 +952,7 @@ int CL_ButtonBits( int bResetState )
 	{
 		bits |= IN_MOVELEFT;
 	}
-	
+
 	if( in_moveright.state & 3 )
 	{
 		bits |= IN_MOVERIGHT;

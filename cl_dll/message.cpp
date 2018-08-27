@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -22,6 +22,7 @@
 #include "cl_util.h"
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "parsemsg.h"
 
 DECLARE_MESSAGE( m_Message, HudText )
@@ -204,7 +205,7 @@ void CHudMessage::MessageScanStart( void )
 	case 1:
 	case 0:
 		m_parms.fadeTime = m_parms.pMessage->fadein + m_parms.pMessage->holdtime;
-		
+
 
 		if( m_parms.time < m_parms.pMessage->fadein )
 		{
@@ -226,7 +227,7 @@ void CHudMessage::MessageScanStart( void )
 		break;
 	case 2:
 		m_parms.fadeTime = (m_parms.pMessage->fadein * m_parms.length) + m_parms.pMessage->holdtime;
-		
+
 		if ( m_parms.time > m_parms.fadeTime && m_parms.pMessage->fadeout > 0 )
 			m_parms.fadeBlend = ( ( ( m_parms.time - m_parms.fadeTime ) / m_parms.pMessage->fadeout ) * 255 );
 		else
@@ -416,7 +417,7 @@ void CHudMessage::MessageAdd( const char *pName, float time )
 		if( !m_pMessages[i] )
 		{
 			// Trim off a leading # if it's there
-			if( pName[0] == '#' ) 
+			if( pName[0] == '#' )
 				tempMessage = TextMessageGet( pName + 1 );
 			else
 				tempMessage = TextMessageGet( pName );

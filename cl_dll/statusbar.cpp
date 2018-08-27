@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -25,6 +25,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 DECLARE_MESSAGE( m_StatusBar, StatusText )
 DECLARE_MESSAGE( m_StatusBar, StatusValue )
@@ -125,7 +126,7 @@ void CHudStatusBar::ParseStatusString( int line_num )
 					}
 
 					// move over descriptor, then get and move over the index
-					index = atoi( ++src ); 
+					index = atoi( ++src );
 					while( *src >= '0' && *src <= '9' )
 						src++;
 
@@ -212,7 +213,7 @@ int CHudStatusBar::Draw( float fTime )
 
 // Message handler for StatusText message
 // accepts two values:
-//		byte: line number of status bar text 
+//		byte: line number of status bar text
 //		string: status bar text
 // this string describes how the status bar should be drawn
 // a semi-regular expression:

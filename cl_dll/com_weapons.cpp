@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -16,6 +16,7 @@
 // Com_Weapons.cpp
 // Shared weapons common/shared functions
 #include <stdarg.h>
+#include <stdio.h>
 #include "hud.h"
 #include "cl_util.h"
 #include "com_weapons.h"
@@ -164,7 +165,7 @@ float UTIL_WeaponTimeBase( void )
 	return 0.0;
 }
 
-static unsigned int glSeed = 0; 
+static unsigned int glSeed = 0;
 
 unsigned int seed_table[256] =
 {
@@ -186,13 +187,13 @@ unsigned int seed_table[256] =
 	25678, 18555, 13256, 23316, 22407, 16727, 991, 9236, 5373, 29402, 6117, 15241, 27715, 19291, 19888, 19847
 };
 
-unsigned int U_Random( void ) 
+unsigned int U_Random( void )
 {
-	glSeed *= 69069; 
+	glSeed *= 69069;
 	glSeed += seed_table[glSeed & 0xff];
 
 	return ( ++glSeed & 0x0fffffff );
-} 
+}
 
 void U_Srand( unsigned int seed )
 {

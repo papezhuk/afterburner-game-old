@@ -1,6 +1,6 @@
 //========= Copyright (c) 1996-2002, Valve LLC, All rights reserved. ============
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 //=============================================================================
@@ -22,6 +22,7 @@
 #include <string.h>
 #include <memory.h>
 #include <math.h>
+#include <cstdlib>
 
 #include "studio_util.h"
 #include "r_studioint.h"
@@ -46,7 +47,7 @@ const char *legs_bones[] =
 	"Bip01 L Foot",
 	"Bip01 R Leg",
 	"Bip01 R Leg1",
-	"Bip01 R Foot" 
+	"Bip01 R Foot"
 };
 
 /*
@@ -157,7 +158,7 @@ void CStudioModelRenderer::StudioCalcBoneAdj( float dadt, float *adj, const byte
 		else
 		{
 			value = mouthopen / 64.0;
-			if( value > 1.0 ) value = 1.0;				
+			if( value > 1.0 ) value = 1.0;
 			value = ( 1.0 - value ) * pbonecontroller[j].start + value * pbonecontroller[j].end;
 			// Con_DPrintf( "%d %f\n", mouthopen, value );
 		}
@@ -285,7 +286,7 @@ void CStudioModelRenderer::StudioCalcBonePosition( int frame, float s, mstudiobo
 			if( i == 0 && j == 0 )
 				Con_DPrintf( "%d  %d:%d  %f\n", frame, panimvalue->num.valid, panimvalue->num.total, s );
 			*/
-			
+
 			k = frame;
 			// DEBUG
 			if( panimvalue->num.total < panimvalue->num.valid )
@@ -512,7 +513,7 @@ void CStudioModelRenderer::StudioSetUpTransform( int trivial_accept )
 		}
 		//Con_DPrintf( "%.3f \n", f );
 	}
-	else if( m_pCurrentEntity->curstate.movetype != MOVETYPE_NONE ) 
+	else if( m_pCurrentEntity->curstate.movetype != MOVETYPE_NONE )
 	{
 		VectorCopy( m_pCurrentEntity->angles, angles );
 	}
@@ -740,7 +741,7 @@ float CStudioModelRenderer::StudioEstimateFrame( mstudioseqdesc_t *pseqdesc )
 	{
 		f = ( m_pCurrentEntity->curstate.frame * ( pseqdesc->numframes - 1 ) ) / 256.0;
 	}
- 
+
 	f += dfdt;
 
 	if( pseqdesc->flags & STUDIO_LOOPING )
@@ -754,7 +755,7 @@ float CStudioModelRenderer::StudioEstimateFrame( mstudioseqdesc_t *pseqdesc )
 			f += ( pseqdesc->numframes - 1 );
 		}
 	}
-	else 
+	else
 	{
 		if( f >= pseqdesc->numframes - 1.001 )
 		{
@@ -839,9 +840,9 @@ void CStudioModelRenderer::StudioSetupBones( void )
 			StudioSlerpBones( q, pos, q3, pos3, s );
 		}
 	}
-	
+
 	if( m_fDoInterp && m_pCurrentEntity->latched.sequencetime &&
-		( m_pCurrentEntity->latched.sequencetime + 0.2 > m_clTime ) && 
+		( m_pCurrentEntity->latched.sequencetime + 0.2 > m_clTime ) &&
 		( m_pCurrentEntity->latched.prevsequence < m_pStudioHeader->numseq ) )
 	{
 		// blend from last sequence
@@ -945,8 +946,8 @@ void CStudioModelRenderer::StudioSetupBones( void )
 
 			// Apply client-side effects to the transformation matrix
 			StudioFxTransform( m_pCurrentEntity, (*m_pbonetransform)[i] );
-		} 
-		else 
+		}
+		else
 		{
 			ConcatTransforms( (*m_pbonetransform)[pbones[i].parent], bonematrix, (*m_pbonetransform)[i] );
 			ConcatTransforms( (*m_plighttransform)[pbones[i].parent], bonematrix, (*m_plighttransform)[i] );
@@ -1053,8 +1054,8 @@ void CStudioModelRenderer::StudioMergeBones( model_t *m_pSubModel )
 
 				// Apply client-side effects to the transformation matrix
 				StudioFxTransform( m_pCurrentEntity, (*m_pbonetransform)[i] );
-			} 
-			else 
+			}
+			else
 			{
 				ConcatTransforms( (*m_pbonetransform)[pbones[i].parent], bonematrix, (*m_pbonetransform)[i] );
 				ConcatTransforms( (*m_plighttransform)[pbones[i].parent], bonematrix, (*m_plighttransform)[i] );
@@ -1103,10 +1104,10 @@ int CStudioModelRenderer::StudioDrawModel( int flags )
 
 		save_interp = m_fDoInterp;
 		m_fDoInterp = 0;
-		
+
 		// draw as though it were a player
 		result = StudioDrawPlayer( flags, &deadplayer );
-		
+
 		m_fDoInterp = save_interp;
 		return result;
 	}
@@ -1583,7 +1584,7 @@ void CStudioModelRenderer::StudioRenderFinal_Software( void )
 	int i;
 
 	// Note, rendermode set here has effect in SW
-	IEngineStudio.SetupRenderer( 0 ); 
+	IEngineStudio.SetupRenderer( 0 );
 
 	if( m_pCvarDrawEntities->value == 2 )
 	{
@@ -1648,7 +1649,7 @@ void CStudioModelRenderer::StudioRenderFinal_Hardware( void )
 			if( m_fDoInterp )
 			{
 				// interpolation messes up bounding boxes.
-				m_pCurrentEntity->trivial_accept = 0; 
+				m_pCurrentEntity->trivial_accept = 0;
 			}
 
 			IEngineStudio.GL_SetRenderMode( rendermode );

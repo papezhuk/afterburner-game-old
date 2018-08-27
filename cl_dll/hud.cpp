@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -22,6 +22,7 @@
 #include "cl_util.h"
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "parsemsg.h"
 #include "hud_servers.h"
 
@@ -135,7 +136,7 @@ int __MsgFunc_RandomPC( const char *pszName, int iSize, void *pbuf )
 {
 	return 0;
 }
- 
+
 int __MsgFunc_ServerName( const char *pszName, int iSize, void *pbuf )
 {
 	return 0;
@@ -150,7 +151,7 @@ int __MsgFunc_AllowSpec( const char *pszName, int iSize, void *pbuf )
 {
 	return 0;
 }
- 
+
 // This is called every time the DLL is loaded
 void CHud::Init( void )
 {
@@ -233,7 +234,7 @@ void CHud::Init( void )
 	m_Scoreboard.Init();
 
 	m_Menu.Init();
-	
+
 	MsgFunc_ResetHUD( 0, 0, NULL );
 }
 
@@ -285,7 +286,7 @@ void CHud::VidInit( void )
 	// ---------
 	//m_hsprFont = LoadSprite("sprites/%d_font.spr");
 
-	m_hsprLogo = 0;	
+	m_hsprLogo = 0;
 	m_hsprCursor = 0;
 
 	if( ScreenWidth < 640 )
@@ -445,7 +446,7 @@ void COM_FileBase ( const char *in, char *out )
 
 	if( in[end] != '.' )		// no '.', copy to end
 		end = len - 1;
-	else 
+	else
 		end--;					// Found ',', copy to left of '.'
 
 	// Scan backward for '/'
@@ -455,7 +456,7 @@ void COM_FileBase ( const char *in, char *out )
 
 	if( in[start] != '/' && in[start] != '\\' )
 		start = 0;
-	else 
+	else
 		start++;
 
 	// Length of new sting
@@ -540,12 +541,12 @@ int CHud::MsgFunc_SetFOV( const char *pszName,  int iSize, void *pbuf )
 
 	// Set a new sensitivity
 	if( m_iFOV == def_fov )
-	{  
+	{
 		// reset to saved sensitivity
 		m_flMouseSensitivity = 0;
 	}
 	else
-	{  
+	{
 		// set a new sensitivity that is proportional to the change from the FOV default
 		m_flMouseSensitivity = sensitivity->value * ((float)newfov / (float)def_fov) * CVAR_GET_FLOAT("zoom_sensitivity_ratio");
 	}

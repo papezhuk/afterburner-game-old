@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -71,13 +71,8 @@ typedef int BOOL;
 // Header file containing definition of globalvars_t and entvars_t
 typedef unsigned int func_t;
 typedef int string_t;				// from engine's pr_comp.h;
-typedef float vec_t;				// needed before including progdefs.h
 
-// Vector class
-#include "vector.h"
-
-// Defining it as a (bogus) struct helps enforce type-checking
-#define vec3_t Vector
+#include "vector_classes.h"
 
 // Shared engine/DLL constants
 #include "const.h"

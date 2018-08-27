@@ -1,23 +1,16 @@
-/***
-*
-*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
-*	All Rights Reserved.
-*
-*   Use, distribution, and modification of this source code and/or resulting
-*   object code is restricted to non-commercial enhancements to products from
-*   Valve LLC.  All other use, distribution, or modification is prohibited
-*   without written permission from Valve LLC.
-*
-****/
 #pragma once
-#ifndef VECTOR_H
-#define VECTOR_H
 
+#include <math.h>
+
+typedef float vec_t;
+typedef vec_t vec2_t[2];
+typedef vec_t vec3_t[3];
+typedef vec_t vec4_t[4];	// x,y,z,w
+
+// Some of the pm_shared stuff is C instead of C++, so don't use the classes in this situation.
+#ifdef __cplusplus
 //=========================================================
-// 2DVector - used for many pathfinding and many other 
+// 2DVector - used for many pathfinding and many other
 // operations that are treated as planar rather than 3d.
 //=========================================================
 class Vector2D
@@ -29,13 +22,13 @@ public:
 	inline Vector2D operator-(const Vector2D& v)	const	{ return Vector2D( x - v.x, y - v.y );	}
 	inline Vector2D operator*(float fl)		const	{ return Vector2D( x * fl, y * fl );	}
 	inline Vector2D operator/(float fl)		const	{ return Vector2D( x / fl, y / fl );	}
+	operator float *()								{ return &x; } // Vectors will now automatically convert to float * when needed
+	operator const float *() const					{ return &x; } // Vectors will now automatically convert to float * when needed
 
 	inline float Length(void)			const	{ return sqrt(x * x + y * y );		}
 
 	inline Vector2D Normalize ( void ) const
 	{
-		//Vector2D vec2;
-
 		float flLen = Length();
 		if( flLen == 0 )
 		{
@@ -46,6 +39,16 @@ public:
 			flLen = 1 / flLen;
 			return Vector2D( x * flLen, y * flLen );
 		}
+	}
+
+	inline float& operator [](int index)
+	{
+		return operator float*()[index];
+	}
+
+	inline const float& operator [](int index) const
+	{
+		return operator const float*()[index];
 	}
 
 	vec_t	x, y;
@@ -63,9 +66,7 @@ public:
 	// Construction/destruction
 	inline Vector( void ): x( 0.0f ), y( 0.0f ), z( 0.0f )								{ }
 	inline Vector( float X, float Y, float Z ): x( 0.0f ), y( 0.0f ), z( 0.0f )	{ x = X; y = Y; z = Z;				}
-	//inline Vector( double X, double Y, double Z )		{ x = (float)X; y = (float)Y; z = (float)Z;	}
-	//inline Vector( int X, int Y, int Z )			{ x = (float)X; y = (float)Y; z = (float)Z;	}
-	inline Vector( const Vector& v ): x( 0.0f ), y( 0.0f ), z( 0.0f )	{ x = v.x; y = v.y; z = v.z;			} 
+	inline Vector( const Vector& v ): x( 0.0f ), y( 0.0f ), z( 0.0f )	{ x = v.x; y = v.y; z = v.z;			}
 	inline Vector( float rgfl[3] ): x( 0.0f ), y( 0.0f ), z( 0.0f )	{ x = rgfl[0]; y = rgfl[1]; z = rgfl[2];	}
 
 	// Operators
@@ -101,10 +102,31 @@ public:
 	}
 	inline float Length2D( void ) const		{ return sqrt( x * x + y * y ); }
 
+	inline float& operator [](int index)
+	{
+		return operator float*()[index];
+	}
+
+	inline const float& operator [](int index) const
+	{
+		return operator const float*()[index];
+	}
+
 	// Members
 	vec_t x, y, z;
 };
+
 inline Vector operator*( float fl, const Vector& v ) { return v * fl; }
-inline float DotProduct( const Vector& a, const Vector& b ) { return( a.x * b.x + a.y * b.y + a.z * b.z); }
 inline Vector CrossProduct( const Vector& a, const Vector& b ) { return Vector( a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x ); }
-#endif
+
+// This is disgusting, but too deeply entrenched to remove now.
+#define vec3_t Vector
+
+#endif // __cplusplus
+
+// These are defines rather than inline functions so that they'll work with either a pure array or a vector class.
+#define VectorSubtract(a,b,c) {(c)[0]=(a)[0]-(b)[0];(c)[1]=(a)[1]-(b)[1];(c)[2]=(a)[2]-(b)[2];}
+#define VectorAdd(a,b,c) {(c)[0]=(a)[0]+(b)[0];(c)[1]=(a)[1]+(b)[1];(c)[2]=(a)[2]+(b)[2];}
+#define VectorCopy(a,b) {(b)[0]=(a)[0];(b)[1]=(a)[1];(b)[2]=(a)[2];}
+#define VectorClear(a) {(a)[0]=0.0;(a)[1]=0.0;(a)[2]=0.0;}
+#define DotProduct(x, y) ((x)[0] * (y)[0] + (x)[1] * (y)[1] + (x)[2] * (y)[2])
