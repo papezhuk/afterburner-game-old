@@ -35,8 +35,6 @@ void Game_HookEvents( void )
 {
 	gEngfuncs.pfnHookEvent( "events/glock1.sc", EV_FireGlock1 );
 	gEngfuncs.pfnHookEvent( "events/glock2.sc", EV_FireGlock2 );
-	gEngfuncs.pfnHookEvent( "events/weapon_generictest_fire01.sc", EV_FireGenericTest1 );
-	gEngfuncs.pfnHookEvent( "events/weapon_generictest_fire02.sc", EV_FireGenericTest2 );
 	gEngfuncs.pfnHookEvent( "events/p991.sc", EV_FireP991 );
 	gEngfuncs.pfnHookEvent( "events/p992.sc", EV_FireP992 );
 	gEngfuncs.pfnHookEvent( "events/shotgun1.sc", EV_FireShotGunSingle );
@@ -56,4 +54,7 @@ void Game_HookEvents( void )
 	gEngfuncs.pfnHookEvent( "events/firehornet.sc", EV_HornetGunFire );
 	gEngfuncs.pfnHookEvent( "events/tripfire.sc", EV_TripmineFire );
 	gEngfuncs.pfnHookEvent( "events/snarkfire.sc", EV_SnarkFire );
+
+	gEngfuncs.pfnHookEvent( "events/weapon_generictest_fire01.sc", EV_WeaponGenericTest_Fire1 );
+	gEngfuncs.pfnHookEvent( "events/weapon_generictest_fire02.sc", EV_WeaponGenericTest_Fire2 );
 }

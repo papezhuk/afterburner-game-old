@@ -37,7 +37,10 @@
 
 #include "r_studioint.h"
 #include "com_model.h"
+
 #include "genericweaponattributes.h"
+#include "weaponregistry.h"
+#include "weapon_generictest.h"
 
 extern engine_studio_api_t IEngineStudio;
 
@@ -268,7 +271,7 @@ void EV_HLDM_GunshotDecalTrace( pmtrace_t *pTrace, char *decalName )
 	// Only decal brush models such as the world etc.
 	if(  decalName && decalName[0] && pe && ( pe->solid == SOLID_BSP || pe->movetype == MOVETYPE_PUSHSTEP ) )
 	{
-		if( CVAR_GET_FLOAT( "r_decals" ) )
+		if( gEngfuncs.pfnGetCvarFloat("r_decals") )
 		{
 			gEngfuncs.pEfxAPI->R_DecalShoot(
 				gEngfuncs.pEfxAPI->Draw_DecalIndex( gEngfuncs.pEfxAPI->Draw_DecalIndexFromName( decalName ) ),
@@ -419,6 +422,114 @@ void EV_HLDM_FireBullets( int idx, float *forward, float *right, float *up, int 
 
 		gEngfuncs.pEventAPI->EV_PopPMStates();
 	}
+}
+
+// Generic handlers
+
+static void GenericWeaponFireBullets(event_args_t *args, const CGenericWeaponAttributes& atts, const CGenericWeaponAtts_HitscanFireMode* fireMode)
+{
+	if ( !fireMode )
+	{
+		ASSERT(false);
+		return;
+	}
+
+	const int idx = args->entindex;
+	const bool empty = args->bparam1;
+	const int shell = gEngfuncs.pEventAPI->EV_FindModelIndex(fireMode->ShellModelName());
+
+	vec3_t origin;
+	vec3_t angles;
+	vec3_t velocity;
+	vec3_t forward;
+	vec3_t right;
+	vec3_t up;
+	VectorCopy( args->origin, origin );
+	VectorCopy( args->angles, angles );
+	VectorCopy( args->velocity, velocity );
+	AngleVectors( angles, forward, right, up );
+
+	if( EV_IsLocal( idx ) )
+	{
+		EV_MuzzleFlash();
+
+		int animIndex = empty ? fireMode->AnimIndex_FireEmpty() : fireMode->AnimIndex_FireNotEmpty();
+		if ( empty && animIndex < 0 )
+		{
+			animIndex = fireMode->AnimIndex_FireNotEmpty();
+		}
+
+		gEngfuncs.pEventAPI->EV_WeaponAnimation(animIndex, 0);
+		V_PunchAxis(fireMode->ViewPunchX(), fireMode->ViewPunchY());
+	}
+
+	vec3_t ShellVelocity;
+	vec3_t ShellOrigin;
+	EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20, -12, 4 );
+	EV_EjectBrass( ShellOrigin, ShellVelocity, angles[YAW], shell, TE_BOUNCE_SHELL );
+
+	if ( fireMode->HasSounds() )
+	{
+		const CGenericWeaponAttributes_Sound& fireSound = fireMode->Sounds();
+		const float volume = (fireSound.MinVolume() < fireSound.MaxVolume())
+			? gEngfuncs.pfnRandomFloat(fireSound.MinVolume(), fireSound.MaxVolume())
+			: fireSound.MaxVolume();
+		const int pitch = (fireSound.MinPitch() < fireSound.MaxPitch())
+			? gEngfuncs.pfnRandomLong(fireSound.MinPitch(), fireSound.MaxPitch())
+			: fireSound.MaxPitch();
+		const char* const soundName = fireSound.SoundList().ItemByProbabilisticValue(gEngfuncs.pfnRandomFloat(0.0f, 1.0f));
+
+		gEngfuncs.pEventAPI->EV_PlaySound(idx,
+										origin,
+										CHAN_WEAPON,
+										soundName,
+										volume,
+										ATTN_NORM,
+										0,
+										pitch);
+	}
+
+	vec3_t vecSrc;
+	vec3_t vecAiming;
+	EV_GetGunPosition( args, vecSrc, origin );
+	VectorCopy( forward, vecAiming );
+
+	EV_HLDM_FireBullets(idx,
+						forward,
+						right,
+						up,
+						1,
+						vecSrc,
+						vecAiming,
+						8192,
+						fireMode->BulletType(),
+						1,
+						fireMode->SpreadX(),
+						fireMode->SpreadY());
+}
+
+void EV_WeaponGenericTest_Fire1(event_args_t* args)
+{
+	const CGenericWeaponAttributes* atts = CWeaponRegistry::StaticInstance.Get(WeaponId_e::WeaponGenericTest);
+	if ( !atts )
+	{
+		ASSERT(false);
+		return;
+	}
+
+	GenericWeaponFireBullets(args, *atts, dynamic_cast<const CGenericWeaponAtts_HitscanFireMode*>(atts->FireMode(0)));
+}
+
+void EV_WeaponGenericTest_Fire2(event_args_t* args)
+{
+	const CGenericWeaponAttributes* atts = CWeaponRegistry::StaticInstance.Get(WeaponId_e::WeaponGenericTest);
+	if ( !atts )
+	{
+		ASSERT(false);
+		return;
+	}
+
+	GenericWeaponFireBullets(args, *atts, dynamic_cast<const CGenericWeaponAtts_HitscanFireMode*>(atts->FireMode(1)));
 }
 
 //======================

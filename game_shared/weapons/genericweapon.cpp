@@ -166,12 +166,13 @@ void CGenericWeapon::HitscanFire(int index, const CGenericWeaponAtts_HitscanFire
 	}
 
 	Vector vecDir;
-	const float spread = fireMode->Spread();
+	const float spreadX = fireMode->SpreadX();
+	const float spreadY = fireMode->SpreadY();
 
 	vecDir = m_pPlayer->FireBulletsPlayer(fireMode->BulletsPerShot(),
 										  vecSrc,
 										  vecAiming,
-										  Vector(spread, spread, spread),
+										  Vector(spreadX, spreadY, 0.0f),
 										  8192,
 										  fireMode->BulletType(),
 										  0,

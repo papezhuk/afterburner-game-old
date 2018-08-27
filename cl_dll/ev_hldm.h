@@ -9,40 +9,41 @@
 #if !defined ( EV_HLDMH )
 #define EV_HLDMH
 
+typedef struct pmtrace_s pmtrace_t;
+typedef struct event_args_s event_args_t;
+
 extern "C"
 {
 	// HLDM
-	void EV_FireGlock1( struct event_args_s *args  );
-	void EV_FireGlock2( struct event_args_s *args  );
-	void EV_FireGenericTest1( struct event_args_s *args  );
-	void EV_FireGenericTest2( struct event_args_s *args  );
-	void EV_FireShotGunSingle( struct event_args_s *args  );
-	void EV_FireShotGunDouble( struct event_args_s *args  );
-	void EV_FireMP5( struct event_args_s *args  );
-	void EV_FireMP52( struct event_args_s *args  );
-	void EV_FirePython( struct event_args_s *args  );
-	void EV_FireGauss( struct event_args_s *args  );
-	void EV_SpinGauss( struct event_args_s *args  );
-	void EV_Crowbar( struct event_args_s *args );
-	void EV_FireCrossbow( struct event_args_s *args );
-	void EV_FireCrossbow2( struct event_args_s *args );
-	void EV_FireRpg( struct event_args_s *args );
-	void EV_EgonFire( struct event_args_s *args );
-	void EV_EgonStop( struct event_args_s *args );
-	void EV_HornetGunFire( struct event_args_s *args );
-	void EV_TripmineFire( struct event_args_s *args );
-	void EV_SnarkFire( struct event_args_s *args );
+	void EV_FireGlock1( event_args_t *args  );
+	void EV_FireGlock2( event_args_t *args  );
+	void EV_FireGenericTest1( event_args_t *args  );
+	void EV_FireGenericTest2( event_args_t *args  );
+	void EV_FireShotGunSingle( event_args_t *args  );
+	void EV_FireShotGunDouble( event_args_t *args  );
+	void EV_FireMP5( event_args_t *args  );
+	void EV_FireMP52( event_args_t *args  );
+	void EV_FirePython( event_args_t *args  );
+	void EV_FireGauss( event_args_t *args  );
+	void EV_SpinGauss( event_args_t *args  );
+	void EV_Crowbar( event_args_t *args );
+	void EV_FireCrossbow( event_args_t *args );
+	void EV_FireCrossbow2( event_args_t *args );
+	void EV_FireRpg( event_args_t *args );
+	void EV_EgonFire( event_args_t *args );
+	void EV_EgonStop( event_args_t *args );
+	void EV_HornetGunFire( event_args_t *args );
+	void EV_TripmineFire( event_args_t *args );
+	void EV_SnarkFire( event_args_t *args );
 
-	void EV_FireP991( struct event_args_s *args  );
-	void EV_FireP992( struct event_args_s *args  );
+	void EV_FireP991( event_args_t *args  );
+	void EV_FireP992( event_args_t *args  );
 
-	void EV_TrainPitchAdjust( struct event_args_s *args );
+	void EV_TrainPitchAdjust( event_args_t *args );
 
-	void EV_WeaponGenericTest_Fire1(struct event_args_s* args);
-	void EV_WeaponGenericTest_Fire2(struct event_args_s* args);
+	void EV_WeaponGenericTest_Fire1(event_args_t* args);
+	void EV_WeaponGenericTest_Fire2(event_args_t* args);
 }
-
-typedef struct pmtrace_s pmtrace_t;
 
 void EV_HLDM_GunshotDecalTrace( pmtrace_t *pTrace, char *decalName );
 void EV_HLDM_DecalGunshot( pmtrace_t *pTrace, int iBulletType );

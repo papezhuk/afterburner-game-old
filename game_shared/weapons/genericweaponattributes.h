@@ -53,6 +53,13 @@ public:
 		return m_Items.size() - 1;
 	}
 
+	// As above, but returns the item pointed to by the index.
+	const T& ItemByProbabilisticValue(float input) const
+	{
+		ASSERTSZ(m_Items.size() > 0, "Container must not be empty.");
+		return m_Items[IndexByProbabilisticValue(input)].m_Value;
+	}
+
 	float OriginalWeight(uint32_t index) const
 	{
 		ASSERTSZ(index < m_Items.size(), "Index must be in range.");
@@ -141,6 +148,34 @@ public:
 	}
 };
 
+class CGenericWeaponAttributes_Sound
+{
+public:
+#define ATTR(type, name, defaultVal) BASE_ATTR(CGenericWeaponAttributes_Sound, type, name, defaultVal)
+	ATTR(float, MinVolume, 1.0f);
+	ATTR(float, MaxVolume, 1.0f);
+	ATTR(int, MinPitch, 100);
+	ATTR(int, MaxPitch, 100);
+	ATTR(float, Attenuation, ATTN_NORM);
+	ATTR(int, Flags, 0);
+#undef ATTR
+
+	inline CGenericWeaponAttributes_Sound& Sound(const char* name, float weight = 1.0f)
+	{
+		m_SoundNames.Add(name, weight);
+		return *this;
+	}
+
+	inline const WeightedValueList<const char*>& SoundList() const
+	{
+		return m_SoundNames;
+	}
+
+private:
+	// Expects static char pointers fixed at compile time!
+	WeightedValueList<const char*> m_SoundNames;
+};
+
 class CGenericWeaponAtts_BaseFireMode
 {
 public:
@@ -193,12 +228,43 @@ public:
 	ATTR(float, FireRate, 1.0f);	// Cycles per second
 	ATTR(uint8_t, BulletsPerShot, 1);
 	ATTR(Bullet, BulletType, BULLET_NONE);
-	ATTR(float, Spread, 0.01f);
+	ATTR(float, SpreadX, 0.01f);
+	ATTR(float, SpreadY, 0.01f);
 	ATTR(bool, FullAuto, false);
 	ATTR(float, AutoAim, 0.0f);
 	ATTR(int, Volume, NORMAL_GUN_VOLUME);
 	ATTR(int, MuzzleFlashBrightness, NORMAL_GUN_FLASH);
+	ATTR(const char*, ShellModelName, NULL);
+	ATTR(int, AnimIndex_FireNotEmpty, -1);	// If left at -1, FireNotEmpty used instead.
+	ATTR(int, AnimIndex_FireEmpty, -1);
+	ATTR(float, ViewPunchX, 0.0f);
+	ATTR(float, ViewPunchY, 0.0f);
 #undef ATTR
+
+	// Convenience:
+	CGenericWeaponAtts_HitscanFireMode& UniformSpread(float spread)
+	{
+		return SpreadX(spread).SpreadY(spread);
+	}
+
+	inline const CGenericWeaponAttributes_Sound& Sounds() const
+	{
+		return m_Sounds;
+	}
+
+	inline CGenericWeaponAtts_HitscanFireMode& Sounds(const CGenericWeaponAttributes_Sound& sound)
+	{
+		m_Sounds = sound;
+		return *this;
+	}
+
+	inline bool HasSounds() const
+	{
+		return m_Sounds.SoundList().Count() > 0;
+	}
+
+private:
+	CGenericWeaponAttributes_Sound m_Sounds;
 };
 
 class CGenericWeaponAtts_Animations
@@ -215,13 +281,13 @@ public:
 class CGenericWeaponAtts_IdleAnimations
 {
 public:
-	CGenericWeaponAtts_IdleAnimations& Animation(int index, float weight)
+	inline CGenericWeaponAtts_IdleAnimations& Animation(int index, float weight)
 	{
 		m_AnimIndices.Add(index, weight);
 		return *this;
 	}
 
-	const WeightedValueList<int>& List() const
+	inline const WeightedValueList<int>& List() const
 	{
 		return m_AnimIndices;
 	}
