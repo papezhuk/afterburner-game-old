@@ -41,8 +41,7 @@ extern "C"
 
 	void EV_TrainPitchAdjust( event_args_t *args );
 
-	void EV_WeaponGenericTest_Fire1(event_args_t* args);
-	void EV_WeaponGenericTest_Fire2(event_args_t* args);
+	void EV_GenericHitscanFire(event_args_t* args);
 }
 
 void EV_HLDM_GunshotDecalTrace( pmtrace_t *pTrace, char *decalName );

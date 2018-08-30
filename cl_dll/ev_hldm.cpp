@@ -426,17 +426,11 @@ void EV_HLDM_FireBullets( int idx, float *forward, float *right, float *up, int 
 
 // Generic handlers
 
-static void GenericWeaponFireBullets(event_args_t *args, const CGenericWeaponAttributes& atts, const CGenericWeaponAtts_HitscanFireMode* fireMode)
+static void GenericWeaponFireBullets(event_args_t *args, const CGenericWeaponAttributes& atts, const CGenericWeaponAtts_HitscanFireMode& fireMode)
 {
-	if ( !fireMode )
-	{
-		ASSERT(false);
-		return;
-	}
-
 	const int idx = args->entindex;
 	const bool empty = args->bparam1;
-	const int shell = gEngfuncs.pEventAPI->EV_FindModelIndex(fireMode->ShellModelName());
+	const int shell = gEngfuncs.pEventAPI->EV_FindModelIndex(fireMode.ShellModelName());
 
 	vec3_t origin;
 	vec3_t angles;
@@ -453,14 +447,14 @@ static void GenericWeaponFireBullets(event_args_t *args, const CGenericWeaponAtt
 	{
 		EV_MuzzleFlash();
 
-		int animIndex = empty ? fireMode->AnimIndex_FireEmpty() : fireMode->AnimIndex_FireNotEmpty();
+		int animIndex = empty ? fireMode.AnimIndex_FireEmpty() : fireMode.AnimIndex_FireNotEmpty();
 		if ( empty && animIndex < 0 )
 		{
-			animIndex = fireMode->AnimIndex_FireNotEmpty();
+			animIndex = fireMode.AnimIndex_FireNotEmpty();
 		}
 
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(animIndex, 0);
-		V_PunchAxis(fireMode->ViewPunchX(), fireMode->ViewPunchY());
+		V_PunchAxis(fireMode.ViewPunchX(), fireMode.ViewPunchY());
 	}
 
 	vec3_t ShellVelocity;
@@ -468,9 +462,9 @@ static void GenericWeaponFireBullets(event_args_t *args, const CGenericWeaponAtt
 	EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20, -12, 4 );
 	EV_EjectBrass( ShellOrigin, ShellVelocity, angles[YAW], shell, TE_BOUNCE_SHELL );
 
-	if ( fireMode->HasSounds() )
+	if ( fireMode.HasSounds() )
 	{
-		const CGenericWeaponAttributes_Sound& fireSound = fireMode->Sounds();
+		const CGenericWeaponAttributes_Sound& fireSound = fireMode.Sounds();
 		const float volume = (fireSound.MinVolume() < fireSound.MaxVolume())
 			? gEngfuncs.pfnRandomFloat(fireSound.MinVolume(), fireSound.MaxVolume())
 			: fireSound.MaxVolume();
@@ -494,6 +488,9 @@ static void GenericWeaponFireBullets(event_args_t *args, const CGenericWeaponAtt
 	EV_GetGunPosition( args, vecSrc, origin );
 	VectorCopy( forward, vecAiming );
 
+	// We don't use the X/Y spread from the weapon attributes here, because the bullet firing
+	// code has already been run on the server. We need to use the values we've been given
+	// from this in order to make sure the tracers match the fired bullets.
 	EV_HLDM_FireBullets(idx,
 						forward,
 						right,
@@ -502,34 +499,32 @@ static void GenericWeaponFireBullets(event_args_t *args, const CGenericWeaponAtt
 						vecSrc,
 						vecAiming,
 						8192,
-						fireMode->BulletType(),
+						fireMode.BulletType(),
 						1,
-						fireMode->SpreadX(),
-						fireMode->SpreadY());
+						args->fparam1,
+						args->fparam2);
 }
 
-void EV_WeaponGenericTest_Fire1(event_args_t* args)
+void EV_GenericHitscanFire(event_args_t* args)
 {
-	const CGenericWeaponAttributes* atts = CWeaponRegistry::StaticInstance.Get(WeaponId_e::WeaponGenericTest);
+	const WeaponId_e weaponId = static_cast<const WeaponId_e>(args->iparam1);
+	const uint8_t fireModeIndex = static_cast<const uint8_t>(args->iparam2);
+
+	const CGenericWeaponAttributes* atts = CWeaponRegistry::StaticInstance.Get(weaponId);
 	if ( !atts )
 	{
 		ASSERT(false);
 		return;
 	}
 
-	GenericWeaponFireBullets(args, *atts, dynamic_cast<const CGenericWeaponAtts_HitscanFireMode*>(atts->FireMode(0)));
-}
-
-void EV_WeaponGenericTest_Fire2(event_args_t* args)
-{
-	const CGenericWeaponAttributes* atts = CWeaponRegistry::StaticInstance.Get(WeaponId_e::WeaponGenericTest);
-	if ( !atts )
+	const CGenericWeaponAtts_BaseFireMode* fireMode = atts->FireMode(fireModeIndex);
+	if ( !fireMode || fireMode->Id() != CGenericWeaponAtts_BaseFireMode::e_FireMode::Hitscan )
 	{
 		ASSERT(false);
 		return;
 	}
 
-	GenericWeaponFireBullets(args, *atts, dynamic_cast<const CGenericWeaponAtts_HitscanFireMode*>(atts->FireMode(1)));
+	GenericWeaponFireBullets(args, *atts, *(fireMode->AsType<const CGenericWeaponAtts_HitscanFireMode>()));
 }
 
 //======================

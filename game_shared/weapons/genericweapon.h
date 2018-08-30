@@ -24,9 +24,14 @@ public:
 	virtual const CGenericWeaponAttributes& WeaponAttributes() const = 0;
 
 protected:
-	void Fire(int index, const CGenericWeaponAtts_BaseFireMode* fireMode);
-	void HitscanFire(int index, const CGenericWeaponAtts_HitscanFireMode* fireMode);
+	void FireUsingMode(int index);
+	void HitscanFire(int index, const CGenericWeaponAtts_HitscanFireMode& fireMode);
 
 private:
+	void PrecacheFireMode(uint8_t fireModeIndex);
+	void PrecacheHitscanResources(const CGenericWeaponAtts_HitscanFireMode& fireMode);
+	void PrecacheCore(const CGenericWeaponAtts_Core& core);
+	void PrecacheSounds(const CGenericWeaponAttributes_Sound& sounds);
+
 	unsigned short m_FireEvents[2];
 };

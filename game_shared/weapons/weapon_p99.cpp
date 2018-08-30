@@ -22,7 +22,7 @@ void CWeaponP99::Spawn()
 {
 	pev->classname = MAKE_STRING( "weapon_p99" ); // hack to allow for old names
 	Precache();
-	m_iId = WEAPON_GLOCK;
+	m_iId = WEAPON_P99;
 	SET_MODEL( ENT( pev ), "models/w_p99.mdl" );
 
 	m_iDefaultAmmo = GLOCK_DEFAULT_GIVE;
@@ -60,7 +60,7 @@ int CWeaponP99::GetItemInfo( ItemInfo *p )
 	p->iSlot = 1;
 	p->iPosition = 0;
 	p->iFlags = 0;
-	p->iId = m_iId = WEAPON_GLOCK;
+	p->iId = m_iId = WEAPON_P99;
 	p->iWeight = GLOCK_WEIGHT;
 
 	return 1;

@@ -17,6 +17,8 @@
 #include "../cl_util.h"
 #include "event_api.h"
 #include "ev_hldm.h"
+#include "weaponregistry.h"
+#include "genericweaponattributes.h"
 
 /*
 ======================
@@ -55,6 +57,30 @@ void Game_HookEvents( void )
 	gEngfuncs.pfnHookEvent( "events/tripfire.sc", EV_TripmineFire );
 	gEngfuncs.pfnHookEvent( "events/snarkfire.sc", EV_SnarkFire );
 
-	gEngfuncs.pfnHookEvent( "events/weapon_generictest_fire01.sc", EV_WeaponGenericTest_Fire1 );
-	gEngfuncs.pfnHookEvent( "events/weapon_generictest_fire02.sc", EV_WeaponGenericTest_Fire2 );
+	// Hook up all registered weapons to generic event handlers for firing.
+	CWeaponRegistry::StaticInstance.ForEach([](const CGenericWeaponAttributes& atts)
+	{
+		for ( uint8_t fireModeIndex = 0; fireModeIndex < 2; ++fireModeIndex )
+		{
+			const CGenericWeaponAtts_BaseFireMode* fireMode = atts.FireMode(fireModeIndex);
+			if ( !fireMode )
+			{
+				continue;
+			}
+
+			switch (fireMode->Id())
+			{
+				case CGenericWeaponAtts_BaseFireMode::e_FireMode::Hitscan:
+				{
+					gEngfuncs.pfnHookEvent(fireMode->EventName(), EV_GenericHitscanFire);
+					break;
+				}
+
+				default:
+				{
+					break;
+				}
+			}
+		}
+	});
 }

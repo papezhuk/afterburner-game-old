@@ -21,30 +21,69 @@ void CGenericWeapon::Spawn()
 
 void CGenericWeapon::Precache()
 {
-	const CGenericWeaponAttributes atts = WeaponAttributes();
-	const CGenericWeaponAtts_Core& core = atts.Core();
+	PrecacheCore(WeaponAttributes().Core());
+	PrecacheFireMode(0);
+	PrecacheFireMode(1);
+}
 
+void CGenericWeapon::PrecacheFireMode(uint8_t fireModeIndex)
+{
+	const CGenericWeaponAttributes& atts = WeaponAttributes();
+	const CGenericWeaponAtts_BaseFireMode* fireMode = atts.FireMode(fireModeIndex);
+
+	if ( !fireMode || !fireMode->EventName() )
+	{
+		m_FireEvents[fireModeIndex] = 0;
+	}
+	else
+	{
+		m_FireEvents[fireModeIndex] = PRECACHE_EVENT(1, atts.FireMode(0)->EventName());
+	}
+
+	switch ( fireMode->Id() )
+	{
+		case CGenericWeaponAtts_BaseFireMode::e_FireMode::Hitscan:
+		{
+			PrecacheHitscanResources(*fireMode->AsType<const CGenericWeaponAtts_HitscanFireMode>());
+			break;
+		}
+
+		default:
+		{
+			break;
+		}
+	}
+}
+
+void CGenericWeapon::PrecacheHitscanResources(const CGenericWeaponAtts_HitscanFireMode& fireMode)
+{
+	if ( fireMode.ShellModelName() )
+	{
+		PRECACHE_MODEL(fireMode.ShellModelName());
+	}
+
+	PrecacheSounds(fireMode.Sounds());
+}
+
+void CGenericWeapon::PrecacheSounds(const CGenericWeaponAttributes_Sound& sounds)
+{
+	const WeightedValueList<const char*>& soundList = sounds.SoundList();
+
+	for ( uint32_t index = 0; index < soundList.Count(); ++index )
+	{
+		const char* const soundName = soundList.Value(index);
+		if ( soundName )
+		{
+			PRECACHE_SOUND(soundName);
+		}
+	}
+}
+
+void CGenericWeapon::PrecacheCore(const CGenericWeaponAtts_Core& core)
+{
 	PRECACHE_MODEL(core.ViewModelName());
 	PRECACHE_MODEL(core.PlayerModelName());
 	PRECACHE_MODEL(core.WorldModelName());
-
-	if ( atts.FireMode(0) && atts.FireMode(0)->EventName() )
-	{
-		m_FireEvents[0] = PRECACHE_EVENT(1, atts.FireMode(0)->EventName());
-	}
-	else
-	{
-		m_FireEvents[0] = 0;
-	}
-
-	if ( atts.FireMode(1) && atts.FireMode(1)->EventName() )
-	{
-		m_FireEvents[1] = PRECACHE_EVENT(1, atts.FireMode(1)->EventName());
-	}
-	else
-	{
-		m_FireEvents[1] = 0;
-	}
 }
 
 int CGenericWeapon::GetItemInfo(ItemInfo *p)
@@ -89,17 +128,24 @@ BOOL CGenericWeapon::Deploy()
 
 void CGenericWeapon::PrimaryAttack()
 {
-	Fire(0, WeaponAttributes().FireMode(0));
+	FireUsingMode(0);
 }
 
 void CGenericWeapon::SecondaryAttack()
 {
-	Fire(1, WeaponAttributes().FireMode(1));
+	FireUsingMode(1);
 }
 
-void CGenericWeapon::Fire(int index, const CGenericWeaponAtts_BaseFireMode* fireMode)
+void CGenericWeapon::FireUsingMode(int index)
 {
-	if ( index < 0 || index > 1 || !fireMode )
+	if ( index < 0 || index > 1 )
+	{
+		return;
+	}
+
+	const CGenericWeaponAtts_BaseFireMode* fireMode = WeaponAttributes().FireMode(index);
+
+	if ( !fireMode )
 	{
 		return;
 	}
@@ -108,7 +154,7 @@ void CGenericWeapon::Fire(int index, const CGenericWeaponAtts_BaseFireMode* fire
 	{
 		case CGenericWeaponAtts_BaseFireMode::e_FireMode::Hitscan:
 		{
-			HitscanFire(index, fireMode->AsType<CGenericWeaponAtts_HitscanFireMode>());
+			HitscanFire(index, *fireMode->AsType<CGenericWeaponAtts_HitscanFireMode>());
 			return;
 		}
 
@@ -119,12 +165,14 @@ void CGenericWeapon::Fire(int index, const CGenericWeaponAtts_BaseFireMode* fire
 	}
 }
 
-void CGenericWeapon::HitscanFire(int index, const CGenericWeaponAtts_HitscanFireMode* fireMode)
+void CGenericWeapon::HitscanFire(int index, const CGenericWeaponAtts_HitscanFireMode& fireMode)
 {
-	if ( index < 0 || index > 1 || !fireMode || fireMode->FireRate() <= 0.0f || fireMode->BulletsPerShot() < 1 )
+	if ( index < 0 || index > 1 || fireMode.FireRate() <= 0.0f || fireMode.BulletsPerShot() < 1 )
 	{
 		return;
 	}
+
+	const CGenericWeaponAttributes& atts = WeaponAttributes();
 
 	if( m_iClip <= 0 )
 	{
@@ -150,15 +198,15 @@ void CGenericWeapon::HitscanFire(int index, const CGenericWeaponAtts_HitscanFire
 	// player "shoot" animation
 	m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
 
-	m_pPlayer->m_iWeaponVolume = fireMode->Volume();
-	m_pPlayer->m_iWeaponFlash = fireMode->MuzzleFlashBrightness();
+	m_pPlayer->m_iWeaponVolume = fireMode.Volume();
+	m_pPlayer->m_iWeaponFlash = fireMode.MuzzleFlashBrightness();
 
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	Vector vecAiming;
 
-	if( fireMode->AutoAim() > 0.0f )
+	if( fireMode.AutoAim() > 0.0f )
 	{
-		vecAiming = m_pPlayer->GetAutoaimVector(fireMode->AutoAim());
+		vecAiming = m_pPlayer->GetAutoaimVector(fireMode.AutoAim());
 	}
 	else
 	{
@@ -166,15 +214,15 @@ void CGenericWeapon::HitscanFire(int index, const CGenericWeaponAtts_HitscanFire
 	}
 
 	Vector vecDir;
-	const float spreadX = fireMode->SpreadX();
-	const float spreadY = fireMode->SpreadY();
+	const float spreadX = fireMode.SpreadX();
+	const float spreadY = fireMode.SpreadY();
 
-	vecDir = m_pPlayer->FireBulletsPlayer(fireMode->BulletsPerShot(),
+	vecDir = m_pPlayer->FireBulletsPlayer(fireMode.BulletsPerShot(),
 										  vecSrc,
 										  vecAiming,
 										  Vector(spreadX, spreadY, 0.0f),
 										  8192,
-										  fireMode->BulletType(),
+										  fireMode.BulletType(),
 										  0,
 										  0,
 										  m_pPlayer->pev,
@@ -190,13 +238,13 @@ void CGenericWeapon::HitscanFire(int index, const CGenericWeaponAtts_HitscanFire
 							(float *)&g_vecZero,
 							vecDir.x,
 							vecDir.y,
-							0,
-							0,
+							static_cast<int>(atts.Core().Id()),
+							index,
 							m_iClip == 0 ? 1 : 0,
 							0);
 	}
 
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = GetNextAttackDelay(1.0f / fireMode->FireRate());
+	m_flNextPrimaryAttack = m_flNextSecondaryAttack = GetNextAttackDelay(1.0f / fireMode.FireRate());
 
 	if( !m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 )
 	{
