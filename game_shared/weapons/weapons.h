@@ -17,6 +17,7 @@
 #define WEAPONS_H
 
 #include "effects.h"
+#include "cdll_dll.h"
 
 class CBasePlayer;
 extern int gmsgWeapPickup;
@@ -83,10 +84,6 @@ public:
 #define WEAPON_P99 17
 
 #define WEAPON_ALLWEAPONS		(~(1<<WEAPON_SUIT))
-
-#define WEAPON_SUIT				31	// ?????
-
-#define MAX_WEAPONS			32
 
 #define MAX_NORMAL_BATTERY	100
 
