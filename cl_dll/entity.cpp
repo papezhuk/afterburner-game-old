@@ -181,10 +181,6 @@ void DLLEXPORT HUD_TxferPredictionData( struct entity_state_s *ps, const struct 
 
 	pcd->viewmodel				= ppcd->viewmodel;
 	pcd->m_iId				= ppcd->m_iId;
-	pcd->ammo_shells			= ppcd->ammo_shells;
-	pcd->ammo_nails				= ppcd->ammo_nails;
-	pcd->ammo_cells				= ppcd->ammo_cells;
-	pcd->ammo_rockets			= ppcd->ammo_rockets;
 	pcd->m_flNextAttack			= ppcd->m_flNextAttack;
 	pcd->fov				= ppcd->fov;
 	pcd->weaponanim				= ppcd->weaponanim;
