@@ -1,6 +1,6 @@
 //========= Copyright (c) 1996-2002, Valve LLC, All rights reserved. ============
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 //=============================================================================
@@ -113,7 +113,7 @@ void CGameStudioModelRenderer::StudioSetupBones ( void )
 	}
 
 	// Bound sequence number.
-	if ( m_pCurrentEntity->curstate.sequence >= m_pStudioHeader->numseq ) 
+	if ( m_pCurrentEntity->curstate.sequence >= m_pStudioHeader->numseq )
 	{
 		m_pCurrentEntity->curstate.sequence = 0;
 	}
@@ -124,7 +124,7 @@ void CGameStudioModelRenderer::StudioSetupBones ( void )
 	{
 		f = m_pPlayerInfo->gaitframe;
 	}
-	else 
+	else
 	{
 		f = StudioEstimateFrame( pseqdesc );
 	}
@@ -141,14 +141,14 @@ void CGameStudioModelRenderer::StudioSetupBones ( void )
 		if ( m_pCurrentEntity->curstate.blending[0] <= 127 )
 		{
 			StudioCalcRotations( pos, q, pseqdesc, panim, f );
-			
+
 			// Scale 0-127 blending up to 0-255
 			s = m_pCurrentEntity->curstate.blending[0];
 			s = ( s * 2.0 );
 		}
 		else
 		{
-			
+
 			// Skip ahead to middle
 			panim += m_pStudioHeader->numbones;
 
@@ -179,7 +179,7 @@ void CGameStudioModelRenderer::StudioSetupBones ( void )
 	// Are we in the process of transitioning from one sequence to another.
 	if ( m_fDoInterp &&
 		m_pCurrentEntity->latched.sequencetime &&
-		( m_pCurrentEntity->latched.sequencetime + 0.2 > m_clTime ) && 
+		( m_pCurrentEntity->latched.sequencetime + 0.2 > m_clTime ) &&
 		( m_pCurrentEntity->latched.prevsequence < m_pStudioHeader->numseq ))
 	{
 		// blend from last sequence
@@ -192,7 +192,7 @@ void CGameStudioModelRenderer::StudioSetupBones ( void )
 
 		// Point at previous sequenece
 		pseqdesc = (mstudioseqdesc_t *)((byte *)m_pStudioHeader + m_pStudioHeader->seqindex) + m_pCurrentEntity->latched.prevsequence;
-		
+
 		// Know how to do three way blends
 		if ( pseqdesc->numblends == 3 )
 		{
@@ -205,7 +205,7 @@ void CGameStudioModelRenderer::StudioSetupBones ( void )
 			{
 				// Set up bones based on final frame of previous sequence
 				StudioCalcRotations( pos1b, q1b, pseqdesc, panim, m_pCurrentEntity->latched.prevframe );
-				
+
 				s = prevseqblending;
 				s = ( s * 2.0 );
 			}
@@ -248,7 +248,7 @@ void CGameStudioModelRenderer::StudioSetupBones ( void )
 	// Now convert quaternions and bone positions into matrices
 	pbones = (mstudiobone_t *)((byte *)m_pStudioHeader + m_pStudioHeader->boneindex);
 
-	for (i = 0; i < m_pStudioHeader->numbones; i++) 
+	for (i = 0; i < m_pStudioHeader->numbones; i++)
 	{
 		QuaternionMatrix( q[i], bonematrix );
 
@@ -256,7 +256,7 @@ void CGameStudioModelRenderer::StudioSetupBones ( void )
 		bonematrix[1][3] = pos[i][1];
 		bonematrix[2][3] = pos[i][2];
 
-		if (pbones[i].parent == -1) 
+		if (pbones[i].parent == -1)
 		{
 			if ( IEngineStudio.IsHardware() )
 			{
@@ -271,8 +271,8 @@ void CGameStudioModelRenderer::StudioSetupBones ( void )
 
 			// Apply client-side effects to the transformation matrix
 			StudioFxTransform( m_pCurrentEntity, (*m_pbonetransform)[i] );
-		} 
-		else 
+		}
+		else
 		{
 			ConcatTransforms ((*m_pbonetransform)[pbones[i].parent], bonematrix, (*m_pbonetransform)[i]);
 			ConcatTransforms ((*m_plighttransform)[pbones[i].parent], bonematrix, (*m_plighttransform)[i]);
@@ -292,8 +292,8 @@ void CGameStudioModelRenderer::StudioEstimateGait( entity_state_t *pplayer )
 	vec3_t est_velocity;
 
 	dt = (m_clTime - m_clOldTime);
-	dt = max( 0.0, dt );
-	dt = min( 1.0, dt );
+	dt = MAX( 0.0, dt );
+	dt = MIN( 1.0, dt );
 
 	if (dt == 0 || m_pPlayerInfo->renderframe == m_nFrameCount)
 	{
@@ -368,8 +368,8 @@ void CGameStudioModelRenderer::StudioProcessGait( entity_state_t *pplayer )
 	m_pCurrentEntity->latched.prevangles[PITCH] = m_pCurrentEntity->angles[PITCH];
 
 	dt = (m_clTime - m_clOldTime);
-	dt = max( 0.0, dt );
-	dt = min( 1.0, dt );
+	dt = MAX( 0.0, dt );
+	dt = MIN( 1.0, dt );
 
 	StudioEstimateGait( pplayer );
 
@@ -403,9 +403,9 @@ void CGameStudioModelRenderer::StudioProcessGait( entity_state_t *pplayer )
 	}
 
 	float blend_yaw = ( flYaw / 90.0 ) * 128.0 + 127.0;
-	blend_yaw = min( 255.0, blend_yaw );
-	blend_yaw = max( 0.0, blend_yaw );
-	
+	blend_yaw = MIN( 255.0, blend_yaw );
+	blend_yaw = MAX( 0.0, blend_yaw );
+
 	blend_yaw = 255.0 - blend_yaw;
 
 	m_pCurrentEntity->curstate.blending[0] = (int)(blend_yaw);
@@ -420,7 +420,7 @@ void CGameStudioModelRenderer::StudioProcessGait( entity_state_t *pplayer )
 	m_pCurrentEntity->latched.prevangles[YAW] = m_pCurrentEntity->angles[YAW];
 
 	pseqdesc = (mstudioseqdesc_t *)((byte *)m_pStudioHeader + m_pStudioHeader->seqindex) + pplayer->gaitsequence;
-	
+
 	// Calc gait frame
 	if (pseqdesc->linearmovement[0] > 0)
 	{
@@ -476,7 +476,7 @@ void CGameStudioModelRenderer::SavePlayerState( entity_state_t *pplayer )
 void GetSequenceInfo( void *pmodel, client_anim_state_t *pev, float *pflFrameRate, float *pflGroundSpeed )
 {
 	studiohdr_t *pstudiohdr;
-	
+
 	pstudiohdr = (studiohdr_t *)pmodel;
 	if (! pstudiohdr)
 		return;
@@ -508,7 +508,7 @@ void GetSequenceInfo( void *pmodel, client_anim_state_t *pev, float *pflFrameRat
 int GetSequenceFlags( void *pmodel, client_anim_state_t *pev )
 {
 	studiohdr_t *pstudiohdr;
-	
+
 	pstudiohdr = (studiohdr_t *)pmodel;
 	if ( !pstudiohdr || pev->sequence >= pstudiohdr->numseq )
 		return 0;
@@ -532,11 +532,11 @@ float StudioFrameAdvance ( client_anim_state_t *st, float framerate, float flInt
 	}
 	if (!st->animtime)
 		flInterval = 0.0;
-	
+
 	st->frame += flInterval * framerate * st->framerate;
 	st->animtime = gEngfuncs.GetClientTime();
 
-	if (st->frame < 0.0 || st->frame >= 256.0) 
+	if (st->frame < 0.0 || st->frame >= 256.0)
 	{
 		if ( st->m_fSequenceLoops )
 			st->frame -= (int)(st->frame / 256.0) * 256.0;
@@ -570,11 +570,11 @@ void CGameStudioModelRenderer::SetupClientAnimation( entity_state_t *pplayer )
 
 	curtime = gEngfuncs.GetClientTime();
 	dt = curtime - oldtime;
-	dt = min( 1.0, max( 0.0, dt ) );
+	dt = MIN( 1.0, MAX( 0.0, dt ) );
 
 	oldtime = curtime;
 	st = &g_clientstate;
-	
+
 	st->framerate = 1.0;
 
 	int oldseq = st->sequence;
@@ -597,7 +597,7 @@ void CGameStudioModelRenderer::SetupClientAnimation( entity_state_t *pplayer )
 	GetSequenceInfo( pmodel, st, &fr, &gs );
 	st->m_fSequenceLoops = ((GetSequenceFlags( pmodel, st ) & STUDIO_LOOPING) != 0);
 	StudioFrameAdvance( st, fr, dt );
-	
+
 //	gEngfuncs.Con_Printf( "gs %i frame %f\n", st->gaitsequence, st->frame );
 
 	ent->angles				= st->realangles;
@@ -674,7 +674,7 @@ int CGameStudioModelRenderer::StudioDrawPlayer( int flags, entity_state_t *pplay
 	int iret = 0;
 
 	bool isLocalPlayer = false;
-		
+
 	// Set up for client?
 	if ( m_bLocal && IEngineStudio.GetCurrentEntity() == gEngfuncs.GetLocalPlayer() )
 	{
@@ -738,7 +738,7 @@ int CGameStudioModelRenderer::_StudioDrawPlayer( int flags, entity_state_t *ppla
 		m_pPlayerInfo = IEngineStudio.PlayerInfo( m_nPlayerIndex );
 
 		VectorCopy( m_pCurrentEntity->angles, orig_angles );
-	
+
 		StudioProcessGait( pplayer );
 
 		m_pPlayerInfo->gaitsequence = pplayer->gaitsequence;
@@ -757,7 +757,7 @@ int CGameStudioModelRenderer::_StudioDrawPlayer( int flags, entity_state_t *ppla
 		m_pCurrentEntity->latched.prevcontroller[1] = m_pCurrentEntity->curstate.controller[1];
 		m_pCurrentEntity->latched.prevcontroller[2] = m_pCurrentEntity->curstate.controller[2];
 		m_pCurrentEntity->latched.prevcontroller[3] = m_pCurrentEntity->curstate.controller[3];
-		
+
 		m_pPlayerInfo = IEngineStudio.PlayerInfo( m_nPlayerIndex );
 		m_pPlayerInfo->gaitsequence = 0;
 
