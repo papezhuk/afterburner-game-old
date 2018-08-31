@@ -90,7 +90,7 @@ int CGenericWeapon::GetItemInfo(ItemInfo *p)
 {
 	const CGenericWeaponAtts_Core& core = WeaponAttributes().Core();
 
-	p->pszName = STRING(core.Classname());
+	p->pszName = STRING( pev->classname );
 	p->pszAmmo1 = core.PrimaryAmmoName();
 	p->iMaxAmmo1 = core.PrimaryAmmoMax();
 	p->pszAmmo2 = core.SecondaryAmmoName();
