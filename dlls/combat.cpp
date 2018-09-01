@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -60,7 +60,7 @@ void CGib::SpawnStickyGibs( entvars_t *pevVictim, Vector vecOrigin, int cGibs )
 	if( g_Language == LANGUAGE_GERMAN )
 	{
 		// no sticky gibs in germany right now!
-		return; 
+		return;
 	}
 
 	for( i = 0; i < cGibs; i++ )
@@ -401,7 +401,7 @@ Activity CBaseMonster::GetDeathActivity( void )
 	// can we perform the prescribed death?
 	if( LookupActivity( deathActivity ) == ACTIVITY_NOT_AVAILABLE )
 	{
-		// no! did we fail to perform a directional death? 
+		// no! did we fail to perform a directional death?
 		if( fTriedDirection )
 		{
 			// if yes, we're out of options. Go simple.
@@ -508,7 +508,7 @@ void CBaseMonster::BecomeDead( void )
 {
 	pev->takedamage = DAMAGE_YES;// don't let autoaim aim at corpses.
 
-	// give the corpse half of the monster's original maximum health. 
+	// give the corpse half of the monster's original maximum health.
 	pev->health = pev->max_health / 2;
 	pev->max_health = 5; // max_health now becomes a counter for how many blood decals the corpse can place.
 
@@ -626,7 +626,7 @@ void CBaseMonster::Killed( entvars_t *pevAttacker, int iGib )
 //
 // fade out - slowly fades a entity out, then removes it.
 //
-// DON'T USE ME FOR GIBS AND STUFF IN MULTIPLAYER! 
+// DON'T USE ME FOR GIBS AND STUFF IN MULTIPLAYER!
 // SET A FUTURE THINK AND A RENDERMODE!!
 void CBaseEntity::SUB_StartFadeOut( void )
 {
@@ -650,7 +650,7 @@ void CBaseEntity::SUB_FadeOut( void )
 		pev->renderamt -= 7;
 		pev->nextthink = gpGlobals->time + 0.1;
 	}
-	else 
+	else
 	{
 		pev->renderamt = 0;
 		pev->nextthink = gpGlobals->time + 0.2;
@@ -660,7 +660,7 @@ void CBaseEntity::SUB_FadeOut( void )
 
 //=========================================================
 // WaitTillLand - in order to emit their meaty scent from
-// the proper location, gibs should wait until they stop 
+// the proper location, gibs should wait until they stop
 // bouncing to emit their scent. That's what this function
 // does.
 //=========================================================
@@ -719,7 +719,7 @@ void CGib::BounceGibTouch( CBaseEntity *pOther )
 
 			UTIL_BloodDecalTrace( &tr, m_bloodColor );
 
-			m_cBloodDecals--; 
+			m_cBloodDecals--;
 		}
 
 		if( m_material != matNone && RANDOM_LONG( 0, 2 ) == 0 )
@@ -735,7 +735,7 @@ void CGib::BounceGibTouch( CBaseEntity *pOther )
 }
 
 //
-// Sticky gib puts blood on the wall and stays put. 
+// Sticky gib puts blood on the wall and stays put.
 //
 void CGib::StickyGibTouch( CBaseEntity *pOther )
 {
@@ -787,7 +787,7 @@ void CGib::Spawn( const char *szGibModel )
 	SetTouch( &CGib::BounceGibTouch );
 
 	m_material = matNone;
-	m_cBloodDecals = 5;// how many blood decals this gib can place (1 per bounce until none remain). 
+	m_cBloodDecals = 5;// how many blood decals this gib can place (1 per bounce until none remain).
 }
 
 // take health
@@ -927,13 +927,13 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 			}
 			else
 			{
-				m_vecEnemyLKP = pev->origin + ( g_vecAttackDir * 64 ); 
+				m_vecEnemyLKP = pev->origin + ( g_vecAttackDir * 64 );
 			}
 
 			MakeIdealYaw( m_vecEnemyLKP );
 
-			// add pain to the conditions 
-			// !!!HACKHACK - fudged for now. Do we want to have a virtual function to determine what is light and 
+			// add pain to the conditions
+			// !!!HACKHACK - fudged for now. Do we want to have a virtual function to determine what is light and
 			// heavy damage per monster class?
 			if( flDamage > 0 )
 			{
@@ -974,7 +974,7 @@ int CBaseMonster::DeadTakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacke
 
 	pev->flags &= ~FL_ONGROUND;
 	pev->origin.z += 1;
-	
+
 	// let the damage scoot the corpse around a bit.
 	if( !FNullEnt( pevInflictor ) && ( pevAttacker->solid != SOLID_TRIGGER ) )
 	{
@@ -998,10 +998,10 @@ int CBaseMonster::DeadTakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacke
 }
 
 float CBaseMonster::DamageForce( float damage )
-{ 
+{
 	float force = damage * ( ( 32 * 32 * 72.0 ) / ( pev->size.x * pev->size.y * pev->size.z ) ) * 5;
 
-	if( force > 1000.0 ) 
+	if( force > 1000.0 )
 	{
 		force = 1000.0;
 	}
@@ -1011,7 +1011,7 @@ float CBaseMonster::DamageForce( float damage )
 
 //
 // RadiusDamage - this entity is exploding, or otherwise needs to inflict damage upon entities within a certain range.
-// 
+//
 // only damage ents that can clearly be seen by the explosion!
 void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, float flRadius, int iClassIgnore, int bitsDamageType )
 {
@@ -1100,7 +1100,7 @@ void CBaseMonster::RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars
 }
 
 //=========================================================
-// CheckTraceHullAttack - expects a length to trace, amount 
+// CheckTraceHullAttack - expects a length to trace, amount
 // of damage to do, and damage type. Returns a pointer to
 // the damaged entity in case the monster wishes to do
 // other stuff to the victim (punchangle, etc)
@@ -1140,7 +1140,7 @@ CBaseEntity* CBaseMonster::CheckTraceHullAttack( float flDist, int iDamage, int 
 //=========================================================
 // FInViewCone - returns true is the passed ent is in
 // the caller's forward view cone. The dot product is performed
-// in 2d, making the view cone infinitely tall. 
+// in 2d, making the view cone infinitely tall.
 //=========================================================
 BOOL CBaseMonster::FInViewCone( CBaseEntity *pEntity )
 {
@@ -1167,7 +1167,7 @@ BOOL CBaseMonster::FInViewCone( CBaseEntity *pEntity )
 //=========================================================
 // FInViewCone - returns true is the passed vector is in
 // the caller's forward view cone. The dot product is performed
-// in 2d, making the view cone infinitely tall. 
+// in 2d, making the view cone infinitely tall.
 //=========================================================
 BOOL CBaseMonster::FInViewCone( Vector *pOrigin )
 {
@@ -1210,7 +1210,7 @@ BOOL CBaseEntity::FVisible( CBaseEntity *pEntity )
 		return FALSE;
 
 	// don't look through water
-	if( ( pev->waterlevel != 3 && pEntity->pev->waterlevel == 3 ) 
+	if( ( pev->waterlevel != 3 && pEntity->pev->waterlevel == 3 )
 		|| ( pev->waterlevel == 3 && pEntity->pev->waterlevel == 0 ) )
 		return FALSE;
 
@@ -1426,7 +1426,7 @@ void CBaseEntity::FireBullets( ULONG cShots, Vector vecSrc, Vector vecDirShootin
 
 				TEXTURETYPE_PlaySound( &tr, vecSrc, vecEnd, iBulletType );
 				DecalGunshot( &tr, iBulletType );
-			} 
+			}
 			else switch( iBulletType )
 			{
 			default:
@@ -1513,13 +1513,15 @@ Vector CBaseEntity::FireBulletsPlayer( ULONG cShots, Vector vecSrc, Vector vecDi
 		{
 			CBaseEntity *pEntity = CBaseEntity::Instance( tr.pHit );
 
-			if( iDamage )
+			if( iDamage || iBulletType == BULLET_GENERIC )
 			{
+				// TODO: One day we could apply damage modifiers per bullet here, etc.
+				// However, it'd probably be better to roll our own CGenericWeapon::FireBulletsPlayer() function at that point.
 				pEntity->TraceAttack( pevAttacker, iDamage, vecDir, &tr, DMG_BULLET | ( ( iDamage > 16 ) ? DMG_ALWAYSGIB : DMG_NEVERGIB ) );
 
 				TEXTURETYPE_PlaySound( &tr, vecSrc, vecEnd, iBulletType );
 				DecalGunshot( &tr, iBulletType );
-			} 
+			}
 			else switch( iBulletType )
 			{
 			default:
@@ -1567,9 +1569,9 @@ void CBaseEntity::TraceBleed( float flDamage, Vector vecDir, TraceResult *ptr, i
 	if( !( bitsDamageType & ( DMG_CRUSH | DMG_BULLET | DMG_SLASH | DMG_BLAST | DMG_CLUB | DMG_MORTAR ) ) )
 		return;
 
-	// make blood decal on the wall! 
+	// make blood decal on the wall!
 	TraceResult Bloodtr;
-	Vector vecTraceDir; 
+	Vector vecTraceDir;
 	float flNoise;
 	int cCount;
 	int i;
@@ -1577,11 +1579,11 @@ void CBaseEntity::TraceBleed( float flDamage, Vector vecDir, TraceResult *ptr, i
 /*
 	if( !IsAlive() )
 	{
-		// dealing with a dead monster. 
+		// dealing with a dead monster.
 		if( pev->max_health <= 0 )
 		{
 			// no blood decal for a monster that has already decalled its limit.
-			return; 
+			return;
 		}
 		else
 		{
@@ -1626,18 +1628,18 @@ void CBaseEntity::TraceBleed( float flDamage, Vector vecDir, TraceResult *ptr, i
 //=========================================================
 void CBaseMonster::MakeDamageBloodDecal( int cCount, float flNoise, TraceResult *ptr, const Vector &vecDir )
 {
-	// make blood decal on the wall! 
+	// make blood decal on the wall!
 	TraceResult Bloodtr;
-	Vector vecTraceDir; 
+	Vector vecTraceDir;
 	int i;
 
 	if( !IsAlive() )
 	{
-		// dealing with a dead monster. 
+		// dealing with a dead monster.
 		if( pev->max_health <= 0 )
 		{
 			// no blood decal for a monster that has already decalled its limit.
-			return; 
+			return;
 		}
 		else
 		{

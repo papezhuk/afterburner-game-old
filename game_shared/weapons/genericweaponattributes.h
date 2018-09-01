@@ -225,7 +225,7 @@ public:
 #define ATTR(type, name, defaultVal) BASE_ATTR(CGenericWeaponAtts_HitscanFireMode, type, name, defaultVal)
 	ATTR(float, FireRate, 1.0f);	// Cycles per second
 	ATTR(uint8_t, BulletsPerShot, 1);
-	ATTR(Bullet, BulletType, BULLET_NONE);
+	ATTR(float, DamagePerShot, 1.0f);
 	ATTR(float, SpreadX, 0.01f);
 	ATTR(float, SpreadY, 0.01f);
 	ATTR(bool, FullAuto, false);

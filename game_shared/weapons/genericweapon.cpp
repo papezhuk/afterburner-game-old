@@ -242,9 +242,9 @@ void CGenericWeapon::HitscanFire(int index, const CGenericWeaponAtts_HitscanFire
 										  vecAiming,
 										  Vector(spreadX, spreadY, 0.0f),
 										  8192,
-										  fireMode.BulletType(),
+										  BULLET_GENERIC,
 										  0,
-										  0,
+										  fireMode.DamagePerShot(),
 										  m_pPlayer->pev,
 										  m_pPlayer->random_seed);
 

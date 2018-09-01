@@ -153,6 +153,9 @@ public:
 #define AMMO_SNARKBOX_GIVE		5
 
 // bullet types
+// NOTE: At some point (once we make the original HL weapons obsolete)
+// we'll want to remove the whole concept of bullet types. Damage will
+// be calculated by the weapon that was fired, plus skill settings.
 typedef	enum
 {
 	BULLET_NONE = 0,
@@ -161,6 +164,7 @@ typedef	enum
 	BULLET_PLAYER_357, // python
 	BULLET_PLAYER_BUCKSHOT, // shotgun
 	BULLET_PLAYER_CROWBAR, // crowbar swipe
+	BULLET_GENERIC, // Check for ammo-specific damage instead
 
 	BULLET_MONSTER_9MM,
 	BULLET_MONSTER_MP5,
