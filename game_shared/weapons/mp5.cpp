@@ -22,6 +22,7 @@
 #include "player.h"
 #include "soundent.h"
 #include "gamerules.h"
+#include "ammodefs.h"
 
 LINK_ENTITY_TO_CLASS( weapon_mp5, CMP5 )
 LINK_ENTITY_TO_CLASS( weapon_9mmAR, CMP5 )
@@ -77,10 +78,10 @@ void CMP5::Precache( void )
 int CMP5::GetItemInfo( ItemInfo *p )
 {
 	p->pszName = STRING( pev->classname );
-	p->pszAmmo1 = "9mm";
-	p->iMaxAmmo1 = _9MM_MAX_CARRY;
-	p->pszAmmo2 = "ARgrenades";
-	p->iMaxAmmo2 = M203_GRENADE_MAX_CARRY;
+	p->pszAmmo1 = AmmoDef_9mm.Name;
+	p->iMaxAmmo1 = AmmoDef_9mm.MaxCarry;
+	p->pszAmmo2 = AmmoDef_M203Grenade.Name;
+	p->iMaxAmmo2 = AmmoDef_M203Grenade.MaxCarry;
 	p->iMaxClip = MP5_MAX_CLIP;
 	p->iSlot = 2;
 	p->iPosition = 0;
@@ -279,7 +280,7 @@ class CMP5AmmoClip : public CBasePlayerAmmo
 	}
 	BOOL AddAmmo( CBaseEntity *pOther )
 	{
-		int bResult = ( pOther->GiveAmmo( AMMO_MP5CLIP_GIVE, "9mm", _9MM_MAX_CARRY ) != -1 );
+		int bResult = ( pOther->GiveAmmo( AMMO_MP5CLIP_GIVE, AmmoDef_9mm.Name, AmmoDef_9mm.MaxCarry ) != -1 );
 		if( bResult )
 		{
 			EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM );
@@ -306,7 +307,7 @@ class CMP5Chainammo : public CBasePlayerAmmo
 	}
 	BOOL AddAmmo( CBaseEntity *pOther )
 	{
-		int bResult = ( pOther->GiveAmmo( AMMO_CHAINBOX_GIVE, "9mm", _9MM_MAX_CARRY ) != -1 );
+		int bResult = ( pOther->GiveAmmo( AMMO_CHAINBOX_GIVE, AmmoDef_9mm.Name, AmmoDef_9mm.MaxCarry ) != -1 );
 		if( bResult )
 		{
 			EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM );
@@ -332,7 +333,7 @@ class CMP5AmmoGrenade : public CBasePlayerAmmo
 	}
 	BOOL AddAmmo( CBaseEntity *pOther )
 	{
-		int bResult = ( pOther->GiveAmmo( AMMO_M203BOX_GIVE, "ARgrenades", M203_GRENADE_MAX_CARRY ) != -1 );
+		int bResult = ( pOther->GiveAmmo( AMMO_M203BOX_GIVE, AmmoDef_M203Grenade.Name, AmmoDef_M203Grenade.MaxCarry ) != -1 );
 
 		if( bResult )
 		{

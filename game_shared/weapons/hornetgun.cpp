@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -23,6 +23,7 @@
 #include "player.h"
 #include "hornet.h"
 #include "gamerules.h"
+#include "ammodefs.h"
 
 enum hgun_e
 {
@@ -77,8 +78,8 @@ int CHgun::AddToPlayer( CBasePlayer *pPlayer )
 #ifndef CLIENT_DLL
 		if( g_pGameRules->IsMultiplayer() )
 		{
-			// in multiplayer, all hivehands come full. 
-			pPlayer->m_rgAmmo[PrimaryAmmoIndex()] = HORNET_MAX_CARRY;
+			// in multiplayer, all hivehands come full.
+			pPlayer->m_rgAmmo[PrimaryAmmoIndex()] = AmmoDef_Hornet.MaxCarry;
 		}
 #endif
 		MESSAGE_BEGIN( MSG_ONE, gmsgWeapPickup, NULL, pPlayer->pev );
@@ -92,8 +93,8 @@ int CHgun::AddToPlayer( CBasePlayer *pPlayer )
 int CHgun::GetItemInfo( ItemInfo *p )
 {
 	p->pszName = STRING( pev->classname );
-	p->pszAmmo1 = "Hornets";
-	p->iMaxAmmo1 = HORNET_MAX_CARRY;
+	p->pszAmmo1 = AmmoDef_Hornet.Name;
+	p->iMaxAmmo1 = AmmoDef_Hornet.MaxCarry;
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = WEAPON_NOCLIP;
@@ -140,7 +141,7 @@ void CHgun::PrimaryAttack()
 	m_flRechargeTime = gpGlobals->time + 0.5;
 #endif
 	m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
-	
+
 	m_pPlayer->m_iWeaponVolume = QUIET_GUN_VOLUME;
 	m_pPlayer->m_iWeaponFlash = DIM_GUN_FLASH;
 
@@ -246,10 +247,10 @@ void CHgun::SecondaryAttack( void )
 
 void CHgun::Reload( void )
 {
-	if( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] >= HORNET_MAX_CARRY )
+	if( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] >= AmmoDef_Hornet.MaxCarry )
 		return;
 
-	while( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] < HORNET_MAX_CARRY && m_flRechargeTime < gpGlobals->time )
+	while( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] < AmmoDef_Hornet.MaxCarry && m_flRechargeTime < gpGlobals->time )
 	{
 		m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]++;
 		m_flRechargeTime += 0.5;

@@ -1,5 +1,6 @@
 #include "weapon_p99.h"
 #include "player.h"
+#include "ammodefs.h"
 
 // TODO: Make these public when all fixed up
 enum p99_e
@@ -52,8 +53,8 @@ void CWeaponP99::Precache( void )
 int CWeaponP99::GetItemInfo( ItemInfo *p )
 {
 	p->pszName = STRING( pev->classname );
-	p->pszAmmo1 = "9mm";
-	p->iMaxAmmo1 = _9MM_MAX_CARRY;
+	p->pszAmmo1 = AmmoDef_9mm.Name;
+	p->iMaxAmmo1 = AmmoDef_9mm.MaxCarry;
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = GLOCK_MAX_CLIP;

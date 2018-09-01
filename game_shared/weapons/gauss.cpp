@@ -25,6 +25,7 @@
 #include "shake.h"
 #include "gamerules.h"
 #include "game.h"
+#include "ammodefs.h"
 
 LINK_ENTITY_TO_CLASS( weapon_gauss, CGauss )
 
@@ -94,8 +95,8 @@ int CGauss::AddToPlayer( CBasePlayer *pPlayer )
 int CGauss::GetItemInfo( ItemInfo *p )
 {
 	p->pszName = STRING( pev->classname );
-	p->pszAmmo1 = "uranium";
-	p->iMaxAmmo1 = URANIUM_MAX_CARRY;
+	p->pszAmmo1 = AmmoDef_Uranium.Name;
+	p->iMaxAmmo1 = AmmoDef_Uranium.MaxCarry;
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = WEAPON_NOCLIP;
@@ -604,7 +605,7 @@ class CGaussAmmo : public CBasePlayerAmmo
 	}
 	BOOL AddAmmo( CBaseEntity *pOther )
 	{
-		if( pOther->GiveAmmo( AMMO_URANIUMBOX_GIVE, "uranium", URANIUM_MAX_CARRY ) != -1 )
+		if( pOther->GiveAmmo( AMMO_URANIUMBOX_GIVE, AmmoDef_Uranium.Name, AmmoDef_Uranium.MaxCarry ) != -1 )
 		{
 			EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM );
 			return TRUE;

@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -22,6 +22,7 @@
 #include "player.h"
 #include "effects.h"
 #include "gamerules.h"
+#include "ammodefs.h"
 
 #define	TRIPMINE_PRIMARY_VOLUME		450
 
@@ -104,7 +105,7 @@ void CTripmineGrenade::Spawn( void )
 	pev->sequence = TRIPMINE_WORLD;
 	ResetSequenceInfo();
 	pev->framerate = 0;
-	
+
 	UTIL_SetSize( pev, Vector( -8, -8, -8 ), Vector( 8, 8, 8 ) );
 	UTIL_SetOrigin( pev, pev->origin );
 
@@ -215,7 +216,7 @@ void CTripmineGrenade::PowerupThink( void )
 		return;
 	}
 	// ALERT( at_console, "%d %.0f %.0f %0.f\n", pev->owner, m_pOwner->pev->origin.x, m_pOwner->pev->origin.y, m_pOwner->pev->origin.z );
- 
+
 	if( gpGlobals->time > m_flPowerUp )
 	{
 		// make solid
@@ -274,7 +275,7 @@ void CTripmineGrenade::BeamBreakThink( void )
 
 	// ALERT( at_console, "%f : %f\n", tr.flFraction, m_flBeamLength );
 
-	// respawn detect. 
+	// respawn detect.
 	if( !m_pBeam )
 	{
 		MakeBeam();
@@ -300,7 +301,7 @@ void CTripmineGrenade::BeamBreakThink( void )
 	{
 		// a bit of a hack, but all CGrenade code passes pev->owner along to make sure the proper player gets credit for the kill
 		// so we have to restore pev->owner from pRealOwner, because an entity's tracelines don't strike it's pev->owner which meant
-		// that a player couldn't trigger his own tripmine. Now that the mine is exploding, it's safe the restore the owner so the 
+		// that a player couldn't trigger his own tripmine. Now that the mine is exploding, it's safe the restore the owner so the
 		// CGrenade code knows who the explosive really belongs to.
 		pev->owner = m_pRealOwner;
 		pev->health = 0;
@@ -374,7 +375,7 @@ void CTripmine::Spawn()
 	if( !g_pGameRules->IsDeathmatch() )
 #endif
 	{
-		UTIL_SetSize( pev, Vector( -16, -16, 0 ), Vector( 16, 16, 28 ) ); 
+		UTIL_SetSize( pev, Vector( -16, -16, 0 ), Vector( 16, 16, 28 ) );
 	}
 }
 
@@ -390,8 +391,8 @@ void CTripmine::Precache( void )
 int CTripmine::GetItemInfo( ItemInfo *p )
 {
 	p->pszName = STRING( pev->classname );
-	p->pszAmmo1 = "Trip Mine";
-	p->iMaxAmmo1 = TRIPMINE_MAX_CARRY;
+	p->pszAmmo1 = AmmoDef_Tripmine.Name;
+	p->iMaxAmmo1 = AmmoDef_Tripmine.MaxCarry;
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = WEAPON_NOCLIP;
@@ -459,10 +460,10 @@ void CTripmine::PrimaryAttack( void )
 
 			// player "shoot" animation
 			m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
-			
+
 			if( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 )
 			{
-				// no more mines! 
+				// no more mines!
 				RetireWeapon();
 				return;
 			}
@@ -492,7 +493,7 @@ void CTripmine::WeaponIdle( void )
 	}
 	else
 	{
-		RetireWeapon(); 
+		RetireWeapon();
 		return;
 	}
 

@@ -22,6 +22,7 @@
 #include "nodes.h"
 #include "player.h"
 #include "gamerules.h"
+#include "ammodefs.h"
 
 LINK_ENTITY_TO_CLASS( weapon_rpg, CRpg )
 
@@ -352,8 +353,8 @@ void CRpg::Precache( void )
 int CRpg::GetItemInfo( ItemInfo *p )
 {
 	p->pszName = STRING( pev->classname );
-	p->pszAmmo1 = "rockets";
-	p->iMaxAmmo1 = ROCKET_MAX_CARRY;
+	p->pszAmmo1 = AmmoDef_Rocket.Name;
+	p->iMaxAmmo1 = AmmoDef_Rocket.MaxCarry;
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = RPG_MAX_CLIP;
@@ -568,7 +569,7 @@ class CRpgAmmo : public CBasePlayerAmmo
 			iGive = AMMO_RPGCLIP_GIVE;
 		}
 
-		if( pOther->GiveAmmo( iGive, "rockets", ROCKET_MAX_CARRY ) != -1 )
+		if( pOther->GiveAmmo( iGive, AmmoDef_Rocket.Name, AmmoDef_Rocket.MaxCarry ) != -1 )
 		{
 			EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM );
 			return TRUE;
