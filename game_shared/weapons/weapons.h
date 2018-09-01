@@ -81,7 +81,7 @@ public:
 #define	WEAPON_SNARK			15
 
 // TODO: Convert this into an enum once we've made sure the weapon compiles
-#define WEAPON_P99 17
+#define WEAPON_P99 16
 
 #define WEAPON_ALLWEAPONS		(~(1<<WEAPON_SUIT))
 

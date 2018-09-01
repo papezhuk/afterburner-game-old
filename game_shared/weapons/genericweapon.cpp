@@ -91,16 +91,36 @@ int CGenericWeapon::GetItemInfo(ItemInfo *p)
 	const CGenericWeaponAtts_Core& core = WeaponAttributes().Core();
 
 	p->pszName = STRING( pev->classname );
-	p->pszAmmo1 = core.PrimaryAmmoName();
-	p->iMaxAmmo1 = core.PrimaryAmmoMax();
-	p->pszAmmo2 = core.SecondaryAmmoName();
-	p->iMaxAmmo2 = core.SecondaryAmmoMax();
 	p->iMaxClip = core.MaxClip();
 	p->iSlot = core.WeaponSlot();
 	p->iPosition = core.WeaponSlotPosition();
 	p->iFlags = core.Flags();
 	p->iId = m_iId = static_cast<int>(core.Id());
 	p->iWeight = core.SwitchWeight();
+
+	const CAmmoDef* primaryAmmo = core.PrimaryAmmoDef();
+	if ( primaryAmmo )
+	{
+		p->pszAmmo1 = primaryAmmo->Name;
+		p->iMaxAmmo1 = primaryAmmo->MaxCarry;
+	}
+	else
+	{
+		p->pszAmmo1 = NULL;
+		p->iMaxAmmo1 = -1;
+	}
+
+	const CAmmoDef* secondaryAmmo = core.SecondaryAmmoDef();
+	if ( secondaryAmmo )
+	{
+		p->pszAmmo2 = secondaryAmmo->Name;
+		p->iMaxAmmo2 = secondaryAmmo->MaxCarry;
+	}
+	else
+	{
+		p->pszAmmo2 = NULL;
+		p->iMaxAmmo2 = -1;
+	}
 
 	return 1;
 }

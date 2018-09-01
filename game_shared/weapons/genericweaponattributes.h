@@ -6,6 +6,7 @@
 #include "standard_includes.h"
 #include "weapons.h"
 #include "weaponids.h"
+#include "ammodefs.h"
 
 template<typename T>
 class WeightedValueList
@@ -124,12 +125,9 @@ public:
 	ATTR(int, Flags, 0);
 	ATTR(int, SwitchWeight, 0);
 
-	ATTR(const char*, PrimaryAmmoName, NULL);
-	ATTR(int, PrimaryAmmoMax, -1);
+	ATTR(const CAmmoDef*, PrimaryAmmoDef, NULL);
+	ATTR(const CAmmoDef*, SecondaryAmmoDef, NULL);
 	ATTR(int, PrimaryAmmoOnFirstPickup, 0);
-
-	ATTR(const char*, SecondaryAmmoName, NULL);
-	ATTR(int, SecondaryAmmoMax, -1);
 
 	ATTR(int, MaxClip, 0);
 
