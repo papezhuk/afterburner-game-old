@@ -1,5 +1,10 @@
 #include "genericweapon.h"
 
+namespace
+{
+	constexpr float BULLET_TRACE_DISTANCE = 8192;
+}
+
 CGenericWeapon::~CGenericWeapon()
 {
 }
@@ -237,16 +242,7 @@ void CGenericWeapon::HitscanFire(int index, const CGenericWeaponAtts_HitscanFire
 	const float spreadX = fireMode.SpreadX();
 	const float spreadY = fireMode.SpreadY();
 
-	vecDir = m_pPlayer->FireBulletsPlayer(fireMode.BulletsPerShot(),
-										  vecSrc,
-										  vecAiming,
-										  Vector(spreadX, spreadY, 0.0f),
-										  8192,
-										  BULLET_GENERIC,
-										  0,
-										  fireMode.DamagePerShot(),
-										  m_pPlayer->pev,
-										  m_pPlayer->random_seed);
+	vecDir = FireBulletsPlayer(fireMode, 1, vecSrc, vecAiming);
 
 	if ( m_FireEvents[index] )
 	{
@@ -334,3 +330,76 @@ int CGenericWeapon::iItemSlot()
 {
 	return WeaponAttributes().Core().WeaponSlot();
 }
+
+Vector CGenericWeapon::FireBulletsPlayer(const CGenericWeaponAtts_HitscanFireMode& fireMode,
+										 uint32_t numShots,
+										 const Vector& vecSrc,
+										 const Vector& vecDirShooting)
+{
+#ifdef CLIENT_DLL
+	// The client doesn't actually do any bullet simulation, we just make sure that
+	// the generated random vectors match up.
+	return FireBulletsPlayer_Client(fireMode, numShots);
+#else
+	TraceResult tr;
+	Vector vecRight = gpGlobals->v_right;
+	Vector vecUp = gpGlobals->v_up;
+	float x = 0.0f;
+	float y = 0.0f;
+
+	entvars_t* const pevAttacker = m_pPlayer->pev;
+	const int shared_rand = m_pPlayer->random_seed;
+
+	ClearMultiDamage();
+	gMultiDamage.type = DMG_BULLET | DMG_NEVERGIB;
+
+	for( uint32_t shot = 1; shot <= numShots; shot++ )
+	{
+		GetSharedCircularGaussianSpread(shot, shared_rand, x, y);
+
+		Vector vecDir = vecDirShooting +
+						x * fireMode.SpreadX() * vecRight +
+						y * fireMode.SpreadY() * vecUp;
+		Vector vecEnd;
+
+		vecEnd = vecSrc + vecDir * BULLET_TRACE_DISTANCE;
+		UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(pev), &tr);
+
+		// do damage, paint decals
+		if( tr.flFraction != 1.0 )
+		{
+			CBaseEntity *pEntity = CBaseEntity::Instance(tr.pHit);
+
+			pEntity->TraceAttack(pevAttacker, fireMode.DamagePerShot(), vecDir, &tr, DMG_BULLET);
+			TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, BULLET_GENERIC);
+		}
+
+		// make bullet trails
+		UTIL_BubbleTrail(vecSrc, tr.vecEndPos, (int)((BULLET_TRACE_DISTANCE * tr.flFraction) / 64.0));
+	}
+
+	ApplyMultiDamage(pev, pevAttacker);
+
+	return Vector(x * fireMode.SpreadX(), y * fireMode.SpreadY(), 0.0);
+#endif
+}
+
+void CGenericWeapon::GetSharedCircularGaussianSpread(uint32_t shot, int shared_rand, float& x, float& y)
+{
+	x = UTIL_SharedRandomFloat( shared_rand + shot, -0.5, 0.5 ) + UTIL_SharedRandomFloat( shared_rand + ( 1 + shot ) , -0.5, 0.5 );
+	y = UTIL_SharedRandomFloat( shared_rand + ( 2 + shot ), -0.5, 0.5 ) + UTIL_SharedRandomFloat( shared_rand + ( 3 + shot ), -0.5, 0.5 );
+}
+
+#ifdef CLIENT_DLL
+Vector CGenericWeapon::FireBulletsPlayer_Client(const CGenericWeaponAtts_HitscanFireMode& fireMode, uint32_t numShots)
+{
+	float x = 0, y = 0;
+
+	for( uint32_t shot = 1; shot <= numShots; shot++ )
+	{
+		GetSharedCircularGaussianSpread(shot, m_pPlayer->random_seed, x, y);
+	}
+
+	return Vector(x * fireMode.SpreadX(), y * fireMode.SpreadY(), 0.0);
+}
+#endif

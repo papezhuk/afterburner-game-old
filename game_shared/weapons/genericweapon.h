@@ -25,13 +25,24 @@ public:
 
 protected:
 	void FireUsingMode(int index);
-	void HitscanFire(int index, const CGenericWeaponAtts_HitscanFireMode& fireMode);
 
 private:
 	void PrecacheFireMode(uint8_t fireModeIndex);
 	void PrecacheHitscanResources(const CGenericWeaponAtts_HitscanFireMode& fireMode);
 	void PrecacheCore(const CGenericWeaponAtts_Core& core);
 	void PrecacheSounds(const CGenericWeaponAttributes_Sound& sounds);
+
+	void HitscanFire(int index, const CGenericWeaponAtts_HitscanFireMode& fireMode);
+	void GetSharedCircularGaussianSpread(uint32_t shot, int shared_rand, float& x, float& y);
+
+	Vector FireBulletsPlayer(const CGenericWeaponAtts_HitscanFireMode& fireMode,
+							 uint32_t numShots,
+							 const Vector& vecSrc,
+							 const Vector& vecDirShooting);
+
+#ifdef CLIENT_DLL
+	Vector FireBulletsPlayer_Client(const CGenericWeaponAtts_HitscanFireMode& fireMode, uint32_t numShots);
+#endif
 
 	unsigned short m_FireEvents[2];
 };
