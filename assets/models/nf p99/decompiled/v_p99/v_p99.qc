@@ -45,31 +45,15 @@ $sequence "idle2" "idle2_ani" fps 15
 $sequence "idle3" "idle3_ani" fps 15
 $sequence "shoot" "shoot_ani" {
 	event 5001 1 "22"
-	event 5004 1 "weapons/p99_fire1.wav"
 }
 $sequence "shoot_empty" "shoot_empty_ani" {
 	event 5001 1 "22"
-	event 5004 1 "weapons/p99_fire2.wav"
 }
-$sequence "reload" "reload_ani" fps 45 {
-	event 5004 1 "weapons/p99_reload_empty.wav"
-}
-$sequence "reload_noshot" "reload_noshot_ani" fps 45 {
-	event 5004 1 "weapons/p99_reload.wav"
-}
-$sequence "draw" "draw_ani" {
-	event 5004 0 "weapons/p99_draw.wav"
-}
+$sequence "reload" "reload_ani" fps 45
+$sequence "reload_noshot" "reload_noshot_ani" fps 45
+$sequence "draw" "draw_ani"
 $sequence "holster" "holster_ani"
-$sequence "silencer_draw" "silencer_draw_ani" {
-	event 5004 0 "weapons/p99_draw_sil.wav"
-}
-$sequence "silencer_holster" "silencer_holster_ani" {
-	event 5004 0 "weapons/p99_holster_sil.wav"
-}
-$sequence "SILENCER_shoot" "SILENCER_shoot_ani" {
-	event 5004 1 "weapons/p99_fire_sil1.wav"
-}
-$sequence "SILENCER_shoot_empty" "SILENCER_shoot_empty_ani" {
-	event 5004 1 "weapons/p99_fire_sil2.wav"
-}
+$sequence "silencer_draw" "silencer_draw_ani"
+$sequence "silencer_holster" "silencer_holster_ani"
+$sequence "SILENCER_shoot" "SILENCER_shoot_ani"
+$sequence "SILENCER_shoot_empty" "SILENCER_shoot_empty_ani"
