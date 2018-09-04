@@ -20,3 +20,6 @@ extern const CAmmoDef AmmoDef_Snark;
 extern const CAmmoDef AmmoDef_Hornet;
 extern const CAmmoDef AmmoDef_M203Grenade;
 extern const CAmmoDef AmmoDef_Uranium;
+
+// Nightfire weapon ammo
+extern const CAmmoDef AmmoDef_P99;

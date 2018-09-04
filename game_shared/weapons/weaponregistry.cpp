@@ -3,11 +3,15 @@
 #include "standard_includes.h"
 #include "genericweapon.h"
 
-CWeaponRegistry CWeaponRegistry::StaticInstance = CWeaponRegistry();
-
 CWeaponRegistry::CWeaponRegistry()
 	: m_AttributesList{0}
 {
+}
+
+CWeaponRegistry& CWeaponRegistry::StaticInstance()
+{
+	static CWeaponRegistry registry;
+	return registry;
 }
 
 void CWeaponRegistry::Add(const CGenericWeaponAttributes* atts)
@@ -17,15 +21,11 @@ void CWeaponRegistry::Add(const CGenericWeaponAttributes* atts)
 		return;
 	}
 
-	// Since weapon IDs are sequential, we can resize the vector to cater for the current ID.
-	// Lower IDs that are added will just slot into the lower indices.
 	const int id = static_cast<const int>(atts->Core().Id());
-	ASSERTSZ(id >= 0 && id < MAX_WEAPONS, "Weapon ID is out of range!");
-	ASSERTSZ(m_AttributesList[id] == NULL, "Attributes already present at this index.");
+	ASSERTSZ_Q(id >= 0 && id < MAX_WEAPONS, "Weapon ID is out of range!");
+	ASSERTSZ_Q(m_AttributesList[id] == NULL, "Attributes already present at this index.");
 
 	m_AttributesList[id] = atts;
-
-	// Keep track
 }
 
 const CGenericWeaponAttributes* CWeaponRegistry::Get(int index) const

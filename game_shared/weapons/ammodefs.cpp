@@ -12,3 +12,6 @@ const CAmmoDef AmmoDef_Snark = { "Snarks", 15 };
 const CAmmoDef AmmoDef_Hornet = { "Hornets", 8 };
 const CAmmoDef AmmoDef_M203Grenade = { "ARgrenades", 10 };
 const CAmmoDef AmmoDef_Uranium = { "uranium", 100 };
+
+// Nightfire weapon ammo
+const CAmmoDef AmmoDef_P99 = { "ammodef_p99", 200 };

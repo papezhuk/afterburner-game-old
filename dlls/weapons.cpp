@@ -296,7 +296,7 @@ void W_Precache( void )
 
 	// custom items...
 
-	CWeaponRegistry::StaticInstance.ForEach([](const CGenericWeaponAttributes& atts)
+	CWeaponRegistry::StaticInstance().ForEach([](const CGenericWeaponAttributes& atts)
 	{
 		UTIL_PrecacheOtherWeapon(atts.Core().Classname());
 	});

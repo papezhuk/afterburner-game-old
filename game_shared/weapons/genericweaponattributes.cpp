@@ -3,5 +3,5 @@
 
 void CGenericWeaponAttributes::Register()
 {
-	CWeaponRegistry::StaticInstance.Add(this);
+	CWeaponRegistry::StaticInstance().Add(this);
 }

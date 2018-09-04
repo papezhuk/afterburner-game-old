@@ -515,7 +515,7 @@ void EV_GenericHitscanFire(event_args_t* args)
 	const WeaponId_e weaponId = static_cast<const WeaponId_e>(args->iparam1);
 	const uint8_t fireModeIndex = static_cast<const uint8_t>(args->iparam2);
 
-	const CGenericWeaponAttributes* atts = CWeaponRegistry::StaticInstance.Get(weaponId);
+	const CGenericWeaponAttributes* atts = CWeaponRegistry::StaticInstance().Get(weaponId);
 	if ( !atts )
 	{
 		ASSERT(false);

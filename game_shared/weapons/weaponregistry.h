@@ -30,7 +30,7 @@ public:
 		}
 	}
 
-	static CWeaponRegistry StaticInstance;
+	static CWeaponRegistry& StaticInstance();
 
 private:
 	const CGenericWeaponAttributes* m_AttributesList[MAX_WEAPONS];

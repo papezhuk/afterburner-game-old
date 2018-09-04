@@ -58,7 +58,7 @@ void Game_HookEvents( void )
 	gEngfuncs.pfnHookEvent( "events/snarkfire.sc", EV_SnarkFire );
 
 	// Hook up all registered weapons to generic event handlers for firing.
-	CWeaponRegistry::StaticInstance.ForEach([](const CGenericWeaponAttributes& atts)
+	CWeaponRegistry::StaticInstance().ForEach([](const CGenericWeaponAttributes& atts)
 	{
 		for ( uint8_t fireModeIndex = 0; fireModeIndex < 2; ++fireModeIndex )
 		{

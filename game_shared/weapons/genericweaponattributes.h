@@ -26,7 +26,7 @@ public:
 
 	const T& Value(uint32_t index) const
 	{
-		ASSERTSZ(index < m_Items.size(), "Index must be in range.");
+		ASSERTSZ_Q(index < m_Items.size(), "Index must be in range.");
 		return m_Items[index].m_Value;
 	}
 
@@ -138,11 +138,11 @@ public:
 
 	inline void Validate() const
 	{
-		ASSERTSZ(m_Classname, "Weapon must have a classname.");
-		ASSERTSZ(m_Id != WeaponId_e::WeaponNone, "Weapon must have a valid ID.");
-		ASSERTSZ(m_ViewModelName, "Weapon must have a view model.");
-		ASSERTSZ(m_PlayerModelName, "Weapon must have a player model.");
-		ASSERTSZ(m_WorldModelName, "Weapon must have a world model.");
+		ASSERTSZ_Q(m_Classname, "Weapon must have a classname.");
+		ASSERTSZ_Q(m_Id != WeaponId_e::WeaponNone, "Weapon must have a valid ID.");
+		ASSERTSZ_Q(m_ViewModelName, "Weapon must have a view model.");
+		ASSERTSZ_Q(m_PlayerModelName, "Weapon must have a player model.");
+		ASSERTSZ_Q(m_WorldModelName, "Weapon must have a world model.");
 	}
 };
 
@@ -271,15 +271,18 @@ public:
 #define ATTR(type, name, defaultVal) BASE_ATTR(CGenericWeaponAtts_Animations, type, name, defaultVal)
 	ATTR(const char*, Extension, NULL);
 	ATTR(int, Index_Draw, -1);
+	ATTR(const char*, Sound_Draw, NULL);
 	ATTR(int, Index_ReloadWhenEmpty, -1);
+	ATTR(const char*, Sound_ReloadWhenEmpty, NULL);
 	ATTR(int, Index_ReloadWhenNotEmpty, -1);
+	ATTR(const char*, Sound_ReloadWhenNotEmpty, NULL);
 #undef ATTR
 };
 
 class CGenericWeaponAtts_IdleAnimations
 {
 public:
-	inline CGenericWeaponAtts_IdleAnimations& Animation(int index, float weight)
+	inline CGenericWeaponAtts_IdleAnimations& Animation(int index, float weight = 1.0f)
 	{
 		m_AnimIndices.Add(index, weight);
 		return *this;
@@ -305,7 +308,6 @@ public:
 		  m_Animations(),
 		  m_IdleAnimations()
 	{
-		Register();
 	}
 
 	CGenericWeaponAttributes(const CGenericWeaponAttributes& other)
@@ -324,6 +326,29 @@ public:
 		}
 
 		Register();
+	}
+
+	CGenericWeaponAttributes& operator =(const CGenericWeaponAttributes& other)
+	{
+		m_Core = other.m_Core;
+		m_Animations = other.m_Animations;
+		m_IdleAnimations = other.m_IdleAnimations;
+
+		for ( int mode = 0; mode < 2; ++mode )
+		{
+			CGenericWeaponAtts_BaseFireMode* modePtr = other.m_FireModes[mode].get();
+			if ( modePtr )
+			{
+				m_FireModes[mode].reset(modePtr->Clone());
+			}
+			else
+			{
+				m_FireModes[mode] = NULL;
+			}
+		}
+
+		Register();
+		return *this;
 	}
 
 	// Implemented in .cpp to remove cyclic dependencies.

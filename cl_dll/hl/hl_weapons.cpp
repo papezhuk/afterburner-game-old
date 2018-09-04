@@ -607,7 +607,7 @@ void HUD_InitClientWeapons( void )
 	// Allocate a slot for the local player
 	HUD_PrepEntity( &player, NULL );
 
-	CWeaponRegistry::StaticInstance.ForEach([](const CGenericWeaponAttributes& atts)
+	CWeaponRegistry::StaticInstance().ForEach([](const CGenericWeaponAttributes& atts)
 	{
 		ASSERTSZ(atts.Core().ClientPredictionWeapon(), "Expected a valid prediction weapon.");
 		HUD_PrepEntity(atts.Core().ClientPredictionWeapon(), &player);
@@ -689,7 +689,7 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	// Get current clock
 	gpGlobals->time = time;
 
-	const CGenericWeaponAttributes* atts = CWeaponRegistry::StaticInstance.Get(from->client.m_iId);
+	const CGenericWeaponAttributes* atts = CWeaponRegistry::StaticInstance().Get(from->client.m_iId);
 	if ( atts )
 	{
 		pWeapon = atts->Core().ClientPredictionWeapon();

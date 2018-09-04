@@ -3,10 +3,27 @@
 namespace
 {
 	constexpr float BULLET_TRACE_DISTANCE = 8192;
+
+	inline void PrecacheSoundSafe(const char* sound)
+	{
+		if ( sound )
+		{
+			PRECACHE_SOUND(sound);
+		}
+	}
+
+	inline void PrecacheModelSafe(const char* modelName)
+	{
+		if ( modelName )
+		{
+			PRECACHE_MODEL(modelName);
+		}
+	}
 }
 
 CGenericWeapon::~CGenericWeapon()
 {
+	// Default implementation of blank virtual destructor.
 }
 
 void CGenericWeapon::Spawn()
@@ -26,7 +43,10 @@ void CGenericWeapon::Spawn()
 
 void CGenericWeapon::Precache()
 {
-	PrecacheCore(WeaponAttributes().Core());
+	const CGenericWeaponAttributes& atts = WeaponAttributes();
+
+	PrecacheCore(atts.Core());
+	PrecacheAnimations(atts.Animations());
 	PrecacheFireMode(0);
 	PrecacheFireMode(1);
 }
@@ -42,7 +62,7 @@ void CGenericWeapon::PrecacheFireMode(uint8_t fireModeIndex)
 	}
 	else
 	{
-		m_FireEvents[fireModeIndex] = PRECACHE_EVENT(1, atts.FireMode(0)->EventName());
+		m_FireEvents[fireModeIndex] = PRECACHE_EVENT(1, fireMode->EventName());
 	}
 
 	switch ( fireMode->Id() )
@@ -62,11 +82,7 @@ void CGenericWeapon::PrecacheFireMode(uint8_t fireModeIndex)
 
 void CGenericWeapon::PrecacheHitscanResources(const CGenericWeaponAtts_HitscanFireMode& fireMode)
 {
-	if ( fireMode.ShellModelName() )
-	{
-		PRECACHE_MODEL(fireMode.ShellModelName());
-	}
-
+	PrecacheModelSafe(fireMode.ShellModelName());
 	PrecacheSounds(fireMode.Sounds());
 }
 
@@ -76,19 +92,22 @@ void CGenericWeapon::PrecacheSounds(const CGenericWeaponAttributes_Sound& sounds
 
 	for ( uint32_t index = 0; index < soundList.Count(); ++index )
 	{
-		const char* const soundName = soundList.Value(index);
-		if ( soundName )
-		{
-			PRECACHE_SOUND(soundName);
-		}
+		PrecacheSoundSafe(soundList.Value(index));
 	}
+}
+
+void CGenericWeapon::PrecacheAnimations(const CGenericWeaponAtts_Animations& animations)
+{
+	PrecacheSoundSafe(animations.Sound_Draw());
+	PrecacheSoundSafe(animations.Sound_ReloadWhenEmpty());
+	PrecacheSoundSafe(animations.Sound_ReloadWhenNotEmpty());
 }
 
 void CGenericWeapon::PrecacheCore(const CGenericWeaponAtts_Core& core)
 {
-	PRECACHE_MODEL(core.ViewModelName());
-	PRECACHE_MODEL(core.PlayerModelName());
-	PRECACHE_MODEL(core.WorldModelName());
+	PrecacheModelSafe(core.ViewModelName());
+	PrecacheModelSafe(core.PlayerModelName());
+	PrecacheModelSafe(core.WorldModelName());
 }
 
 int CGenericWeapon::GetItemInfo(ItemInfo *p)
@@ -326,11 +345,6 @@ void CGenericWeapon::WeaponIdle()
 	}
 }
 
-int CGenericWeapon::iItemSlot()
-{
-	return WeaponAttributes().Core().WeaponSlot();
-}
-
 Vector CGenericWeapon::FireBulletsPlayer(const CGenericWeaponAtts_HitscanFireMode& fireMode,
 										 uint32_t numShots,
 										 const Vector& vecSrc,
@@ -382,6 +396,11 @@ Vector CGenericWeapon::FireBulletsPlayer(const CGenericWeaponAtts_HitscanFireMod
 
 	return Vector(x * fireMode.SpreadX(), y * fireMode.SpreadY(), 0.0);
 #endif
+}
+
+int CGenericWeapon::iItemSlot()
+{
+	return WeaponAttributes().Core().WeaponSlot();
 }
 
 void CGenericWeapon::GetSharedCircularGaussianSpread(uint32_t shot, int shared_rand, float& x, float& y)

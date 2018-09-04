@@ -31,6 +31,7 @@ private:
 	void PrecacheHitscanResources(const CGenericWeaponAtts_HitscanFireMode& fireMode);
 	void PrecacheCore(const CGenericWeaponAtts_Core& core);
 	void PrecacheSounds(const CGenericWeaponAttributes_Sound& sounds);
+	void PrecacheAnimations(const CGenericWeaponAtts_Animations& animations);
 
 	void HitscanFire(int index, const CGenericWeaponAtts_HitscanFireMode& fireMode);
 	void GetSharedCircularGaussianSpread(uint32_t shot, int shared_rand, float& x, float& y);
