@@ -89,6 +89,12 @@ if(${CMAKE_VERSION} VERSION_LESS "3.0.2")
 	endmacro()
 endif()
 
+if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+	add_definitions(-D_DEBUG)
+else()
+	add_definitions(-DNDEBUG)
+endif()
+
 if(BUILD_CLIENT)
 	add_subdirectory(cl_dll)
 endif()

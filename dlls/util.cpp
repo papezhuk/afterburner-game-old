@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2001, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -30,6 +30,7 @@
 #include "player.h"
 #include "weapons.h"
 #include "gamerules.h"
+#include <cassert>
 
 float UTIL_WeaponTimeBase( void )
 {
@@ -40,7 +41,7 @@ float UTIL_WeaponTimeBase( void )
 #endif
 }
 
-static unsigned int glSeed = 0; 
+static unsigned int glSeed = 0;
 
 unsigned int seed_table[256] =
 {
@@ -62,13 +63,13 @@ unsigned int seed_table[256] =
 	25678, 18555, 13256, 23316, 22407, 16727, 991, 9236, 5373, 29402, 6117, 15241, 27715, 19291, 19888, 19847
 };
 
-unsigned int U_Random( void ) 
-{ 
-	glSeed *= 69069; 
+unsigned int U_Random( void )
+{
+	glSeed *= 69069;
 	glSeed += seed_table[glSeed & 0xff];
 
-	return ( ++glSeed & 0x0fffffff ); 
-} 
+	return ( ++glSeed & 0x0fffffff );
+}
 
 void U_Srand( unsigned int seed )
 {
@@ -137,7 +138,7 @@ float UTIL_SharedRandomFloat( unsigned int seed, float low, float high )
 }
 
 void UTIL_ParametricRocket( entvars_t *pev, Vector vecOrigin, Vector vecAngles, edict_t *owner )
-{	
+{
 	pev->startpos = vecOrigin;
 	// Trace out line to end pos
 	TraceResult tr;
@@ -309,7 +310,7 @@ TYPEDESCRIPTION	gEntvarsDescription[] =
 
 #define ENTVARS_COUNT		( sizeof(gEntvarsDescription) / sizeof(gEntvarsDescription[0]) )
 
-#ifdef	DEBUG
+#ifdef	_DEBUG
 edict_t *DBG_EntOfVars( const entvars_t *pev )
 {
 	if( pev->pContainingEntity != NULL )
@@ -322,18 +323,32 @@ edict_t *DBG_EntOfVars( const entvars_t *pev )
 	return pent;
 }
 
-void DBG_AssertFunction( BOOL fExpr, const char* szExpr, const char* szFile, int szLine, const char* szMessage )
+void DBG_AssertFunction( bool fExpr, const char* szExpr, const char* szFile, int szLine, const char* szMessage, bool showAlert )
 {
 	if( fExpr )
+	{
 		return;
-	char szOut[512];
-	
-	if( szMessage != NULL )
-		sprintf( szOut, "ASSERT FAILED:\n %s \n(%s@%d)\n%s", szExpr, szFile, szLine, szMessage );
-	else
-		sprintf( szOut, "ASSERT FAILED:\n %s \n(%s@%d)", szExpr, szFile, szLine );
+	}
 
-	ALERT( at_console, szOut );
+	if ( showAlert )
+	{
+		char szOut[512];
+		if( szMessage != NULL )
+		{
+			sprintf( szOut, "ASSERT FAILED:\n %s \n(%s@%d)\n%s", szExpr, szFile, szLine, szMessage );
+		}
+		else
+		{
+			sprintf( szOut, "ASSERT FAILED:\n %s \n(%s@%d)", szExpr, szFile, szLine );
+		}
+
+		ALERT( at_console, szOut );
+	}
+	else
+	{
+		// Engine not set up yet - just fail a standard assertion so that we can see.
+		assert(false);
+	}
 }
 #endif	// DEBUG
 
@@ -390,8 +405,8 @@ void UTIL_MoveToOrigin( edict_t *pent, const Vector &vecGoal, float flDist, int 
 {
 	float rgfl[3];
 	vecGoal.CopyToArray( rgfl );
-	//return MOVE_TO_ORIGIN( pent, rgfl, flDist, iMoveType ); 
-	MOVE_TO_ORIGIN( pent, rgfl, flDist, iMoveType ); 
+	//return MOVE_TO_ORIGIN( pent, rgfl, flDist, iMoveType );
+	MOVE_TO_ORIGIN( pent, rgfl, flDist, iMoveType );
 }
 
 int UTIL_EntitiesInBox( CBaseEntity **pList, int listMax, const Vector &mins, const Vector &maxs, int flagMask )
@@ -575,7 +590,7 @@ CBaseEntity *UTIL_PlayerByIndex( int playerIndex )
 			pPlayer = CBaseEntity::Instance( pPlayerEdict );
 		}
 	}
-	
+
 	return pPlayer;
 }
 
@@ -806,7 +821,7 @@ void UTIL_HudMessageAll( const hudtextparms_t &textparms, const char *pMessage )
 			UTIL_HudMessage( pPlayer, textparms, pMessage );
 	}
 }
-				 
+
 extern int gmsgTextMsg, gmsgSayText;
 void UTIL_ClientPrintAll( int msg_dest, const char *msg_name, const char *param1, const char *param2, const char *param3, const char *param4 )
 {
@@ -954,7 +969,7 @@ void UTIL_SetSize( entvars_t *pev, const Vector &vecMin, const Vector &vecMax )
 {
 	SET_SIZE( ENT( pev ), vecMin, vecMax );
 }
-	
+
 float UTIL_VecToYaw( const Vector &vec )
 {
 	return VEC_TO_YAW( vec );
@@ -980,7 +995,7 @@ float UTIL_Approach( float target, float value, float speed )
 		value += speed;
 	else if( delta < -speed )
 		value -= speed;
-	else 
+	else
 		value = target;
 
 	return value;
@@ -1006,7 +1021,7 @@ float UTIL_ApproachAngle( float target, float value, float speed )
 		value += speed;
 	else if( delta < -speed )
 		value -= speed;
-	else 
+	else
 		value = target;
 
 	return value;
@@ -1114,7 +1129,7 @@ void UTIL_BloodStream( const Vector &origin, const Vector &direction, int color,
 		WRITE_BYTE( color );
 		WRITE_BYTE( Q_min( amount, 255 ) );
 	MESSAGE_END();
-}				
+}
 
 void UTIL_BloodDrips( const Vector &origin, const Vector &direction, int color, int amount )
 {
@@ -1146,7 +1161,7 @@ void UTIL_BloodDrips( const Vector &origin, const Vector &direction, int color, 
 		WRITE_BYTE( color );								// color index into host_basepal
 		WRITE_BYTE( Q_min( Q_max( 3, amount / 10 ), 16 ) );		// size
 	MESSAGE_END();
-}				
+}
 
 Vector UTIL_RandomBloodVector( void )
 {
@@ -1525,7 +1540,7 @@ void UTIL_PrecacheOther( const char *szClassname )
 		ALERT( at_console, "NULL Ent in UTIL_PrecacheOther\n" );
 		return;
 	}
-	
+
 	CBaseEntity *pEntity = CBaseEntity::Instance( VARS( pent ) );
 	if( pEntity )
 		pEntity->Precache();
@@ -1540,7 +1555,7 @@ void UTIL_LogPrintf( const char *fmt, ... )
 {
 	va_list		argptr;
 	static char	string[1024];
-	
+
 	va_start( argptr, fmt );
 	vsprintf( string, fmt, argptr );
 	va_end( argptr );
@@ -1599,7 +1614,7 @@ static int gSizes[FIELD_TYPECOUNT] =
 #ifdef GNUC
 	sizeof(void *) * 2,	// FIELD_FUNCTION
 #else
-	sizeof(void *),		// FIELD_FUNCTION	
+	sizeof(void *),		// FIELD_FUNCTION
 #endif
 	sizeof(int),		// FIELD_BOOLEAN
 	sizeof(short),		// FIELD_SHORT
@@ -1792,7 +1807,7 @@ unsigned short CSaveRestoreBuffer::TokenHash( const char *pszToken )
 		}
 	}
 
-	// Token hash table full!!! 
+	// Token hash table full!!!
 	// [Consider doing overflow table(s) after the main table & limiting linear hash table search]
 	ALERT( at_error, "CSaveRestoreBuffer :: TokenHash() is COMPLETELY FULL!" );
 	return 0;
@@ -2356,7 +2371,7 @@ int CRestore::ReadFields( const char *pname, void *pBaseData, TYPEDESCRIPTION *p
 		lastField = ReadField( pBaseData, pFields, fieldCount, lastField, header.size, m_pdata->pTokens[header.token], header.pData );
 		lastField++;
 	}
-	
+
 	return 1;
 }
 

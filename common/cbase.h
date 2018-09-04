@@ -283,32 +283,32 @@ public:
 	}
 
 	// Ugly code to lookup all functions to make sure they are exported when set.
-#ifdef _DEBUG
-	void FunctionCheck( void *pFunction, char *name )
+#if defined(_DEBUG) && defined(CHECK_FUNCTION_EXPORTS)
+	void FunctionCheck( void *pFunction, const char *name )
 	{
 		if( pFunction && !NAME_FOR_FUNCTION( pFunction ) )
 			ALERT( at_error, "No EXPORT: %s:%s (%08lx)\n", STRING( pev->classname ), name, (size_t)pFunction );
 	}
 
-	BASEPTR	ThinkSet( BASEPTR func, char *name )
+	BASEPTR	ThinkSet( BASEPTR func, const char *name )
 	{
 		m_pfnThink = func;
 		FunctionCheck( (void *)*( (int *)( (char *)this + ( offsetof( CBaseEntity, m_pfnThink ) ) ) ), name );
 		return func;
 	}
-	ENTITYFUNCPTR TouchSet( ENTITYFUNCPTR func, char *name )
+	ENTITYFUNCPTR TouchSet( ENTITYFUNCPTR func, const char *name )
 	{
 		m_pfnTouch = func;
 		FunctionCheck( (void *)*( (int *)( (char *)this + ( offsetof( CBaseEntity, m_pfnTouch ) ) ) ), name );
 		return func;
 	}
-	USEPTR UseSet( USEPTR func, char *name )
+	USEPTR UseSet( USEPTR func, const char *name )
 	{
 		m_pfnUse = func;
 		FunctionCheck( (void *)*( (int *)( (char *)this + ( offsetof( CBaseEntity, m_pfnUse ) ) ) ), name );
 		return func;
 	}
-	ENTITYFUNCPTR BlockedSet( ENTITYFUNCPTR func, char *name )
+	ENTITYFUNCPTR BlockedSet( ENTITYFUNCPTR func, const char *name )
 	{
 		m_pfnBlocked = func;
 		FunctionCheck( (void *)*( (int *)( (char *)this + ( offsetof( CBaseEntity, m_pfnBlocked ) ) ) ), name );
@@ -351,7 +351,7 @@ public:
 // Normally it's illegal to cast a pointer to a member function of a derived class to a pointer to a
 // member function of a base class.  static_cast is a sleezy way around that problem.
 
-#ifdef _DEBUG
+#if defined(_DEBUG) && defined(CHECK_FUNCTION_EXPORTS)
 
 #define SetThink( a ) ThinkSet( static_cast <void (CBaseEntity::*)(void)> (a), #a )
 #define SetTouch( a ) TouchSet( static_cast <void (CBaseEntity::*)(CBaseEntity *)> (a), #a )

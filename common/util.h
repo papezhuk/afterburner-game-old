@@ -115,7 +115,7 @@ typedef int BOOL;
 //
 // Conversion among the three types of "entity", including identity-conversions.
 //
-#ifdef DEBUG
+#ifdef _DEBUG
 	extern edict_t *DBG_EntOfVars(const entvars_t *pev);
 	inline edict_t *ENT(const entvars_t *pev)	{ return DBG_EntOfVars(pev); }
 #else
@@ -392,10 +392,11 @@ extern int BuildChangeList( LEVELLIST *pLevelList, int maxList );
 //
 // How did I ever live without ASSERT?
 //
-#ifdef	DEBUG
-void DBG_AssertFunction(BOOL fExpr, const char* szExpr, const char* szFile, int szLine, const char* szMessage);
+#ifdef _DEBUG
+void DBG_AssertFunction(bool fExpr, const char* szExpr, const char* szFile, int szLine, const char* szMessage, bool showAlert = true);
 #define ASSERT(f)		DBG_AssertFunction(f, #f, __FILE__, __LINE__, NULL)
 #define ASSERTSZ(f, sz)	DBG_AssertFunction(f, #f, __FILE__, __LINE__, sz)
+#define ASSERTSZ_Q(f, sz) DBG_AssertFunction(f, #f, __FILE__, __LINE__, sz, false)
 #else	// !DEBUG
 #define ASSERT(f)
 #define ASSERTSZ(f, sz)
