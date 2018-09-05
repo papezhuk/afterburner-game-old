@@ -59,7 +59,11 @@ $sequence "draw" "draw_ani" {
 	event 5005 1 "weapons/weapon_p99/p99_draw.wav"
 }
 $sequence "holster" "holster_ani"
-$sequence "silencer_draw" "silencer_draw_ani"
-$sequence "silencer_holster" "silencer_holster_ani"
+$sequence "silencer_draw" "silencer_draw_ani" {
+	event 5005 1 "weapons/weapon_p99/p99_draw_sil.wav"
+}
+$sequence "silencer_holster" "silencer_holster_ani" {
+	event 5005 1 "weapons/weapon_p99/p99_holster_sil.wav"
+}
 $sequence "SILENCER_shoot" "SILENCER_shoot_ani"
 $sequence "SILENCER_shoot_empty" "SILENCER_shoot_empty_ani"
