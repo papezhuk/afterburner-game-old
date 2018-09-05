@@ -4,7 +4,7 @@ $modelname "v_p99.mdl"
 $root "Bip01"
 $scale 1.0
 
-$flags 0 
+$flags 0
 $origin 0.000000 0.000000 0.000000
 $eyeposition 0.000000 0.000000 0.000000
 $bbox 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000
@@ -49,9 +49,15 @@ $sequence "shoot" "shoot_ani" {
 $sequence "shoot_empty" "shoot_empty_ani" {
 	event 5001 1 "22"
 }
-$sequence "reload" "reload_ani" fps 45
-$sequence "reload_noshot" "reload_noshot_ani" fps 45
-$sequence "draw" "draw_ani"
+$sequence "reload" "reload_ani" fps 45 {
+	event 5005 1 "weapons/weapon_p99/p99_reload_empty.wav"
+}
+$sequence "reload_noshot" "reload_noshot_ani" fps 45 {
+	event 5005 1 "weapons/weapon_p99/p99_reload.wav"
+}
+$sequence "draw" "draw_ani" {
+	event 5005 1 "weapons/weapon_p99/p99_draw.wav"
+}
 $sequence "holster" "holster_ani"
 $sequence "silencer_draw" "silencer_draw_ani"
 $sequence "silencer_holster" "silencer_holster_ani"

@@ -558,6 +558,8 @@ void DLLEXPORT HUD_StudioEvent( const struct mstudioevent_s *event, const struct
 	case 5004:
 		gEngfuncs.pfnPlaySoundByNameAtLocation( (char *)event->options, 1.0, (float *)&entity->attachment[0] );
 		break;
+	case 5005:
+		gEngfuncs.pfnPlaySoundByName((char*)event->options, 1.0f);
 	default:
 		break;
 	}

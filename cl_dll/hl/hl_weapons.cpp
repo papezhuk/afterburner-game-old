@@ -32,7 +32,6 @@
 #include "../com_weapons.h"
 #include "../demo.h"
 
-#include "weapon_p99.h"
 #include "weapon_generictest.h"
 #include "weaponregistry.h"
 
@@ -71,8 +70,6 @@ CHandGrenade g_HandGren;
 CSatchel g_Satchel;
 CTripmine g_Tripmine;
 CSqueak g_Snark;
-
-CWeaponP99 g_WeaponP99;
 
 /*
 ======================
@@ -628,8 +625,6 @@ void HUD_InitClientWeapons( void )
 	HUD_PrepEntity( &g_Satchel, &player );
 	HUD_PrepEntity( &g_Tripmine, &player );
 	HUD_PrepEntity( &g_Snark, &player );
-
-	HUD_PrepEntity(&g_WeaponP99, &player);
 }
 
 /*
@@ -741,10 +736,6 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 				break;
 			case WEAPON_SNARK:
 				pWeapon = &g_Snark;
-				break;
-
-			case WEAPON_P99:
-				pWeapon = &g_WeaponP99;
 				break;
 		}
 	}
@@ -907,7 +898,7 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	//  over the wire ( fixes some animation glitches )
 	if( g_runfuncs && ( HUD_GetWeaponAnim() != to->client.weaponanim ) )
 	{
-		int body = 2;
+		int body = 0;
 
 		//Pop the model to body 0.
 		if( pWeapon == &g_Tripmine )

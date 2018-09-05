@@ -46,7 +46,6 @@ void CGenericWeapon::Precache()
 	const CGenericWeaponAttributes& atts = WeaponAttributes();
 
 	PrecacheCore(atts.Core());
-	PrecacheAnimations(atts.Animations());
 	PrecacheFireMode(0);
 	PrecacheFireMode(1);
 }
@@ -94,13 +93,6 @@ void CGenericWeapon::PrecacheSounds(const CGenericWeaponAttributes_Sound& sounds
 	{
 		PrecacheSoundSafe(soundList.Value(index));
 	}
-}
-
-void CGenericWeapon::PrecacheAnimations(const CGenericWeaponAtts_Animations& animations)
-{
-	PrecacheSoundSafe(animations.Sound_Draw());
-	PrecacheSoundSafe(animations.Sound_ReloadWhenEmpty());
-	PrecacheSoundSafe(animations.Sound_ReloadWhenNotEmpty());
 }
 
 void CGenericWeapon::PrecacheCore(const CGenericWeaponAtts_Core& core)

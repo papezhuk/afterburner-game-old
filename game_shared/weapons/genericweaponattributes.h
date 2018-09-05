@@ -271,11 +271,8 @@ public:
 #define ATTR(type, name, defaultVal) BASE_ATTR(CGenericWeaponAtts_Animations, type, name, defaultVal)
 	ATTR(const char*, Extension, NULL);
 	ATTR(int, Index_Draw, -1);
-	ATTR(const char*, Sound_Draw, NULL);
 	ATTR(int, Index_ReloadWhenEmpty, -1);
-	ATTR(const char*, Sound_ReloadWhenEmpty, NULL);
 	ATTR(int, Index_ReloadWhenNotEmpty, -1);
-	ATTR(const char*, Sound_ReloadWhenNotEmpty, NULL);
 #undef ATTR
 };
 

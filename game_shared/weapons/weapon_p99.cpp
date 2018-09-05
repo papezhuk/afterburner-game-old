@@ -12,7 +12,10 @@ enum P99Animations_e
 	P99_RELOAD_NOT_EMPTY,
 	P99_DRAW,
 	P99_HOLSTER,
-	P99_ADD_SILENCER
+	P99_ADD_SILENCER,
+	P99_REMOVE_SILENCER,
+	P99_SHOOT_SILENCER,
+	P99_SHOOT_SILENCER_EMPTY,
 };
 
 #ifdef CLIENT_DLL
@@ -90,11 +93,8 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 	CGenericWeaponAtts_Animations()
 	.Extension("onehanded")
 	.Index_Draw(P99_DRAW)
-	.Sound_Draw("weapons/weapon_p99/p99_draw.wav")
 	.Index_ReloadWhenEmpty(P99_RELOAD)
-	.Sound_ReloadWhenEmpty("weapons/weapon_p99/p99_reload_empty.wav")
 	.Index_ReloadWhenNotEmpty(P99_RELOAD_NOT_EMPTY)
-	.Sound_ReloadWhenNotEmpty("weapons/weapon_p99/p99_reload.wav")
 )
 .IdleAnimations(
 	CGenericWeaponAtts_IdleAnimations()
