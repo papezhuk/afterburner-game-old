@@ -17,8 +17,6 @@ extern "C"
 	// HLDM
 	void EV_FireGlock1( event_args_t *args  );
 	void EV_FireGlock2( event_args_t *args  );
-	void EV_FireGenericTest1( event_args_t *args  );
-	void EV_FireGenericTest2( event_args_t *args  );
 	void EV_FireShotGunSingle( event_args_t *args  );
 	void EV_FireShotGunDouble( event_args_t *args  );
 	void EV_FireMP5( event_args_t *args  );
@@ -35,9 +33,6 @@ extern "C"
 	void EV_HornetGunFire( event_args_t *args );
 	void EV_TripmineFire( event_args_t *args );
 	void EV_SnarkFire( event_args_t *args );
-
-	void EV_FireP991( event_args_t *args  );
-	void EV_FireP992( event_args_t *args  );
 
 	void EV_TrainPitchAdjust( event_args_t *args );
 
