@@ -159,7 +159,7 @@ BOOL CGenericWeapon::Deploy()
 	const CGenericWeaponAtts_Core& core = WeaponAttributes().Core();
 	const CGenericWeaponAtts_Animations anims = WeaponAttributes().Animations();
 
-	return DefaultDeploy(core.ViewModelName(), core.PlayerModelName(), anims.Index_Draw(), anims.Extension());
+	return DefaultDeploy(core.ViewModelName(), core.PlayerModelName(), anims.Index_Draw(), anims.Extension(), pev->body);
 }
 
 void CGenericWeapon::PrimaryAttack()
@@ -282,6 +282,8 @@ void CGenericWeapon::HitscanFire(int index, const CGenericWeaponAtts_HitscanFire
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat( m_pPlayer->random_seed, 10, 15 );
 };
 
+// TODO: Refactor this. We could probably completely reimplement DefaultReload()
+// to make sure the idle time is also updated.
 void CGenericWeapon::Reload()
 {
 	const CGenericWeaponAttributes& atts = WeaponAttributes();
@@ -296,11 +298,11 @@ void CGenericWeapon::Reload()
 
 	if( m_iClip == 0 )
 	{
-		iResult = DefaultReload( maxClip, atts.Animations().Index_ReloadWhenEmpty(), 1.5 );
+		iResult = DefaultReload(maxClip, atts.Animations().Index_ReloadWhenEmpty(), 1.5, pev->body);
 	}
 	else
 	{
-		iResult = DefaultReload( maxClip, atts.Animations().Index_ReloadWhenNotEmpty(), 1.5 );
+		iResult = DefaultReload(maxClip, atts.Animations().Index_ReloadWhenNotEmpty(), 1.5, pev->body);
 	}
 
 	if( iResult )
@@ -333,7 +335,7 @@ void CGenericWeapon::WeaponIdle()
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 60.0 / 16.0;
 
 		const float flRand = UTIL_SharedRandomFloat(m_pPlayer->random_seed, 0.0, 1.0);
-		SendWeaponAnim(idleAnims.List().IndexByProbabilisticValue(flRand));
+		SendWeaponAnim(idleAnims.List().IndexByProbabilisticValue(flRand), pev->body);
 	}
 }
 

@@ -458,7 +458,14 @@ static void GenericWeaponFireBullets(event_args_t *args, const CGenericWeaponAtt
 			animIndex = fireMode.AnimIndex_FireNotEmpty();
 		}
 
-		gEngfuncs.pEventAPI->EV_WeaponAnimation(animIndex, 0);
+		int body = 0;
+		const struct cl_entity_s* const viewModelEnt = GetViewEntity();
+		if ( viewModelEnt )
+		{
+			body = viewModelEnt->curstate.body;
+		}
+
+		gEngfuncs.pEventAPI->EV_WeaponAnimation(animIndex, body);
 		V_PunchAxis(fireMode.ViewPunchX(), fireMode.ViewPunchY());
 	}
 

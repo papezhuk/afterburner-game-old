@@ -835,7 +835,7 @@ void CBasePlayerWeapon::SendWeaponAnim( int iAnim, int body )
 #endif
 	MESSAGE_BEGIN( MSG_ONE, SVC_WEAPONANIM, NULL, m_pPlayer->pev );
 		WRITE_BYTE( iAnim );		// sequence number
-		WRITE_BYTE( pev->body );	// weaponmodel bodygroup.
+		WRITE_BYTE( body );	// weaponmodel bodygroup.
 	MESSAGE_END();
 }
 
@@ -972,7 +972,7 @@ BOOL CBasePlayerWeapon::DefaultReload( int iClipSize, int iAnim, float fDelay, i
 	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + fDelay;
 
 	//!!UNDONE -- reload sound goes here !!!
-	SendWeaponAnim( iAnim );
+	SendWeaponAnim( iAnim, body );
 
 	m_fInReload = TRUE;
 

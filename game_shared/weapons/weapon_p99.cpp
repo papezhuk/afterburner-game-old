@@ -105,12 +105,40 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 
 LINK_ENTITY_TO_CLASS( weapon_p99, CWeaponP99 )
 
+CWeaponP99::CWeaponP99()
+	: CGenericWeapon(),
+	  m_bSilenced(false)
+{
+}
+
 const CGenericWeaponAttributes& CWeaponP99::WeaponAttributes() const
 {
 	return StaticWeaponAttributes;
 }
 
+void CWeaponP99::PrimaryAttack()
+{
+	FireUsingMode(m_bSilenced ? 1 : 0);
+}
+
 void CWeaponP99::SecondaryAttack()
 {
-	// TODO: Toggle silencer
+	if ( m_bSilenced )
+	{
+		SendWeaponAnim(P99_REMOVE_SILENCER, pev->body);
+		pev->body = 0;
+	}
+	else
+	{
+		pev->body = 1;
+		SendWeaponAnim(P99_ADD_SILENCER, pev->body);
+	}
+
+	m_bSilenced = !m_bSilenced;
+
+	// TODO: Increment this by the duration of the actual animation
+	float next = UTIL_WeaponTimeBase() + 2;
+	m_flNextSecondaryAttack = next;
+	m_flNextSecondaryAttack = next;
+	m_flTimeWeaponIdle = next;
 }
