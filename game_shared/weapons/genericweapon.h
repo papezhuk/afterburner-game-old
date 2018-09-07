@@ -9,6 +9,7 @@
 class CGenericWeapon : public CBasePlayerWeapon
 {
 public:
+	CGenericWeapon();
 	virtual ~CGenericWeapon();
 	virtual void Spawn() override;
 	virtual void Precache() override;
@@ -25,6 +26,7 @@ public:
 
 protected:
 	void FireUsingMode(int index);
+	void SetViewModelBody(int body);
 
 private:
 	void PrecacheFireMode(uint8_t fireModeIndex);
@@ -45,4 +47,5 @@ private:
 #endif
 
 	unsigned short m_FireEvents[2];
+	int m_iViewModelBody;
 };

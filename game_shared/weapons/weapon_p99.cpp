@@ -18,6 +18,12 @@ enum P99Animations_e
 	P99_SHOOT_SILENCER_EMPTY,
 };
 
+enum P99Body_e
+{
+	P99BODY_UNSILENCED = 0,
+	P99BODY_SILENCED
+};
+
 #ifdef CLIENT_DLL
 static CWeaponP99 PredictionWeapon;
 #endif
@@ -123,20 +129,12 @@ void CWeaponP99::PrimaryAttack()
 
 void CWeaponP99::SecondaryAttack()
 {
-	if ( m_bSilenced )
-	{
-		SendWeaponAnim(P99_REMOVE_SILENCER, pev->body);
-		pev->body = 0;
-	}
-	else
-	{
-		pev->body = 1;
-		SendWeaponAnim(P99_ADD_SILENCER, pev->body);
-	}
-
+	SendWeaponAnim(m_bSilenced ? P99_REMOVE_SILENCER : P99_ADD_SILENCER, P99BODY_SILENCED);
 	m_bSilenced = !m_bSilenced;
+	SetViewModelBody(m_bSilenced ? P99BODY_SILENCED : P99BODY_UNSILENCED);
 
 	// TODO: Increment this by the duration of the actual animation
+	// TODO: Make this a CGenericWeapon function.
 	float next = UTIL_WeaponTimeBase() + 2;
 	m_flNextSecondaryAttack = next;
 	m_flNextSecondaryAttack = next;

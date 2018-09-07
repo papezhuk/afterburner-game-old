@@ -21,6 +21,12 @@ namespace
 	}
 }
 
+CGenericWeapon::CGenericWeapon()
+	: CBasePlayerWeapon(),
+	  m_iViewModelBody(0)
+{
+}
+
 CGenericWeapon::~CGenericWeapon()
 {
 	// Default implementation of blank virtual destructor.
@@ -159,7 +165,7 @@ BOOL CGenericWeapon::Deploy()
 	const CGenericWeaponAtts_Core& core = WeaponAttributes().Core();
 	const CGenericWeaponAtts_Animations anims = WeaponAttributes().Animations();
 
-	return DefaultDeploy(core.ViewModelName(), core.PlayerModelName(), anims.Index_Draw(), anims.Extension(), pev->body);
+	return DefaultDeploy(core.ViewModelName(), core.PlayerModelName(), anims.Index_Draw(), anims.Extension(), m_iViewModelBody);
 }
 
 void CGenericWeapon::PrimaryAttack()
@@ -296,13 +302,14 @@ void CGenericWeapon::Reload()
 
 	int iResult;
 
+	// TODO: Accurate reload delays?
 	if( m_iClip == 0 )
 	{
-		iResult = DefaultReload(maxClip, atts.Animations().Index_ReloadWhenEmpty(), 1.5, pev->body);
+		iResult = DefaultReload(maxClip, atts.Animations().Index_ReloadWhenEmpty(), 1.5, m_iViewModelBody);
 	}
 	else
 	{
-		iResult = DefaultReload(maxClip, atts.Animations().Index_ReloadWhenNotEmpty(), 1.5, pev->body);
+		iResult = DefaultReload(maxClip, atts.Animations().Index_ReloadWhenNotEmpty(), 1.5, m_iViewModelBody);
 	}
 
 	if( iResult )
@@ -335,7 +342,7 @@ void CGenericWeapon::WeaponIdle()
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 60.0 / 16.0;
 
 		const float flRand = UTIL_SharedRandomFloat(m_pPlayer->random_seed, 0.0, 1.0);
-		SendWeaponAnim(idleAnims.List().IndexByProbabilisticValue(flRand), pev->body);
+		SendWeaponAnim(idleAnims.List().IndexByProbabilisticValue(flRand), m_iViewModelBody);
 	}
 }
 
@@ -391,6 +398,11 @@ Vector CGenericWeapon::FireBulletsPlayer(const CGenericWeaponAtts_HitscanFireMod
 	return Vector(x * fireMode.SpreadX(), y * fireMode.SpreadY(), 0.0);
 #endif
 }
+
+void CGenericWeapon::SetViewModelBody(int body)
+{
+	m_iViewModelBody = body;
+};
 
 int CGenericWeapon::iItemSlot()
 {
