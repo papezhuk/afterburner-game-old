@@ -27,6 +27,7 @@ public:
 protected:
 	void FireUsingMode(int index);
 	void SetViewModelBody(int body);
+	void DelayPendingActions(float secs);
 
 private:
 	void PrecacheFireMode(uint8_t fireModeIndex);

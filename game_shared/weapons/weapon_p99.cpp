@@ -34,7 +34,7 @@ namespace
 	constexpr float P99_FIRE_RATE = 6.0f;
 	constexpr float P99_AUTOAIM_DEG = AUTOAIM_10DEGREES;
 	constexpr float P99_BASE_DAMAGE = 10.0f;	// TODO: Tweak after testing
-	constexpr float P99_BASE_SPREAD = 0.05f;	// TODO: Tweak after testing
+	constexpr float P99_BASE_SPREAD = 0.03f;
 }
 
 static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAttributes(
@@ -62,6 +62,7 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 	.DamagePerShot(P99_BASE_DAMAGE)
 	.AutoAim(P99_AUTOAIM_DEG)
 	.ShellModelName("models/shell.mdl") // TODO: Does Nightfire have shell models? Could we make some?
+	.ViewModelBodyOverride(P99BODY_UNSILENCED)
 	.AnimIndex_FireNotEmpty(P99_SHOOT)
 	.AnimIndex_FireEmpty(P99_SHOOT_EMPTY)
 	.ViewPunchY(-2.0f)
@@ -82,6 +83,7 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 	.DamagePerShot(P99_BASE_DAMAGE)
 	.AutoAim(P99_AUTOAIM_DEG)
 	.ShellModelName("models/shell.mdl") // TODO: Does Nightfire have shell models? Could we make some?
+	.ViewModelBodyOverride(P99BODY_SILENCED)
 	.AnimIndex_FireNotEmpty(P99_SHOOT)
 	.AnimIndex_FireEmpty(P99_SHOOT_EMPTY)
 	.ViewPunchY(-2.0f)
@@ -129,14 +131,12 @@ void CWeaponP99::PrimaryAttack()
 
 void CWeaponP99::SecondaryAttack()
 {
+	// We must animate using the silenced body group in either case, so we can see the silencer.
 	SendWeaponAnim(m_bSilenced ? P99_REMOVE_SILENCER : P99_ADD_SILENCER, P99BODY_SILENCED);
+
 	m_bSilenced = !m_bSilenced;
 	SetViewModelBody(m_bSilenced ? P99BODY_SILENCED : P99BODY_UNSILENCED);
 
-	// TODO: Increment this by the duration of the actual animation
-	// TODO: Make this a CGenericWeapon function.
-	float next = UTIL_WeaponTimeBase() + 2;
-	m_flNextSecondaryAttack = next;
-	m_flNextSecondaryAttack = next;
-	m_flTimeWeaponIdle = next;
+	// TODO: Read animation time from MDL.
+	DelayPendingActions(2.0f);
 }

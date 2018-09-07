@@ -182,8 +182,21 @@ public:
 		Hitscan = 0
 	};
 
+	struct FireModeSignature
+	{
+		WeaponId_e m_iWeaponId;
+		uint8_t m_iFireMode;
+
+		FireModeSignature()
+			: m_iWeaponId(WeaponId_e::WeaponNone),
+			  m_iFireMode(0)
+		{
+		}
+	};
+
 	CGenericWeaponAtts_BaseFireMode(const char* eventName)
-		: m_szEventName(eventName)
+		: m_szEventName(eventName),
+		  m_Signature()
 	{
 	}
 
@@ -207,8 +220,20 @@ public:
 		return m_szEventName;
 	}
 
+	void SetSignature(WeaponId_e weaponId, int fireMode)
+	{
+		m_Signature.m_iWeaponId = weaponId;
+		m_Signature.m_iFireMode = fireMode;
+	}
+
+	const FireModeSignature* Signature() const
+	{
+		return &m_Signature;
+	};
+
 private:
 	const char* m_szEventName;
+	FireModeSignature m_Signature;
 };
 
 class CGenericWeaponAtts_HitscanFireMode : public CGenericWeaponAtts_BaseFireMode
@@ -237,6 +262,7 @@ public:
 	ATTR(int, AnimIndex_FireEmpty, -1);
 	ATTR(float, ViewPunchX, 0.0f);
 	ATTR(float, ViewPunchY, 0.0f);
+	ATTR(int, ViewModelBodyOverride, -1);	// If specified, event uses this body index for the view model.
 #undef ATTR
 
 	// Convenience:
@@ -322,6 +348,7 @@ public:
 			}
 		}
 
+		SetFireModeSignatures();
 		Register();
 	}
 
@@ -344,6 +371,7 @@ public:
 			}
 		}
 
+		SetFireModeSignatures();
 		Register();
 		return *this;
 	}
@@ -397,6 +425,17 @@ public:
 
 private:
 	typedef std::unique_ptr<CGenericWeaponAtts_BaseFireMode> BaseFireModePtr;
+
+	void SetFireModeSignatures()
+	{
+		for ( int index = 0; index < 2; ++index )
+		{
+			if ( m_FireModes[index].get() )
+			{
+				m_FireModes[index]->SetSignature(m_Core.Id(), index);
+			}
+		}
+	}
 
 	CGenericWeaponAtts_Core m_Core;
 	CGenericWeaponAtts_Animations m_Animations;

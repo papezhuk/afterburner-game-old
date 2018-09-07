@@ -458,11 +458,18 @@ static void GenericWeaponFireBullets(event_args_t *args, const CGenericWeaponAtt
 			animIndex = fireMode.AnimIndex_FireNotEmpty();
 		}
 
-		int body = 0;
-		const struct cl_entity_s* const viewModelEnt = GetViewEntity();
-		if ( viewModelEnt )
+		int body = fireMode.ViewModelBodyOverride();
+		if ( body < 0 )
 		{
-			body = viewModelEnt->curstate.body;
+			const struct cl_entity_s* const viewModelEnt = GetViewEntity();
+			if ( viewModelEnt )
+			{
+				body = viewModelEnt->curstate.body;
+			}
+			else
+			{
+				body = 0;
+			}
 		}
 
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(animIndex, body);
@@ -519,8 +526,11 @@ static void GenericWeaponFireBullets(event_args_t *args, const CGenericWeaponAtt
 
 void EV_GenericHitscanFire(event_args_t* args)
 {
-	const WeaponId_e weaponId = static_cast<const WeaponId_e>(args->iparam1);
-	const uint8_t fireModeIndex = static_cast<const uint8_t>(args->iparam2);
+	const CGenericWeaponAtts_BaseFireMode::FireModeSignature* signature =
+		(CGenericWeaponAtts_BaseFireMode::FireModeSignature*)args->localUserData;
+
+	const WeaponId_e weaponId = static_cast<const WeaponId_e>(signature->m_iWeaponId);
+	const uint8_t fireModeIndex = static_cast<const uint8_t>(signature->m_iFireMode);
 
 	const CGenericWeaponAttributes* atts = CWeaponRegistry::StaticInstance().Get(weaponId);
 	if ( !atts )

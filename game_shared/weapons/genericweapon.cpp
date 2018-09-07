@@ -271,8 +271,8 @@ void CGenericWeapon::HitscanFire(int index, const CGenericWeaponAtts_HitscanFire
 							(float *)&g_vecZero,
 							vecDir.x,
 							vecDir.y,
-							static_cast<int>(atts.Core().Id()),
-							index,
+							0,
+							0,
 							m_iClip == 0 ? 1 : 0,
 							0);
 	}
@@ -403,6 +403,26 @@ void CGenericWeapon::SetViewModelBody(int body)
 {
 	m_iViewModelBody = body;
 };
+
+void CGenericWeapon::DelayPendingActions(float secs)
+{
+	const float next = UTIL_WeaponTimeBase() + secs;
+
+	if ( m_flNextPrimaryAttack < next )
+	{
+		m_flNextPrimaryAttack = next;
+	}
+
+	if ( m_flNextSecondaryAttack < next )
+	{
+		m_flNextSecondaryAttack = next;
+	}
+
+	if ( m_flTimeWeaponIdle < next )
+	{
+		m_flTimeWeaponIdle = next;
+	}
+}
 
 int CGenericWeapon::iItemSlot()
 {

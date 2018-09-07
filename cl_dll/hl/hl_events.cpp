@@ -70,7 +70,7 @@ void Game_HookEvents( void )
 			{
 				case CGenericWeaponAtts_BaseFireMode::e_FireMode::Hitscan:
 				{
-					gEngfuncs.pfnHookEvent(fireMode->EventName(), EV_GenericHitscanFire, NULL);
+					gEngfuncs.pfnHookEvent(fireMode->EventName(), EV_GenericHitscanFire, (void*)fireMode->Signature());
 					break;
 				}
 
