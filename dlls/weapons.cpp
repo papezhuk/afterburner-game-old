@@ -32,6 +32,7 @@
 #include "gamerules.h"
 #include "genericweaponattributes.h"
 #include "weaponregistry.h"
+#include "weaponinfo.h"
 
 extern CGraph WorldGraph;
 extern int gEvilImpulse101;
@@ -1015,6 +1016,18 @@ void CBasePlayerWeapon::Holster( int skiplocal /* = 0 */ )
 	m_fInReload = FALSE; // cancel any reload in progress.
 	m_pPlayer->pev->viewmodel = 0;
 	m_pPlayer->pev->weaponmodel = 0;
+}
+
+// If there ends up being any prediction data that's common to all weapons, it can be put here.
+// By default, we just validate the pointer.
+bool CBasePlayerWeapon::ReadPredictionData(const weapon_data_t* from)
+{
+	return from != NULL;
+}
+
+bool CBasePlayerWeapon::WritePredictionData(weapon_data_t* to)
+{
+	return to != NULL;
 }
 
 void CBasePlayerAmmo::Spawn( void )

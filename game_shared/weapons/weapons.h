@@ -20,6 +20,7 @@
 #include "cdll_dll.h"
 
 class CBasePlayer;
+typedef struct weapon_data_s weapon_data_t;
 extern int gmsgWeapPickup;
 
 void DeactivateSatchels( CBasePlayer *pOwner );
@@ -349,6 +350,9 @@ public:
 	// hle time creep vars
 	float	m_flPrevPrimaryAttack;
 	float	m_flLastFireTime;
+
+	virtual bool ReadPredictionData(const weapon_data_t* from);
+	virtual bool WritePredictionData(weapon_data_t* to);
 };
 
 class CBasePlayerAmmo : public CBaseEntity
@@ -785,6 +789,9 @@ public:
 	// we need to know so we can pick the right set of effects.
 	BOOL m_fPrimaryFire;
 
+	bool ReadPredictionData(const weapon_data_t* from);
+	bool WritePredictionData(weapon_data_t* to);
+
 private:
 	unsigned short m_usGaussFire;
 	unsigned short m_usGaussSpin;
@@ -835,6 +842,9 @@ public:
 	CSprite				*m_pSprite;
 
 	unsigned short m_usEgonStop;
+
+	bool ReadPredictionData(const weapon_data_t* from);
+	bool WritePredictionData(weapon_data_t* to);
 
 private:
 #ifndef CLIENT_DLL
@@ -890,6 +900,9 @@ public:
 	BOOL CanHolster( void );
 	void Holster( int skiplocal = 0 );
 	void WeaponIdle( void );
+
+	bool ReadPredictionData(const weapon_data_t* from);
+	bool WritePredictionData(weapon_data_t* to);
 };
 
 class CSatchel : public CBasePlayerWeapon
@@ -915,6 +928,9 @@ public:
 	void Holster( int skiplocal = 0 );
 	void WeaponIdle( void );
 	void Throw( void );
+
+	bool ReadPredictionData(const weapon_data_t* from);
+	bool WritePredictionData(weapon_data_t* to);
 };
 
 class CTripmine : public CBasePlayerWeapon

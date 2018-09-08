@@ -25,6 +25,7 @@
 #include "customentity.h"
 #include "gamerules.h"
 #include "ammodefs.h"
+#include "weaponinfo.h"
 
 #define	EGON_PRIMARY_VOLUME		450
 #define EGON_BEAM_SPRITE		"sprites/xbeam1.spr"
@@ -513,6 +514,30 @@ void CEgon::EndAttack( void )
 	m_fireState = FIRE_OFF;
 
 	DestroyEffect();
+}
+
+bool CEgon::ReadPredictionData(const weapon_data_t* from)
+{
+	if ( !CBasePlayerWeapon::ReadPredictionData(from) )
+	{
+		return false;
+	}
+
+	pev->fuser1 = from->fuser1;
+	m_fireState = from->iuser1;
+	return true;
+}
+
+bool CEgon::WritePredictionData(weapon_data_t* to)
+{
+	if ( !CBasePlayerWeapon::WritePredictionData(to) )
+	{
+		return false;
+	}
+
+	to->fuser1 = pev->fuser1;
+	to->iuser1 = m_fireState;
+	return true;
 }
 
 class CEgonAmmo : public CBasePlayerAmmo

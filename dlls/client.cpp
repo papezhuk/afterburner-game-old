@@ -1661,12 +1661,9 @@ int GetWeaponData( struct edict_s *player, struct weapon_data_s *info )
 						item->m_flNextSecondaryAttack	= Q_max( gun->m_flNextSecondaryAttack, -0.001 );
 						item->m_fInReload		= gun->m_fInReload;
 						item->m_fInSpecialReload	= gun->m_fInSpecialReload;
-						item->fuser1			= Q_max( gun->pev->fuser1, -0.001 );
-						item->fuser2			= gun->m_flStartThrow;
-						item->fuser3			= gun->m_flReleaseThrow;
-						item->iuser1			= gun->m_chargeReady;
-						item->iuser2			= gun->m_fInAttack;
-						item->iuser3			= gun->m_fireState;;
+
+						gun->WritePredictionData(item);
+						item->fuser1 = Q_max( item->fuser1, -0.001 );
 					}
 				}
 				pPlayerItem = pPlayerItem->m_pNext;

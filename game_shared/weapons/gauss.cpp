@@ -26,6 +26,7 @@
 #include "gamerules.h"
 #include "game.h"
 #include "ammodefs.h"
+#include "weaponinfo.h"
 
 LINK_ENTITY_TO_CLASS( weapon_gauss, CGauss )
 
@@ -588,6 +589,28 @@ void CGauss::WeaponIdle( void )
 		SendWeaponAnim( iAnim );
 #endif
 	}
+}
+
+bool CGauss::ReadPredictionData(const weapon_data_t* from)
+{
+	if ( !CBasePlayerWeapon::ReadPredictionData(from) )
+	{
+		return false;
+	}
+
+	m_fInAttack = from->iuser1;
+	return true;
+}
+
+bool CGauss::WritePredictionData(weapon_data_t* to)
+{
+	if ( !CBasePlayerWeapon::WritePredictionData(to) )
+	{
+		return false;
+	}
+
+	to->iuser1 = m_fInAttack;
+	return true;
 }
 
 class CGaussAmmo : public CBasePlayerAmmo

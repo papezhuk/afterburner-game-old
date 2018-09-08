@@ -23,6 +23,7 @@
 #include "player.h"
 #include "gamerules.h"
 #include "ammodefs.h"
+#include "weaponinfo.h"
 
 enum satchel_state
 {
@@ -448,6 +449,28 @@ void CSatchel::WeaponIdle( void )
 		break;
 	}
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat( m_pPlayer->random_seed, 10, 15 );// how long till we do this again.
+}
+
+bool CSatchel::ReadPredictionData(const weapon_data_t* from)
+{
+	if ( !CBasePlayerWeapon::ReadPredictionData(from) )
+	{
+		return false;
+	}
+
+	m_chargeReady = from->iuser1;
+	return true;
+}
+
+bool CSatchel::WritePredictionData(weapon_data_t* to)
+{
+	if ( !CBasePlayerWeapon::WritePredictionData(to) )
+	{
+		return false;
+	}
+
+	to->iuser1 = m_chargeReady;
+	return true;
 }
 
 //=========================================================
