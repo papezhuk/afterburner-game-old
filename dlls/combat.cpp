@@ -1515,8 +1515,6 @@ Vector CBaseEntity::FireBulletsPlayer( ULONG cShots, Vector vecSrc, Vector vecDi
 
 			if( iDamage || iBulletType == BULLET_GENERIC )
 			{
-				// TODO: One day we could apply damage modifiers per bullet here, etc.
-				// However, it'd probably be better to roll our own CGenericWeapon::FireBulletsPlayer() function at that point.
 				pEntity->TraceAttack( pevAttacker, iDamage, vecDir, &tr, DMG_BULLET | ( ( iDamage > 16 ) ? DMG_ALWAYSGIB : DMG_NEVERGIB ) );
 
 				TEXTURETYPE_PlaySound( &tr, vecSrc, vecEnd, iBulletType );

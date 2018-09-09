@@ -25,6 +25,8 @@
 #include "screenfade.h"
 #include "shake.h"
 #include "hltv.h"
+#include "weaponregistry.h"
+#include "genericweaponattributes.h"
 
 // Spectator Mode
 extern "C"
@@ -1338,6 +1340,17 @@ int V_FindViewModelByWeaponModel( int weaponindex )
 		int len = strlen( weaponModel->name );
 		int i = 0;
 
+		// Check generic weapons first.
+		CWeaponRegistry weaponRegistry = CWeaponRegistry::StaticInstance();
+		weaponRegistry.ForEach([weaponModel, len](const CGenericWeaponAttributes& atts)
+		{
+			if ( strnicmp(weaponModel->name, atts.Core().PlayerModelName(), len) )
+			{
+				return gEngfuncs.pEventAPI->EV_FindModelIndex(atts.Core().ViewModelName());
+			}
+		});
+
+		// Then the local table.
 		while( modelmap[i][0] != NULL )
 		{
 			if( !strnicmp( weaponModel->name, modelmap[i][0], len ) )
@@ -1350,7 +1363,9 @@ int V_FindViewModelByWeaponModel( int weaponindex )
 		return 0;
 	}
 	else
+	{
 		return 0;
+	}
 }
 
 /*
