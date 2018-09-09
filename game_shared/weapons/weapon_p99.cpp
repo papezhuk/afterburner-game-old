@@ -34,7 +34,7 @@ namespace
 	// For consistency between fire modes:
 	constexpr float P99_FIRE_RATE = 6.0f;
 	constexpr float P99_AUTOAIM_DEG = AUTOAIM_10DEGREES;
-	constexpr float P99_BASE_DAMAGE = 10.0f;	// TODO: Tweak after testing
+	constexpr float P99_BASE_DAMAGE = 20.0f;
 	constexpr float P99_BASE_SPREAD = 0.03f;
 }
 
@@ -48,16 +48,16 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 	.SwitchWeight(0)
 	.PrimaryAmmoDef(&AmmoDef_P99)
 	.MaxClip(16)
-	.PrimaryAmmoOnFirstPickup(48)
-	.ViewModelName("models/v_p99.mdl")
-	.PlayerModelName("models/p_p99.mdl")
-	.WorldModelName("models/w_p99.mdl")
+	.PrimaryAmmoOnFirstPickup(16)
+	.ViewModelName("models/weapon_p99/v_p99.mdl")
+	.PlayerModelName("models/weapon_p99/p_p99.mdl")
+	.WorldModelName("models/weapon_p99/w_p99.mdl")
 #ifdef CLIENT_DLL
 	.ClientPredictionWeapon(&PredictionWeapon)
 #endif
 )
 .FireMode(0,
-	&((*new CGenericWeaponAtts_HitscanFireMode("events/weapon_p99_fire01.sc"))
+	&((*new CGenericWeaponAtts_HitscanFireMode("events/weapon_p99/fire01.sc"))
 	.FireRate(P99_FIRE_RATE)
 	.UniformSpread(P99_BASE_SPREAD)
 	.DamagePerShot(P99_BASE_DAMAGE)
@@ -78,7 +78,7 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 	)
 ))
 .FireMode(1,
-	&((*new CGenericWeaponAtts_HitscanFireMode("events/weapon_p99_fire02.sc"))
+	&((*new CGenericWeaponAtts_HitscanFireMode("events/weapon_p99/fire02.sc"))
 	.FireRate(P99_FIRE_RATE)
 	.UniformSpread(P99_BASE_SPREAD)
 	.DamagePerShot(P99_BASE_DAMAGE)
