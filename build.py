@@ -120,7 +120,7 @@ def copyLibraries(sourcePath, destinationPath, extension):
 			print("Copying library", lib, "to", destinationPath)
 			shutil.copy2(lib, destinationPath)
 
-def copyGameContent(gameBuildPath, gameContentPath, engineGameLaunchPath, config):
+def copyGameContent(scriptPath, gameBuildPath, gameContentPath, engineGameLaunchPath, config):
 	gameContentPathInEngine = os.path.join(engineGameLaunchPath, "afterburner")
 
 	print("Copying game content from", gameContentPath, "to", gameContentPathInEngine)
@@ -142,6 +142,11 @@ def copyGameContent(gameBuildPath, gameContentPath, engineGameLaunchPath, config
 
 	copyLibraries(os.path.join(gameBuildPath, "cl_dll"), os.path.join(gameContentPathInEngine, "cl_dlls"), libExtension)
 	copyLibraries(os.path.join(gameBuildPath, "dlls"), os.path.join(gameContentPathInEngine, "dlls"), libExtension)
+
+	if platform.system() == "Linux":
+		srcPath = os.path.join(scriptPath, "xash3d-gdb.py")
+		print("Copying", srcPath, "to", engineGameLaunchPath)
+		shutil.copy2(srcPath, engineGameLaunchPath)
 
 	print("*** Game content copy complete.")
 	print()
@@ -166,6 +171,6 @@ args = parseCommandLineArguments()
 
 buildEngine(enginePath, engineBuildPath, args.python_executable, args.config, args.rebuild_engine)
 buildGame(scriptPath, gameBuildPath, args.config, args.rebuild_engine or args.rebuild_game)
-copyGameContent(gameBuildPath, gameContentPath, engineGameLaunchPath, args.config)
+copyGameContent(scriptPath, gameBuildPath, gameContentPath, engineGameLaunchPath, args.config)
 
 sys.exit(0)
