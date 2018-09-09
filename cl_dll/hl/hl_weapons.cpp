@@ -905,7 +905,8 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 
 	// Make sure that weapon animation matches what the game .dll is telling us
 	//  over the wire ( fixes some animation glitches )
-	if( g_runfuncs && ( HUD_GetWeaponAnim() != to->client.weaponanim ) )
+	// TODO: Remove this once all the HL weapons are gone. It doesn't apply to Afterburner weapons.
+	if( g_runfuncs && ( HUD_GetWeaponAnim() != to->client.weaponanim ) && !dynamic_cast<CGenericWeapon*>(pWeapon) )
 	{
 		int body = 0;
 

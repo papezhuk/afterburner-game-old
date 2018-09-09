@@ -1,5 +1,6 @@
 #include "weapon_p99.h"
 #include "weaponregistry.h"
+#include "weaponinfo.h"
 
 enum P99Animations_e
 {
@@ -139,4 +140,34 @@ void CWeaponP99::SecondaryAttack()
 
 	// TODO: Read animation time from MDL.
 	DelayPendingActions(2.0f);
+}
+
+bool CWeaponP99::ReadPredictionData(const weapon_data_t* from)
+{
+	if ( !CGenericWeapon::ReadPredictionData(from) )
+	{
+		return false;
+	}
+
+	const bool newSilencedState = from->iuser1 == 1;
+	if ( m_bSilenced != newSilencedState )
+	{
+		m_bSilenced = newSilencedState;
+
+		// The silenced state has changed, so immediately update the viewmodel body to be accurate.
+		SetViewModelBody(m_bSilenced ? P99BODY_SILENCED : P99BODY_UNSILENCED, true);
+	}
+
+	return true;
+}
+
+bool CWeaponP99::WritePredictionData(weapon_data_t* to)
+{
+	if ( !CGenericWeapon::WritePredictionData(to) )
+	{
+		return false;
+	}
+
+	to->iuser1 = m_bSilenced ? 1 : 0;
+	return true;
 }

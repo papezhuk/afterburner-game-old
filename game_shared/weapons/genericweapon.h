@@ -26,7 +26,7 @@ public:
 
 protected:
 	void FireUsingMode(int index);
-	void SetViewModelBody(int body);
+	void SetViewModelBody(int body, bool immediate = false);
 	void DelayPendingActions(float secs);
 
 private:

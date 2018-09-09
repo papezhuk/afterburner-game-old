@@ -372,6 +372,17 @@ void UpdateMouseThreadActive(void)
 
 #endif
 
+#ifdef _DEBUG
+// Function for GDB to call to release the mouse when a breakpoint is hit.
+extern "C"
+{
+    DEBUG_UngrabMouse()
+    {
+        IN_SetMouseMode(false);
+    };
+}
+#endif
+
 void IN_SetMouseMode(bool enable)
 {
     static bool currentMouseMode = false;

@@ -1,5 +1,10 @@
 #include "genericweapon.h"
 
+#ifdef CLIENT_DLL
+#include "cl_dll.h"
+#include "cl_entity.h"
+#endif
+
 namespace
 {
 	constexpr float BULLET_TRACE_DISTANCE = 8192;
@@ -399,9 +404,20 @@ Vector CGenericWeapon::FireBulletsPlayer(const CGenericWeaponAtts_HitscanFireMod
 #endif
 }
 
-void CGenericWeapon::SetViewModelBody(int body)
+void CGenericWeapon::SetViewModelBody(int body, bool immediate)
 {
 	m_iViewModelBody = body;
+
+#ifdef CLIENT_DLL
+	if ( immediate )
+	{
+		struct cl_entity_s* viewModel = gEngfuncs.GetViewModel();
+		if ( viewModel )
+		{
+			viewModel->curstate.body = body;
+		}
+	}
+#endif
 };
 
 void CGenericWeapon::DelayPendingActions(float secs)
