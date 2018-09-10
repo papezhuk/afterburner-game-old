@@ -30,8 +30,8 @@ namespace
 	constexpr uint8_t FRINESI_PELLETS_PER_SHOT = 6;
 	constexpr float FRINESI_BASE_DAMAGE_AUTO = 81.0f / static_cast<float>(FRINESI_PELLETS_PER_SHOT);
 	constexpr float FRINESI_BASE_DAMAGE_PUMP = 159.0f / static_cast<float>(FRINESI_PELLETS_PER_SHOT);
-	constexpr float FRINESI_BASE_SPREAD_AUTO = 0.1f;	// TODO: Tweak
-	constexpr float FRINESI_BASE_SPREAD_PUMP = 0.15f;	// TODO: Tweak
+	constexpr float FRINESI_BASE_SPREAD_AUTO = 0.05f;
+	constexpr float FRINESI_BASE_SPREAD_PUMP = 0.1f;
 	constexpr float FRINESI_AUTOAIM_DEG = AUTOAIM_5DEGREES;
 	constexpr float FRINESI_FIRE_RATE_AUTO = 4.0f;
 	constexpr float FRINESI_FIRE_RATE_PUMP = 1.0f;
@@ -45,7 +45,8 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 	.WeaponSlotPosition(3)
 	.Flags(0)
 	.SwitchWeight(0)
-	.PrimaryAmmoDef(&AmmoDef_P99)
+	.PrimaryAmmoDef(&AmmoDef_Frinesi)
+	.SecondaryAmmoDef(&AmmoDef_Frinesi)
 	.MaxClip(8)
 	.PrimaryAmmoOnFirstPickup(8)
 	.ViewModelName("models/weapon_frinesi/v_frinesi.mdl")
