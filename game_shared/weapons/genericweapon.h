@@ -25,6 +25,9 @@ public:
 
 	virtual const CGenericWeaponAttributes& WeaponAttributes() const = 0;
 
+	static constexpr float DEFAULT_BULLET_TRACE_DISTANCE = 8192;
+	static void GetSharedCircularGaussianSpread(uint32_t shot, int shared_rand, float& x, float& y);
+
 protected:
 	void FireUsingMode(int index);
 	void SetViewModelBody(int body, bool immediate = false);
@@ -38,15 +41,13 @@ private:
 	void PrecacheSounds(const CGenericWeaponAttributes_Sound& sounds);
 
 	void HitscanFire(int index, const CGenericWeaponAtts_HitscanFireMode& fireMode);
-	void GetSharedCircularGaussianSpread(uint32_t shot, int shared_rand, float& x, float& y);
 
 	Vector FireBulletsPlayer(const CGenericWeaponAtts_HitscanFireMode& fireMode,
-							 uint32_t numShots,
 							 const Vector& vecSrc,
 							 const Vector& vecDirShooting);
 
 #ifdef CLIENT_DLL
-	Vector FireBulletsPlayer_Client(const CGenericWeaponAtts_HitscanFireMode& fireMode, uint32_t numShots);
+	Vector FireBulletsPlayer_Client(const CGenericWeaponAtts_HitscanFireMode& fireMode);
 #endif
 
 	unsigned short m_FireEvents[2];

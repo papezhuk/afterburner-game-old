@@ -23,3 +23,4 @@ extern const CAmmoDef AmmoDef_Uranium;
 
 // Nightfire weapon ammo
 extern const CAmmoDef AmmoDef_P99;
+extern const CAmmoDef AmmoDef_Frinesi;

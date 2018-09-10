@@ -61,13 +61,14 @@ set (CLDLL_SOURCES
 	../game_shared/weapons/squeakgrenade.cpp
 	../game_shared/weapons/tripmine.cpp
 	../game_shared/weapons/glock.cpp
-	../game_shared/weapons/weapon_p99.cpp
 	../game_shared/weapons/weaponregistry.cpp
 	../game_shared/weapons/genericweapon.cpp
 	../game_shared/weapons/genericweaponattributes.cpp
-	../game_shared/weapons/weapon_generictest.cpp
 	../game_shared/weapons/ammodefs.cpp
 	../game_shared/studio_utils_shared.cpp
+	../game_shared/weapons/weapon_generictest.cpp
+	../game_shared/weapons/weapon_p99.cpp
+	../game_shared/weapons/weapon_frinesi.cpp
 	ev_hldm.cpp
 	hl/hl_baseentity.cpp
 	hl/hl_events.cpp

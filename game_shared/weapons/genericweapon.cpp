@@ -6,11 +6,6 @@
 #include "cl_entity.h"
 #endif
 
-namespace
-{
-	constexpr float BULLET_TRACE_DISTANCE = 8192;
-}
-
 CGenericWeapon::CGenericWeapon()
 	: CBasePlayerWeapon(),
 	  m_iViewModelIndex(0),
@@ -252,7 +247,7 @@ void CGenericWeapon::HitscanFire(int index, const CGenericWeaponAtts_HitscanFire
 	const float spreadX = fireMode.SpreadX();
 	const float spreadY = fireMode.SpreadY();
 
-	vecDir = FireBulletsPlayer(fireMode, 1, vecSrc, vecAiming);
+	vecDir = FireBulletsPlayer(fireMode, vecSrc, vecAiming);
 
 	if ( m_FireEvents[index] )
 	{
@@ -264,7 +259,7 @@ void CGenericWeapon::HitscanFire(int index, const CGenericWeaponAtts_HitscanFire
 							(float *)&g_vecZero,
 							vecDir.x,
 							vecDir.y,
-							0,
+							m_pPlayer->random_seed,
 							0,
 							m_iClip == 0 ? 1 : 0,
 							0);
@@ -281,8 +276,6 @@ void CGenericWeapon::HitscanFire(int index, const CGenericWeaponAtts_HitscanFire
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat( m_pPlayer->random_seed, 10, 15 );
 };
 
-// TODO: Refactor this. We could probably completely reimplement DefaultReload()
-// to make sure the idle time is also updated.
 void CGenericWeapon::Reload()
 {
 	const CGenericWeaponAttributes& atts = WeaponAttributes();
@@ -293,9 +286,15 @@ void CGenericWeapon::Reload()
 		return;
 	}
 
-	const int anim = m_iClip < 1
+	int anim = m_iClip < 1
 		? atts.Animations().Index_ReloadWhenEmpty()
 		: atts.Animations().Index_ReloadWhenNotEmpty();
+
+	if ( m_iClip < 1 && anim < 0 )
+	{
+		anim = atts.Animations().Index_ReloadWhenNotEmpty();
+	}
+
 	const float animDuration = ViewModelAnimationDuration(anim);
 
 	if ( DefaultReload(maxClip, anim, animDuration, m_iViewModelBody) )
@@ -333,14 +332,13 @@ void CGenericWeapon::WeaponIdle()
 }
 
 Vector CGenericWeapon::FireBulletsPlayer(const CGenericWeaponAtts_HitscanFireMode& fireMode,
-										 uint32_t numShots,
 										 const Vector& vecSrc,
 										 const Vector& vecDirShooting)
 {
 #ifdef CLIENT_DLL
 	// The client doesn't actually do any bullet simulation, we just make sure that
 	// the generated random vectors match up.
-	return FireBulletsPlayer_Client(fireMode, numShots);
+	return FireBulletsPlayer_Client(fireMode);
 #else
 	TraceResult tr;
 	Vector vecRight = gpGlobals->v_right;
@@ -354,6 +352,7 @@ Vector CGenericWeapon::FireBulletsPlayer(const CGenericWeaponAtts_HitscanFireMod
 	ClearMultiDamage();
 	gMultiDamage.type = DMG_BULLET | DMG_NEVERGIB;
 
+	const uint32_t numShots = fireMode.BulletsPerShot();
 	for( uint32_t shot = 1; shot <= numShots; shot++ )
 	{
 		GetSharedCircularGaussianSpread(shot, shared_rand, x, y);
@@ -363,7 +362,7 @@ Vector CGenericWeapon::FireBulletsPlayer(const CGenericWeaponAtts_HitscanFireMod
 						y * fireMode.SpreadY() * vecUp;
 		Vector vecEnd;
 
-		vecEnd = vecSrc + vecDir * BULLET_TRACE_DISTANCE;
+		vecEnd = vecSrc + vecDir * DEFAULT_BULLET_TRACE_DISTANCE;
 		UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(pev), &tr);
 
 		// do damage, paint decals
@@ -376,7 +375,7 @@ Vector CGenericWeapon::FireBulletsPlayer(const CGenericWeaponAtts_HitscanFireMod
 		}
 
 		// make bullet trails
-		UTIL_BubbleTrail(vecSrc, tr.vecEndPos, (int)((BULLET_TRACE_DISTANCE * tr.flFraction) / 64.0));
+		UTIL_BubbleTrail(vecSrc, tr.vecEndPos, (int)((DEFAULT_BULLET_TRACE_DISTANCE * tr.flFraction) / 64.0));
 	}
 
 	ApplyMultiDamage(pev, pevAttacker);
@@ -443,10 +442,11 @@ void CGenericWeapon::GetSharedCircularGaussianSpread(uint32_t shot, int shared_r
 }
 
 #ifdef CLIENT_DLL
-Vector CGenericWeapon::FireBulletsPlayer_Client(const CGenericWeaponAtts_HitscanFireMode& fireMode, uint32_t numShots)
+Vector CGenericWeapon::FireBulletsPlayer_Client(const CGenericWeaponAtts_HitscanFireMode& fireMode)
 {
 	float x = 0, y = 0;
 
+	const uint32_t numShots = fireMode.BulletsPerShot();
 	for( uint32_t shot = 1; shot <= numShots; shot++ )
 	{
 		GetSharedCircularGaussianSpread(shot, m_pPlayer->random_seed, x, y);

@@ -143,10 +143,11 @@ set (SVDLL_SOURCES
 	../game_shared/weapons/genericweaponattributes.cpp
 	../game_shared/weapons/weaponregistry.cpp
 	../game_shared/weapons/genericweapon.cpp
-	../game_shared/weapons/weapon_generictest.cpp
-	../game_shared/weapons/weapon_p99.cpp
 	../game_shared/weapons/ammodefs.cpp
 	../game_shared/studio_utils_shared.cpp
+	../game_shared/weapons/weapon_generictest.cpp
+	../game_shared/weapons/weapon_p99.cpp
+	../game_shared/weapons/weapon_frinesi.cpp
 )
 
 include_directories (. ../common ../engine ../pm_shared ../game_shared ../public ../game_shared/weapons)

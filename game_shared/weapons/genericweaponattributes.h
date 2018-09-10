@@ -258,8 +258,8 @@ public:
 	ATTR(int, Volume, NORMAL_GUN_VOLUME);
 	ATTR(int, MuzzleFlashBrightness, NORMAL_GUN_FLASH);
 	ATTR(const char*, ShellModelName, NULL);
-	ATTR(int, AnimIndex_FireNotEmpty, -1);	// If left at -1, FireNotEmpty used instead.
-	ATTR(int, AnimIndex_FireEmpty, -1);
+	ATTR(int, AnimIndex_FireNotEmpty, -1);
+	ATTR(int, AnimIndex_FireEmpty, -1);		// If left at -1, FireNotEmpty used instead.
 	ATTR(float, ViewPunchX, 0.0f);
 	ATTR(float, ViewPunchY, 0.0f);
 	ATTR(int, ViewModelBodyOverride, -1);	// If specified, event uses this body index for the view model.
@@ -297,7 +297,7 @@ public:
 #define ATTR(type, name, defaultVal) BASE_ATTR(CGenericWeaponAtts_Animations, type, name, defaultVal)
 	ATTR(const char*, Extension, NULL);
 	ATTR(int, Index_Draw, -1);
-	ATTR(int, Index_ReloadWhenEmpty, -1);
+	ATTR(int, Index_ReloadWhenEmpty, -1);		// If left at -1, ReloadWhenNotEmpty is used instead.
 	ATTR(int, Index_ReloadWhenNotEmpty, -1);
 #undef ATTR
 };

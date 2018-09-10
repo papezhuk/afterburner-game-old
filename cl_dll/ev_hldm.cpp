@@ -431,7 +431,75 @@ void EV_HLDM_FireBullets( int idx, float *forward, float *right, float *up, int 
 
 // Generic handlers
 
-static void GenericWeaponFireBullets(event_args_t *args, const CGenericWeaponAttributes& atts, const CGenericWeaponAtts_HitscanFireMode& fireMode)
+// TODO: This is an ugly function signature.
+void GenericWeaponFireBullets(int idx,
+							  vec3_t& forward,
+							  vec3_t& right,
+							  vec3_t& up,
+							  vec3_t& vecSrc,
+							  vec3_t& vecDirShooting,
+							  const CGenericWeaponAtts_HitscanFireMode& fireMode,
+							  float flSpreadX,
+							  float flSpreadY,
+							  int randomSeed)
+{
+	int i;
+	pmtrace_t tr;
+	int iShot;
+
+	const uint32_t cShots = fireMode.BulletsPerShot();
+	for( iShot = 1; iShot <= cShots; iShot++ )
+	{
+		vec3_t vecDir;
+		vec3_t vecEnd;
+		float x = 0;
+		float y = 0;
+
+		if ( cShots > 1 )
+		{
+			// We are firing multiple shots, so we need to generate the spread for each one.
+			CGenericWeapon::GetSharedCircularGaussianSpread(iShot, randomSeed, x, y);
+
+			for( i = 0 ; i < 3; i++ )
+			{
+				vecDir[i] = vecDirShooting[i] + x * fireMode.SpreadX() * right[i] + y * fireMode.SpreadY() * up [i];
+			}
+		}
+		else
+		{
+			for( i = 0 ; i < 3; i++ )
+			{
+				vecDir[i] = vecDirShooting[i] + flSpreadX * right[i] + flSpreadY * up [i];
+			}
+		}
+
+		vecEnd = vecSrc + CGenericWeapon::DEFAULT_BULLET_TRACE_DISTANCE * vecDir;
+
+		gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(false, true);
+
+		// Store off the old count
+		gEngfuncs.pEventAPI->EV_PushPMStates();
+
+		// Now add in all of the players.
+		gEngfuncs.pEventAPI->EV_SetSolidPlayers( idx - 1 );
+
+		gEngfuncs.pEventAPI->EV_SetTraceHull(2);
+		gEngfuncs.pEventAPI->EV_PlayerTrace(vecSrc, vecEnd, PM_STUDIO_BOX, -1, &tr);
+
+		EV_HLDM_CheckTracer(idx, vecSrc, tr.endpos, forward, right, BULLET_GENERIC);
+
+		// do damage, paint decals
+		if( tr.fraction != 1.0 )
+		{
+			EV_HLDM_PlayTextureSound(idx, &tr, vecSrc, vecEnd, BULLET_GENERIC);
+			EV_HLDM_DecalGunshot(&tr, BULLET_GENERIC);
+		}
+
+		gEngfuncs.pEventAPI->EV_PopPMStates();
+	}
+}
+
+static void GenericWeaponHitscanFire(event_args_t *args, const CGenericWeaponAttributes& atts, const CGenericWeaponAtts_HitscanFireMode& fireMode)
 {
 	const int idx = args->entindex;
 	const bool empty = args->bparam1;
@@ -510,21 +578,19 @@ static void GenericWeaponFireBullets(event_args_t *args, const CGenericWeaponAtt
 	// We don't use the X/Y spread from the weapon attributes here, because the bullet firing
 	// code has already been run on the server. We need to use the values we've been given
 	// from this in order to make sure the tracers match the fired bullets.
-	EV_HLDM_FireBullets(idx,
+	GenericWeaponFireBullets(idx,
 						forward,
 						right,
 						up,
-						1,
 						vecSrc,
 						vecAiming,
-						8192,
-						BULLET_GENERIC,
-						1,
+						fireMode,
 						args->fparam1,
-						args->fparam2);
+						args->fparam2,
+						args->iparam1);
 }
 
-void EV_GenericHitscanFire(event_args_t* args)
+void EV_HandleGenericHitscanFire(event_args_t* args)
 {
 	const CGenericWeaponAtts_BaseFireMode::FireModeSignature* signature =
 		(CGenericWeaponAtts_BaseFireMode::FireModeSignature*)args->localUserData;
@@ -546,7 +612,7 @@ void EV_GenericHitscanFire(event_args_t* args)
 		return;
 	}
 
-	GenericWeaponFireBullets(args, *atts, *(fireMode->AsType<const CGenericWeaponAtts_HitscanFireMode>()));
+	GenericWeaponHitscanFire(args, *atts, *(fireMode->AsType<const CGenericWeaponAtts_HitscanFireMode>()));
 }
 
 //======================
