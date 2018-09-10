@@ -209,7 +209,7 @@ void CGenericWeapon::HitscanFire(int index, const CGenericWeaponAtts_HitscanFire
 		if( m_fFireOnEmpty )
 		{
 			PlayEmptySound();
-			m_flNextPrimaryAttack = GetNextAttackDelay( 0.2 );
+			SetNextPrimaryAttack(0.2f);
 		}
 
 		return;
@@ -225,8 +225,9 @@ void CGenericWeapon::HitscanFire(int index, const CGenericWeaponAtts_HitscanFire
 #else
 	flags = 0;
 #endif
+
 	// player "shoot" animation
-	m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
+	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
 	m_pPlayer->m_iWeaponVolume = fireMode.Volume();
 	m_pPlayer->m_iWeaponFlash = fireMode.MuzzleFlashBrightness();
@@ -265,7 +266,7 @@ void CGenericWeapon::HitscanFire(int index, const CGenericWeaponAtts_HitscanFire
 							0);
 	}
 
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = GetNextAttackDelay(1.0f / fireMode.FireRate());
+	DelayFiring(1.0f / fireMode.FireRate());
 
 	if( !m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 )
 	{
@@ -281,8 +282,16 @@ void CGenericWeapon::Reload()
 	const CGenericWeaponAttributes& atts = WeaponAttributes();
 	const int maxClip = atts.Core().MaxClip();
 
-	if( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 || m_iClip == maxClip )
+	if ( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 || m_iClip == maxClip ||
+		 m_flNextPrimaryAttack > UTIL_WeaponTimeBase() )
 	{
+		return;
+	}
+
+	if ( atts.Core().UsesSpecialReload() )
+	{
+		// Reload is more complicated, so let the derived weapon class do it.
+		m_fInSpecialReload = HandleSpecialReload(m_fInSpecialReload);
 		return;
 	}
 
@@ -303,10 +312,15 @@ void CGenericWeapon::Reload()
 	}
 }
 
+int CGenericWeapon::HandleSpecialReload(int currentState)
+{
+	return 0;
+}
+
 void CGenericWeapon::WeaponIdle()
 {
 	const CGenericWeaponAttributes& atts = WeaponAttributes();
-	const CGenericWeaponAtts_IdleAnimations& idleAnims = atts.IdleAnimations();
+	const CGenericWeaponAtts_Core& core = atts.Core();
 
 	ResetEmptySound();
 
@@ -320,15 +334,52 @@ void CGenericWeapon::WeaponIdle()
 		return;
 	}
 
-	// only idle if the slide isn't back
-	if( m_iClip != 0 && idleAnims.List().Count() > 0 )
+	if ( core.UsesSpecialReload() ? IdleProcess_CheckSpecialReload() : IdleProcess_CheckReload() )
 	{
-		const float flRand = UTIL_SharedRandomFloat(m_pPlayer->random_seed, 0.0, 1.0);
-		const uint32_t anim = idleAnims.List().IndexByProbabilisticValue(flRand);
-
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + ViewModelAnimationDuration(anim);
-		SendWeaponAnim(anim, m_iViewModelBody);
+		// Reload did something, so don't play idle animations;
+		return;
 	}
+
+	IdleProcess_PlayIdleAnimation();
+}
+
+bool CGenericWeapon::IdleProcess_CheckReload()
+{
+	if ( WeaponAttributes().Core().AutoReload() && m_iClip < 1 && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] > 0 )
+	{
+		Reload();
+		return true;
+	}
+
+	return false;
+}
+
+bool CGenericWeapon::IdleProcess_CheckSpecialReload()
+{
+	if ( m_fInSpecialReload > 0 ||									// Haven't finished reloading yet
+		 (m_iClip < 1 && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]) )	// Need to fire off reload sequence automatically
+	{
+		m_fInSpecialReload = HandleSpecialReload(m_fInSpecialReload);
+		return true;
+	}
+
+	return false;
+}
+
+void CGenericWeapon::IdleProcess_PlayIdleAnimation()
+{
+	const CGenericWeaponAtts_IdleAnimations& idleAnims = WeaponAttributes().IdleAnimations();
+
+	if ( idleAnims.List().Count() < 1 || (!idleAnims.IdleWhenClipEmpty() && m_iClip < 1) )
+	{
+		return;
+	}
+
+	const float flRand = UTIL_SharedRandomFloat(m_pPlayer->random_seed, 0.0, 1.0);
+	const uint32_t anim = idleAnims.List().IndexByProbabilisticValue(flRand);
+
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + ViewModelAnimationDuration(anim);
+	SendWeaponAnim(anim, m_iViewModelBody);
 }
 
 Vector CGenericWeapon::FireBulletsPlayer(const CGenericWeaponAtts_HitscanFireMode& fireMode,
@@ -412,22 +463,14 @@ float CGenericWeapon::ViewModelAnimationDuration(int anim) const
 
 void CGenericWeapon::DelayPendingActions(float secs)
 {
-	const float next = UTIL_WeaponTimeBase() + secs;
+	DelayFiring(secs);
+	SetNextIdleTime(secs);
+}
 
-	if ( m_flNextPrimaryAttack < next )
-	{
-		m_flNextPrimaryAttack = next;
-	}
-
-	if ( m_flNextSecondaryAttack < next )
-	{
-		m_flNextSecondaryAttack = next;
-	}
-
-	if ( m_flTimeWeaponIdle < next )
-	{
-		m_flTimeWeaponIdle = next;
-	}
+void CGenericWeapon::DelayFiring(float secs)
+{
+	SetNextPrimaryAttack(secs);
+	SetNextSecondaryAttack(secs);
 }
 
 int CGenericWeapon::iItemSlot()

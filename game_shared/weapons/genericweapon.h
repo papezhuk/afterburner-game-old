@@ -31,8 +31,41 @@ public:
 protected:
 	void FireUsingMode(int index);
 	void SetViewModelBody(int body, bool immediate = false);
-	void DelayPendingActions(float secs);
 	float ViewModelAnimationDuration(int anim) const;
+
+	void DelayPendingActions(float secs);
+	void DelayFiring(float secs);
+
+	// Return the value to set m_fInSpecialReload to next.
+	virtual int HandleSpecialReload(int currentState);
+
+	// For convenience:
+	inline void SetNextPrimaryAttack(float secsInFuture, bool allowIfEarlier = false)
+	{
+		const float delay = UTIL_WeaponTimeBase() + secsInFuture;
+		if ( allowIfEarlier || delay > m_flNextPrimaryAttack )
+		{
+			m_flNextPrimaryAttack = GetNextAttackDelay(secsInFuture);
+		}
+	}
+
+	inline void SetNextSecondaryAttack(float secsInFuture, bool allowIfEarlier = true)
+	{
+		const float delay = UTIL_WeaponTimeBase() + secsInFuture;
+		if ( allowIfEarlier || delay > m_flNextSecondaryAttack )
+		{
+			m_flNextSecondaryAttack = delay;
+		}
+	}
+
+	inline void SetNextIdleTime(float secsInFuture, bool allowIfEarlier = true)
+	{
+		const float delay = UTIL_WeaponTimeBase() + secsInFuture;
+		if ( allowIfEarlier || delay > m_flTimeWeaponIdle )
+		{
+			m_flTimeWeaponIdle = delay;
+		}
+	}
 
 private:
 	void PrecacheFireMode(uint8_t fireModeIndex);
@@ -41,7 +74,6 @@ private:
 	void PrecacheSounds(const CGenericWeaponAttributes_Sound& sounds);
 
 	void HitscanFire(int index, const CGenericWeaponAtts_HitscanFireMode& fireMode);
-
 	Vector FireBulletsPlayer(const CGenericWeaponAtts_HitscanFireMode& fireMode,
 							 const Vector& vecSrc,
 							 const Vector& vecDirShooting);
@@ -49,6 +81,11 @@ private:
 #ifdef CLIENT_DLL
 	Vector FireBulletsPlayer_Client(const CGenericWeaponAtts_HitscanFireMode& fireMode);
 #endif
+
+	// Return true if reload action occurred, or false otherwise.
+	bool IdleProcess_CheckReload();
+	bool IdleProcess_CheckSpecialReload();
+	void IdleProcess_PlayIdleAnimation();
 
 	unsigned short m_FireEvents[2];
 	int m_iViewModelIndex;

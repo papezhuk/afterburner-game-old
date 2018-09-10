@@ -128,8 +128,9 @@ public:
 	ATTR(const CAmmoDef*, PrimaryAmmoDef, NULL);
 	ATTR(const CAmmoDef*, SecondaryAmmoDef, NULL);
 	ATTR(int, PrimaryAmmoOnFirstPickup, 0);
-
 	ATTR(int, MaxClip, 0);
+	ATTR(bool, AutoReload, false);
+	ATTR(bool, UsesSpecialReload, false);
 
 	ATTR(const char*, ViewModelName, NULL);
 	ATTR(const char*, PlayerModelName, NULL);
@@ -305,6 +306,10 @@ public:
 class CGenericWeaponAtts_IdleAnimations
 {
 public:
+#define ATTR(type, name, defaultVal) BASE_ATTR(CGenericWeaponAtts_IdleAnimations, type, name, defaultVal)
+	ATTR(bool, IdleWhenClipEmpty, false);	// Usually idle animations have weapon in a loaded state.
+#undef ATTR
+
 	inline CGenericWeaponAtts_IdleAnimations& Animation(int index, float weight = 1.0f)
 	{
 		m_AnimIndices.Add(index, weight);
