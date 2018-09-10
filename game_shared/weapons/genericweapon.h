@@ -49,7 +49,7 @@ protected:
 		}
 	}
 
-	inline void SetNextSecondaryAttack(float secsInFuture, bool allowIfEarlier = true)
+	inline void SetNextSecondaryAttack(float secsInFuture, bool allowIfEarlier = false)
 	{
 		const float delay = UTIL_WeaponTimeBase() + secsInFuture;
 		if ( allowIfEarlier || delay > m_flNextSecondaryAttack )
@@ -58,7 +58,7 @@ protected:
 		}
 	}
 
-	inline void SetNextIdleTime(float secsInFuture, bool allowIfEarlier = true)
+	inline void SetNextIdleTime(float secsInFuture, bool allowIfEarlier = false)
 	{
 		const float delay = UTIL_WeaponTimeBase() + secsInFuture;
 		if ( allowIfEarlier || delay > m_flTimeWeaponIdle )
