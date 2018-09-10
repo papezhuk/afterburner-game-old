@@ -1,4 +1,5 @@
 #include "genericweapon.h"
+#include "studio_utils_shared.h"
 
 #ifdef CLIENT_DLL
 #include "cl_dll.h"
@@ -8,26 +9,11 @@
 namespace
 {
 	constexpr float BULLET_TRACE_DISTANCE = 8192;
-
-	inline void PrecacheSoundSafe(const char* sound)
-	{
-		if ( sound )
-		{
-			PRECACHE_SOUND(sound);
-		}
-	}
-
-	inline void PrecacheModelSafe(const char* modelName)
-	{
-		if ( modelName )
-		{
-			PRECACHE_MODEL(modelName);
-		}
-	}
 }
 
 CGenericWeapon::CGenericWeapon()
 	: CBasePlayerWeapon(),
+	  m_iViewModelIndex(0),
 	  m_iViewModelBody(0)
 {
 }
@@ -92,7 +78,7 @@ void CGenericWeapon::PrecacheFireMode(uint8_t fireModeIndex)
 
 void CGenericWeapon::PrecacheHitscanResources(const CGenericWeaponAtts_HitscanFireMode& fireMode)
 {
-	PrecacheModelSafe(fireMode.ShellModelName());
+	PRECACHE_MODEL(fireMode.ShellModelName());
 	PrecacheSounds(fireMode.Sounds());
 }
 
@@ -102,15 +88,17 @@ void CGenericWeapon::PrecacheSounds(const CGenericWeaponAttributes_Sound& sounds
 
 	for ( uint32_t index = 0; index < soundList.Count(); ++index )
 	{
-		PrecacheSoundSafe(soundList.Value(index));
+		PRECACHE_SOUND(soundList.Value(index));
 	}
 }
 
 void CGenericWeapon::PrecacheCore(const CGenericWeaponAtts_Core& core)
 {
-	PrecacheModelSafe(core.ViewModelName());
-	PrecacheModelSafe(core.PlayerModelName());
-	PrecacheModelSafe(core.WorldModelName());
+	m_iViewModelIndex = PRECACHE_MODEL(core.ViewModelName());
+	StudioGetAnimationDurations(m_iViewModelIndex, m_ViewAnimDurations);
+
+	PRECACHE_MODEL(core.PlayerModelName());
+	PRECACHE_MODEL(core.WorldModelName());
 }
 
 int CGenericWeapon::GetItemInfo(ItemInfo *p)
@@ -305,21 +293,14 @@ void CGenericWeapon::Reload()
 		return;
 	}
 
-	int iResult;
+	const int anim = m_iClip < 1
+		? atts.Animations().Index_ReloadWhenEmpty()
+		: atts.Animations().Index_ReloadWhenNotEmpty();
+	const float animDuration = ViewModelAnimationDuration(anim);
 
-	// TODO: Accurate reload delays?
-	if( m_iClip == 0 )
+	if ( DefaultReload(maxClip, anim, animDuration, m_iViewModelBody) )
 	{
-		iResult = DefaultReload(maxClip, atts.Animations().Index_ReloadWhenEmpty(), 1.5, m_iViewModelBody);
-	}
-	else
-	{
-		iResult = DefaultReload(maxClip, atts.Animations().Index_ReloadWhenNotEmpty(), 1.5, m_iViewModelBody);
-	}
-
-	if( iResult )
-	{
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat( m_pPlayer->random_seed, 10, 15 );
+		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + animDuration + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 0, 1);
 	}
 }
 
@@ -343,11 +324,11 @@ void CGenericWeapon::WeaponIdle()
 	// only idle if the slide isn't back
 	if( m_iClip != 0 && idleAnims.List().Count() > 0 )
 	{
-		// TODO: Placeholder value here. Calculate automatically, or allow user to specify.
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 60.0 / 16.0;
-
 		const float flRand = UTIL_SharedRandomFloat(m_pPlayer->random_seed, 0.0, 1.0);
-		SendWeaponAnim(idleAnims.List().IndexByProbabilisticValue(flRand), m_iViewModelBody);
+		const uint32_t anim = idleAnims.List().IndexByProbabilisticValue(flRand);
+
+		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + ViewModelAnimationDuration(anim);
+		SendWeaponAnim(anim, m_iViewModelBody);
 	}
 }
 
@@ -419,6 +400,16 @@ void CGenericWeapon::SetViewModelBody(int body, bool immediate)
 	}
 #endif
 };
+
+float CGenericWeapon::ViewModelAnimationDuration(int anim) const
+{
+	if ( anim < 0 || anim >= m_ViewAnimDurations.size() )
+	{
+		return 0.0f;
+	}
+
+	return m_ViewAnimDurations[anim];
+}
 
 void CGenericWeapon::DelayPendingActions(float secs)
 {

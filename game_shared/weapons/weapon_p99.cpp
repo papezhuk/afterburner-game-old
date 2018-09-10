@@ -132,14 +132,15 @@ void CWeaponP99::PrimaryAttack()
 
 void CWeaponP99::SecondaryAttack()
 {
+	const int anim = m_bSilenced ? P99_REMOVE_SILENCER : P99_ADD_SILENCER;
+
 	// We must animate using the silenced body group in either case, so we can see the silencer.
-	SendWeaponAnim(m_bSilenced ? P99_REMOVE_SILENCER : P99_ADD_SILENCER, P99BODY_SILENCED);
+	SendWeaponAnim(anim, P99BODY_SILENCED);
 
 	m_bSilenced = !m_bSilenced;
 	SetViewModelBody(m_bSilenced ? P99BODY_SILENCED : P99BODY_UNSILENCED);
 
-	// TODO: Read animation time from MDL.
-	DelayPendingActions(2.0f);
+	DelayPendingActions(ViewModelAnimationDuration(anim));
 }
 
 bool CWeaponP99::ReadPredictionData(const weapon_data_t* from)

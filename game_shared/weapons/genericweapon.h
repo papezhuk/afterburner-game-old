@@ -3,6 +3,7 @@
 #include "standard_includes.h"
 #include "weapons.h"
 #include "genericweaponattributes.h"
+#include <vector>
 
 // Build on top of CBasePlayerWeapon, because this is so tied into the engine
 // already it'd be a pain to replace it (at least at this stage).
@@ -28,6 +29,7 @@ protected:
 	void FireUsingMode(int index);
 	void SetViewModelBody(int body, bool immediate = false);
 	void DelayPendingActions(float secs);
+	float ViewModelAnimationDuration(int anim) const;
 
 private:
 	void PrecacheFireMode(uint8_t fireModeIndex);
@@ -48,5 +50,7 @@ private:
 #endif
 
 	unsigned short m_FireEvents[2];
+	int m_iViewModelIndex;
 	int m_iViewModelBody;
+	std::vector<float> m_ViewAnimDurations;
 };

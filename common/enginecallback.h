@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -33,6 +33,7 @@ extern enginefuncs_t g_engfuncs;
 #define SET_MODEL		(*g_engfuncs.pfnSetModel)
 #define MODEL_INDEX		(*g_engfuncs.pfnModelIndex)
 #define MODEL_FRAMES	(*g_engfuncs.pfnModelFrames)
+#define MODEL_SEQ_DURATION (*g_engfuncs.pfnModelSequenceDuration)
 #define SET_SIZE		(*g_engfuncs.pfnSetSize)
 #define CHANGE_LEVEL	(*g_engfuncs.pfnChangeLevel)
 #define GET_SPAWN_PARMS	(*g_engfuncs.pfnGetSpawnParms)

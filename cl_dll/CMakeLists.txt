@@ -67,6 +67,7 @@ set (CLDLL_SOURCES
 	../game_shared/weapons/genericweaponattributes.cpp
 	../game_shared/weapons/weapon_generictest.cpp
 	../game_shared/weapons/ammodefs.cpp
+	../game_shared/studio_utils_shared.cpp
 	ev_hldm.cpp
 	hl/hl_baseentity.cpp
 	hl/hl_events.cpp

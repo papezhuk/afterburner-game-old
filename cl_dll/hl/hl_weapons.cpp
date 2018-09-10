@@ -166,7 +166,6 @@ BOOL CBasePlayerWeapon::DefaultReload( int iClipSize, int iAnim, float fDelay, i
 
 	m_fInReload = TRUE;
 
-	// TODO: Get the animation time from the MDL?
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 3;
 	return TRUE;
 }
