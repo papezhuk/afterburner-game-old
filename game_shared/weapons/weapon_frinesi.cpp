@@ -24,6 +24,14 @@ namespace
 		RELOAD_INCREMENT_CLIP
 	};
 
+	constexpr int RELOAD_MASK = 0x3;
+	constexpr int RELOAD_FLAG_INTERRUPTED = (1 << 2);
+	constexpr int RELOAD_FLAG_LOADED_ONCE = (1 << 3);
+	constexpr int NextReloadState(int orig, int next)
+	{
+		return (orig & ~(RELOAD_MASK)) | next;
+	}
+
 	// From Nightfire:
 	// - 6 bullets per shot in either mode
 	// - 81 damage over all 6 shots in auto mode = 13.5 per shot
@@ -132,43 +140,86 @@ void CWeaponFrinesi::Precache()
 	m_flPumpDuration = ViewModelAnimationDuration(FRINESI_PUMP);
 }
 
+void CWeaponFrinesi::PrimaryAttack()
+{
+	// TODO: This bit is a hack. Needs to be done properly.
+	if ( FlagReloadInterrupt() )
+	{
+		WeaponIdle();
+	}
+	else
+	{
+		CGenericWeapon::PrimaryAttack();
+	}
+}
+
+void CWeaponFrinesi::SecondaryAttack()
+{
+	// TODO: This bit is a hack. Needs to be done properly.
+	if ( FlagReloadInterrupt() )
+	{
+		WeaponIdle();
+	}
+	else
+	{
+		CGenericWeapon::SecondaryAttack();
+	}
+}
+
+void CWeaponFrinesi::Holster(int skipLocal)
+{
+	CGenericWeapon::Holster(skipLocal);
+	DelayPendingActions(0.1f, true);
+}
+
+bool CWeaponFrinesi::FlagReloadInterrupt()
+{
+	// If we're reloading, allow an interruption.
+	if ( (m_fInSpecialReload & RELOAD_MASK) != RELOAD_IDLE )
+	{
+		m_fInSpecialReload |= RELOAD_FLAG_INTERRUPTED;
+		return true;
+	}
+
+	return false;
+};
+
 int CWeaponFrinesi::HandleSpecialReload(int currentState)
 {
-	switch (currentState)
+	switch (currentState & RELOAD_MASK)
 	{
 		case RELOAD_IDLE:
 		{
 			SendWeaponAnim(FRINESI_START_RELOAD);
 
-			// The next time we process idle tasks is after this "preroll" animation.
+			// Set both our next firing times to be now.
+			// This allows the player to flag a reload interrupt by firing
+			// at any point from now on. It'll only be honoured at the
+			// appropriate time, though.
+			DelayFiring(0, true);
+
+			// Go into load shell state after intro animation has finished.
 			SetNextIdleTime(m_flReloadStartDuration, true);
-
-			// Not exactly sure what the player's next attack variable is used for - to postpone
-			// usage of any weapon at all? The HL shotgun set it, so we do too.
-			m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + m_flReloadStartDuration;
-
-			// The next time any firing is allowed is this animation, plus a shell reload and a pump.
-			const float nextFire = m_flReloadStartDuration + m_flReloadDuration + m_flPumpDuration;
-			DelayFiring(nextFire);
-
-			return RELOAD_LOAD_SHELL;
+			return NextReloadState(currentState, RELOAD_LOAD_SHELL);
 		}
 
 		case RELOAD_LOAD_SHELL:
 		{
-			// If we haven't finished the animation yet, don't change state.
+			// If we haven't finished whatever animation is currently playing, don't change state.
 			if( m_flTimeWeaponIdle > UTIL_WeaponTimeBase() )
 			{
-				return RELOAD_LOAD_SHELL;
+				return NextReloadState(currentState, RELOAD_LOAD_SHELL);
 			}
 
-			if ( m_iClip >= WeaponAttributes().Core().MaxClip() || m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] < 1 )
+			if ( ((currentState & RELOAD_FLAG_INTERRUPTED) && (currentState & RELOAD_FLAG_LOADED_ONCE)) ||
+				 m_iClip >= WeaponAttributes().Core().MaxClip() ||
+				 m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] < 1 )
 			{
-				// Can't reload any more.
+				// Reloading has finished. Do a pump and delay any further activity until it's finished.
 				SendWeaponAnim(FRINESI_PUMP);
-				DelayPendingActions(m_flPumpDuration);
+				DelayPendingActions(m_flPumpDuration, true);
 
-				return RELOAD_IDLE;
+				return NextReloadState(0, RELOAD_IDLE);
 			}
 
 			// TODO: Make these come from the MDL?
@@ -182,21 +233,26 @@ int CWeaponFrinesi::HandleSpecialReload(int currentState)
 			}
 
 			SendWeaponAnim(FRINESI_RELOAD);
-			DelayPendingActions(m_flReloadDuration);
 
-			return RELOAD_INCREMENT_CLIP;
+			// Go into the increment clip state once this animation has finished.
+			SetNextIdleTime(m_flReloadDuration, true);
+			return NextReloadState(currentState, RELOAD_INCREMENT_CLIP);
 		}
 
 		case RELOAD_INCREMENT_CLIP:
 		{
-			m_iClip += 1;
-			m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= 1;
-			return RELOAD_LOAD_SHELL;
+			if ( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] > 0 )
+			{
+				++m_iClip;
+				--m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType];
+			}
+
+			return NextReloadState(currentState, RELOAD_LOAD_SHELL | RELOAD_FLAG_LOADED_ONCE);
 		}
 
 		default:
 		{
-			return RELOAD_IDLE;
+			return NextReloadState(0, RELOAD_IDLE);
 		}
 	};
 }

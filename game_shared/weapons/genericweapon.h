@@ -33,8 +33,8 @@ protected:
 	void SetViewModelBody(int body, bool immediate = false);
 	float ViewModelAnimationDuration(int anim) const;
 
-	void DelayPendingActions(float secs);
-	void DelayFiring(float secs);
+	void DelayPendingActions(float secs, bool allowIfEarlier = false);
+	void DelayFiring(float secs, bool allowIfEarlier = false);
 
 	// Return the value to set m_fInSpecialReload to next.
 	virtual int HandleSpecialReload(int currentState);

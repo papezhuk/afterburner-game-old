@@ -282,7 +282,7 @@ void CGenericWeapon::Reload()
 	const CGenericWeaponAttributes& atts = WeaponAttributes();
 	const int maxClip = atts.Core().MaxClip();
 
-	if ( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 || m_iClip == maxClip ||
+	if ( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] < 1 || m_iClip == maxClip ||
 		 m_flNextPrimaryAttack > UTIL_WeaponTimeBase() )
 	{
 		return;
@@ -461,16 +461,16 @@ float CGenericWeapon::ViewModelAnimationDuration(int anim) const
 	return m_ViewAnimDurations[anim];
 }
 
-void CGenericWeapon::DelayPendingActions(float secs)
+void CGenericWeapon::DelayPendingActions(float secs, bool allowIfEarlier)
 {
-	DelayFiring(secs);
-	SetNextIdleTime(secs);
+	DelayFiring(secs, allowIfEarlier);
+	SetNextIdleTime(secs, allowIfEarlier);
 }
 
-void CGenericWeapon::DelayFiring(float secs)
+void CGenericWeapon::DelayFiring(float secs, bool allowIfEarlier)
 {
-	SetNextPrimaryAttack(secs);
-	SetNextSecondaryAttack(secs);
+	SetNextPrimaryAttack(secs, allowIfEarlier);
+	SetNextSecondaryAttack(secs, allowIfEarlier);
 }
 
 int CGenericWeapon::iItemSlot()
