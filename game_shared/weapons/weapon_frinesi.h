@@ -11,6 +11,7 @@ public:
 	virtual void PrimaryAttack() override;
 	virtual void SecondaryAttack() override;
 	virtual void Holster(int skipLocal = 0) override;
+	virtual void WeaponTick() override;
 	virtual const CGenericWeaponAttributes& WeaponAttributes() const override;
 
 protected:

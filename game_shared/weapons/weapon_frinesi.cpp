@@ -142,34 +142,39 @@ void CWeaponFrinesi::Precache()
 
 void CWeaponFrinesi::PrimaryAttack()
 {
-	// TODO: This bit is a hack. Needs to be done properly.
 	if ( FlagReloadInterrupt() )
 	{
-		WeaponIdle();
+		return;
 	}
-	else
-	{
-		CGenericWeapon::PrimaryAttack();
-	}
+
+	CGenericWeapon::PrimaryAttack();
 }
 
 void CWeaponFrinesi::SecondaryAttack()
 {
-	// TODO: This bit is a hack. Needs to be done properly.
 	if ( FlagReloadInterrupt() )
 	{
 		WeaponIdle();
 	}
-	else
-	{
-		CGenericWeapon::SecondaryAttack();
-	}
+
+	CGenericWeapon::SecondaryAttack();
 }
 
 void CWeaponFrinesi::Holster(int skipLocal)
 {
 	CGenericWeapon::Holster(skipLocal);
 	DelayPendingActions(0.1f, true);
+}
+
+void CWeaponFrinesi::WeaponTick()
+{
+	// If we're reloading and have already flagged an interrupt, clear the input buttons.
+	// This is to prevent the player holding down attack buttons and preventing
+	// the weapon going into idle state.
+	if ( (m_fInSpecialReload & RELOAD_MASK) && (m_fInSpecialReload & RELOAD_FLAG_INTERRUPTED) )
+	{
+		m_pPlayer->pev->button &= ~(IN_ATTACK | IN_ATTACK2);
+	}
 }
 
 bool CWeaponFrinesi::FlagReloadInterrupt()
