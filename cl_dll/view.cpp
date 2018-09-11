@@ -1334,38 +1334,43 @@ int V_FindViewModelByWeaponModel( int weaponindex )
 	};
 
 	struct model_s *weaponModel = IEngineStudio.GetModelByIndex( weaponindex );
-
-	if( weaponModel )
+	if ( !weaponModel )
 	{
-		int len = strlen( weaponModel->name );
-		int i = 0;
+		return 0;
+	}
 
-		// Check generic weapons first.
-		CWeaponRegistry weaponRegistry = CWeaponRegistry::StaticInstance();
-		weaponRegistry.ForEach([weaponModel, len](const CGenericWeaponAttributes& atts)
-		{
-			if ( strnicmp(weaponModel->name, atts.Core().PlayerModelName(), len) )
-			{
-				return gEngfuncs.pEventAPI->EV_FindModelIndex(atts.Core().ViewModelName());
-			}
-		});
+	int len = strlen(weaponModel->name);
 
-		// Then the local table.
-		while( modelmap[i][0] != NULL )
+	// Check generic weapons first.
+	CWeaponRegistry weaponRegistry = CWeaponRegistry::StaticInstance();
+	for ( int index = 0; index < MAX_WEAPONS; ++index )
+	{
+		const CGenericWeaponAttributes* atts = weaponRegistry.Get(index);
+		if ( !atts )
 		{
-			if( !strnicmp( weaponModel->name, modelmap[i][0], len ) )
-			{
-				return gEngfuncs.pEventAPI->EV_FindModelIndex( modelmap[i][1] );
-			}
-			i++;
+			continue;
 		}
 
-		return 0;
+		const char* name = atts->Core().PlayerModelName();
+		if ( strnicmp(weaponModel->name, name, len) )
+		{
+			return gEngfuncs.pEventAPI->EV_FindModelIndex(name);
+		}
 	}
-	else
+
+	// Then the local table.
+	int i = 0;
+	while( modelmap[i][0] != NULL )
 	{
-		return 0;
+		if( !strnicmp( weaponModel->name, modelmap[i][0], len ) )
+		{
+			return gEngfuncs.pEventAPI->EV_FindModelIndex(modelmap[i][1]);
+			break;
+		}
+		i++;
 	}
+
+	return 0;
 }
 
 /*

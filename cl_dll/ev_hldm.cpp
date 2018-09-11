@@ -541,7 +541,7 @@ static void GenericWeaponHitscanFire(event_args_t *args, const CGenericWeaponAtt
 		}
 
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(animIndex, body);
-		V_PunchAxis(fireMode.ViewPunchX(), fireMode.ViewPunchY());
+		V_PunchAxis(0, fireMode.ViewPunchY());
 	}
 
 	vec3_t ShellVelocity;

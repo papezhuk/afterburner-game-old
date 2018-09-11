@@ -261,7 +261,6 @@ public:
 	ATTR(const char*, ShellModelName, NULL);
 	ATTR(int, AnimIndex_FireNotEmpty, -1);
 	ATTR(int, AnimIndex_FireEmpty, -1);		// If left at -1, FireNotEmpty used instead.
-	ATTR(float, ViewPunchX, 0.0f);
 	ATTR(float, ViewPunchY, 0.0f);
 	ATTR(int, ViewModelBodyOverride, -1);	// If specified, event uses this body index for the view model.
 #undef ATTR

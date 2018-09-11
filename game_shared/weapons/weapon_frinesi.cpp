@@ -30,13 +30,17 @@ namespace
 	// - 159 damage over all 6 shots in pump mode = 26.5 per shot
 
 	constexpr uint8_t FRINESI_PELLETS_PER_SHOT = 6;
-	constexpr float FRINESI_BASE_DAMAGE_AUTO = 81.0f / static_cast<float>(FRINESI_PELLETS_PER_SHOT);
-	constexpr float FRINESI_BASE_DAMAGE_PUMP = 159.0f / static_cast<float>(FRINESI_PELLETS_PER_SHOT);
-	constexpr float FRINESI_BASE_SPREAD_AUTO = 0.05f;
-	constexpr float FRINESI_BASE_SPREAD_PUMP = 0.1f;
 	constexpr float FRINESI_AUTOAIM_DEG = AUTOAIM_5DEGREES;
+
+	constexpr float FRINESI_BASE_DAMAGE_AUTO = 81.0f / static_cast<float>(FRINESI_PELLETS_PER_SHOT);
+	constexpr float FRINESI_BASE_SPREAD_AUTO = 0.05f;
 	constexpr float FRINESI_FIRE_RATE_AUTO = 4.0f;
+	constexpr float FRINESI_RECOIL_AUTO = -5.0f;
+
+	constexpr float FRINESI_BASE_DAMAGE_PUMP = 159.0f / static_cast<float>(FRINESI_PELLETS_PER_SHOT);
+	constexpr float FRINESI_BASE_SPREAD_PUMP = 0.1f;
 	constexpr float FRINESI_FIRE_RATE_PUMP = 1.0f;
+	constexpr float FRINESI_RECOIL_PUMP = -10.0f;
 
 #ifdef CLIENT_DLL
 	static CWeaponFrinesi PredictionWeapon;
@@ -71,7 +75,7 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 	.AutoAim(FRINESI_AUTOAIM_DEG)
 	.ShellModelName("models/shell.mdl") // TODO: Nightfire has a shell model - use that? Multiple skins?
 	.AnimIndex_FireNotEmpty(FRINESI_SHOOT)
-	.ViewPunchY(-3.0f)
+	.ViewPunchY(FRINESI_RECOIL_AUTO)
 	.Volume(LOUD_GUN_VOLUME)
 	.MuzzleFlashBrightness(NORMAL_GUN_FLASH)
 	.Sounds(CGenericWeaponAttributes_Sound()
@@ -90,7 +94,7 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 	.AutoAim(FRINESI_AUTOAIM_DEG)
 	.ShellModelName("models/shell.mdl") // TODO: Nightfire has a shell model - use that? Multiple skins?
 	.AnimIndex_FireNotEmpty(FRINESI_SHOOT_BIG)
-	.ViewPunchY(-4.0f)
+	.ViewPunchY(FRINESI_RECOIL_PUMP)
 	.Volume(LOUD_GUN_VOLUME)
 	.MuzzleFlashBrightness(NORMAL_GUN_FLASH)
 	.Sounds(CGenericWeaponAttributes_Sound()
