@@ -1,5 +1,5 @@
 $cd "."
-$cdtexture "." "..\..\..\common textures"
+$cdtexture "." "..\..\..\common"
 $modelname "v_p99.mdl"
 
 $root "Bip01"
