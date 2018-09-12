@@ -299,7 +299,18 @@ void W_Precache( void )
 
 	CWeaponRegistry::StaticInstance().ForEach([](const CGenericWeaponAttributes& atts)
 	{
-		UTIL_PrecacheOtherWeapon(atts.Core().Classname());
+		const CGenericWeaponAtts_Core& core = atts.Core();
+		UTIL_PrecacheOtherWeapon(core.Classname());
+
+		if ( core.PrimaryAmmoClassname() )
+		{
+			UTIL_PrecacheOther(core.PrimaryAmmoClassname());
+		}
+
+		if ( core.SecondaryAmmoClassname() )
+		{
+			UTIL_PrecacheOther(core.SecondaryAmmoClassname());
+		}
 	});
 
 	// common world objects
@@ -589,7 +600,7 @@ void CBasePlayerItem::DefaultTouch( CBaseEntity *pOther )
 	if( pOther->AddPlayerItem( this ) )
 	{
 		AttachToPlayer( pPlayer );
-		EMIT_SOUND( ENT( pPlayer->pev ), CHAN_ITEM, "items/gunpickup2.wav", 1, ATTN_NORM );
+		EMIT_SOUND( ENT( pPlayer->pev ), CHAN_ITEM, "items/gunpickup1.wav", 1, ATTN_NORM );
 	}
 
 	SUB_UseTargets( pOther, USE_TOGGLE, 0 ); // UNDONE: when should this happen?

@@ -124,7 +124,9 @@ public:
 	ATTR(int, SwitchWeight, 0);
 
 	ATTR(const CAmmoDef*, PrimaryAmmoDef, NULL);
+	ATTR(const char*, PrimaryAmmoClassname, NULL);
 	ATTR(const CAmmoDef*, SecondaryAmmoDef, NULL);
+	ATTR(const char*, SecondaryAmmoClassname, NULL);
 	ATTR(int, PrimaryAmmoOnFirstPickup, 0);
 	ATTR(int, MaxClip, 0);
 	ATTR(bool, AutoReload, false);
@@ -142,6 +144,8 @@ public:
 		ASSERTSZ_Q(m_ViewModelName, "Weapon must have a view model.");
 		ASSERTSZ_Q(m_PlayerModelName, "Weapon must have a player model.");
 		ASSERTSZ_Q(m_WorldModelName, "Weapon must have a world model.");
+		ASSERTSZ_Q(!m_PrimaryAmmoDef || m_PrimaryAmmoClassname, "Weapon must specify primary ammo classname.");
+		ASSERTSZ_Q(!m_SecondaryAmmoDef || m_SecondaryAmmoClassname, "Weapon must specify secondary ammo classname.");
 	}
 };
 

@@ -31,11 +31,11 @@ static CWeaponP99 PredictionWeapon;
 
 namespace
 {
-	// For consistency between fire modes:
 	constexpr float P99_FIRE_RATE = 6.0f;
 	constexpr float P99_AUTOAIM_DEG = AUTOAIM_10DEGREES;
 	constexpr float P99_BASE_DAMAGE = 20.0f;
 	constexpr float P99_BASE_SPREAD = 0.03f;
+	constexpr int P99_AMMOBOX_GIVE = 32;
 }
 
 static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAttributes(
@@ -45,6 +45,7 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 	.Flags(0)
 	.SwitchWeight(0)
 	.PrimaryAmmoDef(&AmmoDef_P99)
+	.PrimaryAmmoClassname("ammo_p99")
 	.MaxClip(16)
 	.PrimaryAmmoOnFirstPickup(16)
 	.ViewModelName("models/weapon_p99/v_p99.mdl")
@@ -180,3 +181,14 @@ TYPEDESCRIPTION	CWeaponP99::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE(CWeaponP99, CGenericWeapon)
 #endif
+
+class CAmmoP99 : public CGenericAmmo
+{
+public:
+	CAmmoP99()
+		: CGenericAmmo("models/weapon_p99/w_ammo_p99.mdl", AmmoDef_P99, P99_AMMOBOX_GIVE)
+	{
+	}
+};
+
+LINK_ENTITY_TO_CLASS(ammo_p99, CAmmoP99)

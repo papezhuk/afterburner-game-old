@@ -100,3 +100,50 @@ private:
 	int m_iWeaponSlot;
 	int m_iWeaponSlotPosition;
 };
+
+class CGenericAmmo : public CBasePlayerAmmo
+{
+public:
+	CGenericAmmo(const char* modelName, const CAmmoDef& ammoDef, int giveAmount, const char* pickupSoundName = NULL)
+		: CBasePlayerAmmo(),
+		  m_szModelName(modelName),
+		  m_AmmoDef(ammoDef),
+		  m_iGiveAmount(giveAmount),
+		  m_szPickupSoundName(pickupSoundName)
+	{
+		ASSERT(m_szModelName);
+		ASSERT(m_iGiveAmount > 0);
+	}
+
+	void Spawn()
+	{
+		Precache();
+		SET_MODEL(ENT(pev), m_szModelName);
+		CBasePlayerAmmo::Spawn();
+	}
+
+	void Precache()
+	{
+		PRECACHE_MODEL(m_szModelName);
+		PRECACHE_SOUND(m_szPickupSoundName ? m_szPickupSoundName : DEFAULT_PICKUP_SOUND);
+	}
+
+	BOOL AddAmmo(CBaseEntity *pOther)
+	{
+		if( pOther->GiveAmmo(m_iGiveAmount, m_AmmoDef.Name, m_AmmoDef.MaxCarry) != -1 )
+		{
+			EMIT_SOUND(ENT(pev), CHAN_ITEM, DEFAULT_PICKUP_SOUND, 1, ATTN_NORM);
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+private:
+	static constexpr const char* DEFAULT_PICKUP_SOUND = "items/ammopickup1.wav";
+
+	const char* m_szModelName;
+	const CAmmoDef& m_AmmoDef;
+	int m_iGiveAmount;
+	const char* m_szPickupSoundName;
+};

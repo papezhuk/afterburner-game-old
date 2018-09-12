@@ -41,7 +41,7 @@ $sequence "shoot_big" "shoot_big_ani" {
 }
 $sequence "reload" "reload_ani" fps 40
 $sequence "pump" "pump_ani" fps 40
-$sequence "start_reload" "start_reload_ani" fps 40
+$sequence "start_reload" "start_reload_ani" fps 30
 $sequence "draw" "draw_ani" {
 	event 5004 0 "weapons/weapon_frinesi/frinesi_draw.wav"
 }

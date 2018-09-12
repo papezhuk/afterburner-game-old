@@ -40,6 +40,7 @@ namespace
 
 	constexpr uint8_t FRINESI_PELLETS_PER_SHOT = 6;
 	constexpr float FRINESI_AUTOAIM_DEG = AUTOAIM_5DEGREES;
+	constexpr int FRINESI_AMMOBOX_GIVE = 20;
 
 	constexpr float FRINESI_BASE_DAMAGE_AUTO = 81.0f / static_cast<float>(FRINESI_PELLETS_PER_SHOT);
 	constexpr float FRINESI_BASE_SPREAD_AUTO = 0.05f;
@@ -64,6 +65,7 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 	.Flags(0)
 	.SwitchWeight(0)
 	.PrimaryAmmoDef(&AmmoDef_Frinesi)
+	.PrimaryAmmoClassname("ammo_frinesi")
 	.MaxClip(8)
 	.PrimaryAmmoOnFirstPickup(8)
 	.UsesSpecialReload(true)
@@ -240,7 +242,7 @@ int CWeaponFrinesi::HandleSpecialReload(int currentState)
 				 m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] < 1 )
 			{
 				// Reloading has finished. Do a pump and delay any further activity until it's finished.
-				m_flNextPumpTime = gpGlobals->time + FRINESI_PUMP_DELAY;
+				m_flNextPumpTime = gpGlobals->time + 0.05f;
 				SendWeaponAnim(FRINESI_PUMP);
 				DelayPendingActions(m_flPumpDuration, true);
 
@@ -319,3 +321,15 @@ TYPEDESCRIPTION	CWeaponFrinesi::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE(CWeaponFrinesi, CGenericWeapon)
 #endif
+
+class CAmmoFrinesi : public CGenericAmmo
+{
+public:
+	CAmmoFrinesi()
+		: CGenericAmmo("models/weapon_frinesi/w_ammo_shotgun.mdl", AmmoDef_Frinesi, FRINESI_AMMOBOX_GIVE)
+	{
+	}
+};
+
+LINK_ENTITY_TO_CLASS(ammo_frinesi, CAmmoFrinesi)
+LINK_ENTITY_TO_CLASS(ammo_shotgun, CAmmoFrinesi)	// For Nightfire compatibility
