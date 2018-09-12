@@ -310,3 +310,12 @@ const CGenericWeaponAttributes& CWeaponFrinesi::WeaponAttributes() const
 {
 	return StaticWeaponAttributes;
 }
+
+#ifndef CLIENT_DLL
+TYPEDESCRIPTION	CWeaponFrinesi::m_SaveData[] =
+{
+	DEFINE_FIELD(CWeaponFrinesi, m_flNextPumpTime, FIELD_FLOAT)
+};
+
+IMPLEMENT_SAVERESTORE(CWeaponFrinesi, CGenericWeapon)
+#endif
