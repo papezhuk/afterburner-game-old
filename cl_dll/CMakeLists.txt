@@ -65,6 +65,7 @@ set (CLDLL_SOURCES
 	../game_shared/weapons/genericweapon.cpp
 	../game_shared/weapons/genericweaponattributes.cpp
 	../game_shared/weapons/ammodefs.cpp
+	../game_shared/weapons/weaponslots.cpp
 	../game_shared/studio_utils_shared.cpp
 	../game_shared/weapons/weapon_generictest.cpp
 	../game_shared/weapons/weapon_p99.cpp

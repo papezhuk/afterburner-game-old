@@ -1,5 +1,6 @@
 #include "genericweapon.h"
 #include "studio_utils_shared.h"
+#include "weaponslots.h"
 
 #ifdef CLIENT_DLL
 #include "cl_dll.h"
@@ -8,8 +9,11 @@
 
 CGenericWeapon::CGenericWeapon()
 	: CBasePlayerWeapon(),
+	  m_FireEvents{0},
 	  m_iViewModelIndex(0),
-	  m_iViewModelBody(0)
+	  m_iViewModelBody(0),
+	  m_iWeaponSlot(-1),
+	  m_iWeaponSlotPosition(-1)
 {
 }
 
@@ -26,6 +30,7 @@ void CGenericWeapon::Spawn()
 	pev->classname = MAKE_STRING(core.Classname()); // hack to allow for old names
 	Precache();
 	m_iId = static_cast<int>(core.Id());
+	FindWeaponSlotInfo();
 	SET_MODEL(ENT(pev), core.WorldModelName());
 
 	m_iDefaultAmmo = core.PrimaryAmmoOnFirstPickup();
@@ -99,12 +104,14 @@ void CGenericWeapon::PrecacheCore(const CGenericWeaponAtts_Core& core)
 
 int CGenericWeapon::GetItemInfo(ItemInfo *p)
 {
+	ASSERT(m_iWeaponSlot >= 0 && m_iWeaponSlotPosition >= 0);
+
 	const CGenericWeaponAtts_Core& core = WeaponAttributes().Core();
 
 	p->pszName = STRING( pev->classname );
 	p->iMaxClip = core.MaxClip();
-	p->iSlot = core.WeaponSlot();
-	p->iPosition = core.WeaponSlotPosition();
+	p->iSlot = m_iWeaponSlot;
+	p->iPosition = m_iWeaponSlotPosition;
 	p->iFlags = core.Flags();
 	p->iId = m_iId = static_cast<int>(core.Id());
 	p->iWeight = core.SwitchWeight();
@@ -167,40 +174,39 @@ void CGenericWeapon::SecondaryAttack()
 	FireUsingMode(1);
 }
 
-void CGenericWeapon::FireUsingMode(int index)
+bool CGenericWeapon::FireUsingMode(int index)
 {
 	if ( index < 0 || index > 1 )
 	{
-		return;
+		return false;
 	}
 
 	const CGenericWeaponAtts_BaseFireMode* fireMode = WeaponAttributes().FireMode(index);
 
 	if ( !fireMode )
 	{
-		return;
+		return false;
 	}
 
 	switch ( fireMode->Id() )
 	{
 		case CGenericWeaponAtts_BaseFireMode::e_FireMode::Hitscan:
 		{
-			HitscanFire(index, *fireMode->AsType<CGenericWeaponAtts_HitscanFireMode>());
-			return;
+			return HitscanFire(index, *fireMode->AsType<CGenericWeaponAtts_HitscanFireMode>());
 		}
 
 		default:
 		{
-			return;
+			return false;
 		}
 	}
 }
 
-void CGenericWeapon::HitscanFire(int index, const CGenericWeaponAtts_HitscanFireMode& fireMode)
+bool CGenericWeapon::HitscanFire(int index, const CGenericWeaponAtts_HitscanFireMode& fireMode)
 {
 	if ( index < 0 || index > 1 || fireMode.FireRate() <= 0.0f || fireMode.BulletsPerShot() < 1 )
 	{
-		return;
+		return false;
 	}
 
 	const CGenericWeaponAttributes& atts = WeaponAttributes();
@@ -210,10 +216,10 @@ void CGenericWeapon::HitscanFire(int index, const CGenericWeaponAtts_HitscanFire
 		if( m_fFireOnEmpty )
 		{
 			PlayEmptySound();
-			SetNextPrimaryAttack(0.2f);
+			DelayFiring(0.2f);
 		}
 
-		return;
+		return false;
 	}
 
 	m_iClip--;
@@ -276,6 +282,7 @@ void CGenericWeapon::HitscanFire(int index, const CGenericWeaponAtts_HitscanFire
 	}
 
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat( m_pPlayer->random_seed, 10, 15 );
+	return true;
 };
 
 void CGenericWeapon::Reload()
@@ -507,6 +514,26 @@ void CGenericWeapon::DelayFiring(float secs, bool allowIfEarlier)
 int CGenericWeapon::iItemSlot()
 {
 	return WeaponAttributes().Core().WeaponSlot();
+}
+
+void CGenericWeapon::FindWeaponSlotInfo()
+{
+	ASSERT(m_iId > 0);
+
+	for ( int slot = 0; slot < MAX_WEAPON_SLOTS; ++slot )
+	{
+		for ( int position = 0; position < MAX_WEAPON_POSITIONS; ++position )
+		{
+			if ( WEAPON_HUD_SLOTS[slot][position] == m_iId )
+			{
+				m_iWeaponSlot = slot;
+				m_iWeaponSlotPosition = position;
+				return;
+			}
+		}
+	}
+
+	ASSERTSZ(false, "No slot/position found for this weapon.");
 }
 
 void CGenericWeapon::GetSharedCircularGaussianSpread(uint32_t shot, int shared_rand, float& x, float& y)

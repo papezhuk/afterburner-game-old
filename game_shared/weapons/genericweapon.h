@@ -29,12 +29,12 @@ public:
 	static void GetSharedCircularGaussianSpread(uint32_t shot, int shared_rand, float& x, float& y);
 
 protected:
-	void FireUsingMode(int index);
 	void SetViewModelBody(int body, bool immediate = false);
 	float ViewModelAnimationDuration(int anim) const;
-
 	void PlaySound(const CGenericWeaponAttributes_Sound& sound, int channel = CHAN_WEAPON);
 
+	// Returns true if firing succeeded.
+	bool FireUsingMode(int index);
 	void DelayPendingActions(float secs, bool allowIfEarlier = false);
 	void DelayFiring(float secs, bool allowIfEarlier = false);
 
@@ -75,7 +75,7 @@ private:
 	void PrecacheCore(const CGenericWeaponAtts_Core& core);
 	void PrecacheSounds(const CGenericWeaponAttributes_Sound& sounds);
 
-	void HitscanFire(int index, const CGenericWeaponAtts_HitscanFireMode& fireMode);
+	bool HitscanFire(int index, const CGenericWeaponAtts_HitscanFireMode& fireMode);
 	Vector FireBulletsPlayer(const CGenericWeaponAtts_HitscanFireMode& fireMode,
 							 const Vector& vecSrc,
 							 const Vector& vecDirShooting);
@@ -89,8 +89,12 @@ private:
 	bool IdleProcess_CheckSpecialReload();
 	void IdleProcess_PlayIdleAnimation();
 
+	void FindWeaponSlotInfo();
+
 	unsigned short m_FireEvents[2];
 	int m_iViewModelIndex;
 	int m_iViewModelBody;
 	std::vector<float> m_ViewAnimDurations;
+	int m_iWeaponSlot;
+	int m_iWeaponSlotPosition;
 };

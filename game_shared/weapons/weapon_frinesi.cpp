@@ -158,7 +158,7 @@ void CWeaponFrinesi::PrimaryAttack()
 		return;
 	}
 
-	CGenericWeapon::PrimaryAttack();
+	FireUsingMode(0);
 }
 
 void CWeaponFrinesi::SecondaryAttack()
@@ -168,8 +168,10 @@ void CWeaponFrinesi::SecondaryAttack()
 		return;
 	}
 
-	CGenericWeapon::SecondaryAttack();
-	m_flNextPumpTime = gpGlobals->time + FRINESI_PUMP_DELAY;
+	if ( FireUsingMode(1) )
+	{
+		m_flNextPumpTime = gpGlobals->time + FRINESI_PUMP_DELAY;
+	}
 }
 
 void CWeaponFrinesi::Holster(int skipLocal)
