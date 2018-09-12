@@ -144,6 +144,22 @@ void CBaseEntity::Killed( entvars_t *pevAttacker, int iGib )
 	pev->effects |= EF_NODRAW;
 }
 
+BOOL CBasePlayerWeapon::CanAttack( float attack_time, float curtime, BOOL isPredicted )
+{
+#if defined( CLIENT_WEAPONS )
+	if( !isPredicted )
+#else
+	if( 1 )
+#endif
+	{
+		return ( attack_time <= curtime ) ? TRUE : FALSE;
+	}
+	else
+	{
+		return ( attack_time <= 0.0 ) ? TRUE : FALSE;
+	}
+}
+
 /*
 =====================
 CBasePlayerWeapon::DefaultReload

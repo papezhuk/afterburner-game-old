@@ -595,7 +595,7 @@ void CBasePlayerItem::DefaultTouch( CBaseEntity *pOther )
 	SUB_UseTargets( pOther, USE_TOGGLE, 0 ); // UNDONE: when should this happen?
 }
 
-BOOL CanAttack( float attack_time, float curtime, BOOL isPredicted )
+BOOL CBasePlayerWeapon::CanAttack( float attack_time, float curtime, BOOL isPredicted )
 {
 #if defined( CLIENT_WEAPONS )
 	if( !isPredicted )

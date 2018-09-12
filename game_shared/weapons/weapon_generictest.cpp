@@ -21,8 +21,6 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 	CGenericWeaponAtts_Core()
 	.Id(WeaponId_e::WeaponGenericTest)
 	.Classname("weapon_generictest")
-	.WeaponSlot(1)
-	.WeaponSlotPosition(2)
 	.Flags(0)
 	.SwitchWeight(0)
 	.PrimaryAmmoDef(&AmmoDef_9mm)

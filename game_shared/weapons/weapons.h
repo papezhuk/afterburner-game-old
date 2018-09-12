@@ -353,6 +353,9 @@ public:
 
 	virtual bool ReadPredictionData(const weapon_data_t* from);
 	virtual bool WritePredictionData(weapon_data_t* to);
+
+protected:
+	static BOOL CanAttack( float attack_time, float curtime, BOOL isPredicted );
 };
 
 class CBasePlayerAmmo : public CBaseEntity

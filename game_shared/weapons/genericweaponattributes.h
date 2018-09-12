@@ -120,8 +120,6 @@ public:
 	ATTR(WeaponId_e, Id, WeaponId_e::WeaponNone);
 	ATTR(const char*, Classname, NULL);
 	ATTR(CBasePlayerWeapon*, ClientPredictionWeapon, NULL);
-	ATTR(int, WeaponSlot, -1);
-	ATTR(int, WeaponSlotPosition, -1);
 	ATTR(int, Flags, 0);
 	ATTR(int, SwitchWeight, 0);
 
@@ -195,8 +193,9 @@ public:
 		}
 	};
 
-	CGenericWeaponAtts_BaseFireMode(const char* eventName)
+	CGenericWeaponAtts_BaseFireMode(const char* eventName, bool secondaryAmmo)
 		: m_szEventName(eventName),
+		  m_bUsesSecondaryAmmo(secondaryAmmo),
 		  m_Signature()
 	{
 	}
@@ -221,6 +220,11 @@ public:
 		return m_szEventName;
 	}
 
+	bool UsesSecondaryAmmo() const
+	{
+		return m_bUsesSecondaryAmmo;
+	}
+
 	void SetSignature(WeaponId_e weaponId, int fireMode)
 	{
 		m_Signature.m_iWeaponId = weaponId;
@@ -234,14 +238,15 @@ public:
 
 private:
 	const char* m_szEventName;
+	bool m_bUsesSecondaryAmmo;
 	FireModeSignature m_Signature;
 };
 
 class CGenericWeaponAtts_HitscanFireMode : public CGenericWeaponAtts_BaseFireMode
 {
 public:
-	CGenericWeaponAtts_HitscanFireMode(const char* eventName)
-		: CGenericWeaponAtts_BaseFireMode(eventName)
+	CGenericWeaponAtts_HitscanFireMode(const char* eventName, bool secondaryAmmo = false)
+		: CGenericWeaponAtts_BaseFireMode(eventName, secondaryAmmo)
 	{
 	}
 
@@ -249,6 +254,7 @@ public:
 	virtual CGenericWeaponAtts_BaseFireMode* Clone() const override { return new CGenericWeaponAtts_HitscanFireMode(*this); }
 
 #define ATTR(type, name, defaultVal) BASE_ATTR(CGenericWeaponAtts_HitscanFireMode, type, name, defaultVal)
+	ATTR(bool, UsesSecondaryAmmo, false);
 	ATTR(float, FireRate, 1.0f);	// Cycles per second
 	ATTR(uint8_t, BulletsPerShot, 1);
 	ATTR(float, DamagePerShot, 1.0f);

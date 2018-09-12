@@ -61,8 +61,6 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 	CGenericWeaponAtts_Core()
 	.Id(WeaponId_e::WeaponFrinesi)
 	.Classname("weapon_frinesi")
-	.WeaponSlot(2)			// TODO: Remove these from attributes, define slots elsewhere
-	.WeaponSlotPosition(3)
 	.Flags(0)
 	.SwitchWeight(0)
 	.PrimaryAmmoDef(&AmmoDef_Frinesi)
@@ -242,7 +240,7 @@ int CWeaponFrinesi::HandleSpecialReload(int currentState)
 				 m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] < 1 )
 			{
 				// Reloading has finished. Do a pump and delay any further activity until it's finished.
-				m_flNextPumpTime = FRINESI_PUMP_DELAY;
+				m_flNextPumpTime = gpGlobals->time + FRINESI_PUMP_DELAY;
 				SendWeaponAnim(FRINESI_PUMP);
 				DelayPendingActions(m_flPumpDuration, true);
 

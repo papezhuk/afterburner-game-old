@@ -1,6 +1,7 @@
 #include "genericweapon.h"
 #include "studio_utils_shared.h"
 #include "weaponslots.h"
+#include "gamerules.h"
 
 #ifdef CLIENT_DLL
 #include "cl_dll.h"
@@ -104,11 +105,11 @@ void CGenericWeapon::PrecacheCore(const CGenericWeaponAtts_Core& core)
 
 int CGenericWeapon::GetItemInfo(ItemInfo *p)
 {
-	ASSERT(m_iWeaponSlot >= 0 && m_iWeaponSlotPosition >= 0);
+	FindWeaponSlotInfo();
 
 	const CGenericWeaponAtts_Core& core = WeaponAttributes().Core();
 
-	p->pszName = STRING( pev->classname );
+	p->pszName = STRING(pev->classname);
 	p->iMaxClip = core.MaxClip();
 	p->iSlot = m_iWeaponSlot;
 	p->iPosition = m_iWeaponSlotPosition;
@@ -325,6 +326,103 @@ void CGenericWeapon::Reload()
 	}
 }
 
+void CGenericWeapon::ItemPostFrame()
+{
+	WeaponTick();
+
+	if( ( m_fInReload ) && ( m_pPlayer->m_flNextAttack <= UTIL_WeaponTimeBase() ) )
+	{
+		// TODO: Ammo needs to be sync'd to client for this to work.
+#ifndef CLIENT_DLL
+		// complete the reload.
+		int j = Q_min( iMaxClip() - m_iClip, m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]);
+
+		// Add them to the clip
+		m_iClip += j;
+		m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= j;
+#else
+	// No idea why this is so arbitrary, but Half Life had it in...
+	m_iClip += 10;
+#endif
+
+		m_fInReload = FALSE;
+	}
+
+	if( !(m_pPlayer->pev->button & IN_ATTACK ) )
+	{
+		m_flLastFireTime = 0.0f;
+	}
+
+	if( ( m_pPlayer->pev->button & IN_ATTACK2 ) && CanAttack( m_flNextSecondaryAttack, gpGlobals->time, UseDecrement() ) )
+	{
+		SetFireOnEmptyState(1);
+		SecondaryAttack();
+	}
+	else if( ( m_pPlayer->pev->button & IN_ATTACK ) && CanAttack( m_flNextPrimaryAttack, gpGlobals->time, UseDecrement() ) )
+	{
+		SetFireOnEmptyState(0);
+		PrimaryAttack();
+	}
+	else if( m_pPlayer->pev->button & IN_RELOAD && iMaxClip() != WEAPON_NOCLIP && !m_fInReload )
+	{
+		// reload when reload is pressed, or if no buttons are down and weapon is empty.
+		Reload();
+	}
+	else if( !( m_pPlayer->pev->button & ( IN_ATTACK | IN_ATTACK2 ) ) )
+	{
+		// no fire buttons down
+		m_fFireOnEmpty = FALSE;
+
+#ifndef CLIENT_DLL
+		if( !IsUseable() && m_flNextPrimaryAttack < ( UseDecrement() ? 0.0 : gpGlobals->time ) )
+		{
+			// weapon isn't useable, switch.
+			if( !( iFlags() & ITEM_FLAG_NOAUTOSWITCHEMPTY ) && g_pGameRules->GetNextBestWeapon( m_pPlayer, this ) )
+			{
+				m_flNextPrimaryAttack = ( UseDecrement() ? 0.0 : gpGlobals->time ) + 0.3;
+				return;
+			}
+		}
+		else
+#endif
+		{
+			// weapon is useable. Reload if empty and weapon has waited as long as it has to after firing
+			if( m_iClip == 0 && !(iFlags() & ITEM_FLAG_NOAUTORELOAD ) && m_flNextPrimaryAttack < ( UseDecrement() ? 0.0 : gpGlobals->time ) )
+			{
+				Reload();
+				return;
+			}
+		}
+
+		WeaponIdle();
+		return;
+	}
+
+	// catch all
+	if( ShouldWeaponIdle() )
+	{
+		WeaponIdle();
+	}
+}
+
+void CGenericWeapon::SetFireOnEmptyState(uint8_t mode)
+{
+	const CGenericWeaponAtts_BaseFireMode* const fireMode = WeaponAttributes().FireMode(mode);
+
+	if ( !fireMode )
+	{
+		return;
+	}
+
+	const char* ammoName = fireMode->UsesSecondaryAmmo() ? pszAmmo2() : pszAmmo1();
+	int ammoIndex = fireMode->UsesSecondaryAmmo() ? SecondaryAmmoIndex() : PrimaryAmmoIndex();
+
+	if( ammoName && ammoIndex >= 0 && m_pPlayer->m_rgAmmo[ammoIndex] < 1 )
+	{
+		m_fFireOnEmpty = TRUE;
+	}
+}
+
 int CGenericWeapon::HandleSpecialReload(int currentState)
 {
 	return 0;
@@ -513,18 +611,24 @@ void CGenericWeapon::DelayFiring(float secs, bool allowIfEarlier)
 
 int CGenericWeapon::iItemSlot()
 {
-	return WeaponAttributes().Core().WeaponSlot();
+	ASSERT(m_iWeaponSlot >= 0);
+	return m_iWeaponSlot;
 }
 
 void CGenericWeapon::FindWeaponSlotInfo()
 {
-	ASSERT(m_iId > 0);
+	if ( m_iWeaponSlot >= 0 && m_iWeaponSlotPosition >= 0 )
+	{
+		return;
+	}
+
+	const int id = static_cast<const int>(WeaponAttributes().Core().Id());
 
 	for ( int slot = 0; slot < MAX_WEAPON_SLOTS; ++slot )
 	{
 		for ( int position = 0; position < MAX_WEAPON_POSITIONS; ++position )
 		{
-			if ( WEAPON_HUD_SLOTS[slot][position] == m_iId )
+			if ( WEAPON_HUD_SLOTS[slot][position] == id )
 			{
 				m_iWeaponSlot = slot;
 				m_iWeaponSlotPosition = position;

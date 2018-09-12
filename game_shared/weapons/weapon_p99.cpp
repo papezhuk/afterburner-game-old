@@ -42,8 +42,6 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 	CGenericWeaponAtts_Core()
 	.Id(WeaponId_e::WeaponP99)
 	.Classname("weapon_p99")
-	.WeaponSlot(1)			// TODO: Remove these from attributes, define slots elsewhere
-	.WeaponSlotPosition(3)
 	.Flags(0)
 	.SwitchWeight(0)
 	.PrimaryAmmoDef(&AmmoDef_P99)

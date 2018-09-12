@@ -343,6 +343,7 @@ void DBG_AssertFunction( bool fExpr, const char* szExpr, const char* szFile, int
 		}
 
 		ALERT( at_console, szOut );
+		assert(false);
 	}
 	else
 	{

@@ -22,6 +22,7 @@ public:
 	virtual void Reload() override;
 	virtual void WeaponIdle() override;
 	virtual int iItemSlot() override;
+	virtual void ItemPostFrame() override;
 
 	virtual const CGenericWeaponAttributes& WeaponAttributes() const = 0;
 
@@ -75,6 +76,7 @@ private:
 	void PrecacheCore(const CGenericWeaponAtts_Core& core);
 	void PrecacheSounds(const CGenericWeaponAttributes_Sound& sounds);
 
+	void SetFireOnEmptyState(uint8_t mode);
 	bool HitscanFire(int index, const CGenericWeaponAtts_HitscanFireMode& fireMode);
 	Vector FireBulletsPlayer(const CGenericWeaponAtts_HitscanFireMode& fireMode,
 							 const Vector& vecSrc,
