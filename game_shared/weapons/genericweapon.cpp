@@ -40,6 +40,7 @@ void CGenericWeapon::Precache()
 	PrecacheCore(atts.Core());
 	PrecacheFireMode(0);
 	PrecacheFireMode(1);
+	PrecacheSounds(atts.Animations().ReloadSounds());
 }
 
 void CGenericWeapon::PrecacheFireMode(uint8_t fireModeIndex)
@@ -308,6 +309,11 @@ void CGenericWeapon::Reload()
 
 	if ( DefaultReload(maxClip, anim, animDuration, m_iViewModelBody) )
 	{
+		if ( atts.Animations().HasSounds() )
+		{
+			PlaySound(atts.Animations().ReloadSounds());
+		}
+
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + animDuration + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 0, 1);
 	}
 }
@@ -376,10 +382,35 @@ void CGenericWeapon::IdleProcess_PlayIdleAnimation()
 	}
 
 	const float flRand = UTIL_SharedRandomFloat(m_pPlayer->random_seed, 0.0, 1.0);
-	const uint32_t anim = idleAnims.List().IndexByProbabilisticValue(flRand);
+	const uint32_t anim = idleAnims.List().ItemByProbabilisticValue(flRand);
 
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + ViewModelAnimationDuration(anim);
 	SendWeaponAnim(anim, m_iViewModelBody);
+}
+
+void CGenericWeapon::PlaySound(const CGenericWeaponAttributes_Sound& sound, int channel)
+{
+	if ( sound.SoundList().Count() < 1 )
+	{
+		return;
+	}
+
+	const float flRand = UTIL_SharedRandomFloat(m_pPlayer->random_seed, 0.0, 1.0);
+	const char* soundName = sound.SoundList().ItemByProbabilisticValue(flRand);
+	const float volume = (sound.MinVolume() < sound.MaxVolume())
+		? UTIL_SharedRandomFloat(m_pPlayer->random_seed, sound.MinVolume(), sound.MaxVolume())
+		: sound.MaxVolume();
+	const int pitch = (sound.MinPitch() < sound.MaxPitch())
+		? UTIL_SharedRandomLong(m_pPlayer->random_seed, sound.MinPitch(), sound.MaxPitch())
+		: sound.MaxPitch();
+
+	EMIT_SOUND_DYN(ENT(m_pPlayer->pev),
+				   channel,
+				   soundName,
+				   volume,
+				   sound.Attenuation(),
+				   sound.Flags(),
+				   pitch);
 }
 
 Vector CGenericWeapon::FireBulletsPlayer(const CGenericWeaponAtts_HitscanFireMode& fireMode,

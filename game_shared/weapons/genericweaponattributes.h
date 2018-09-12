@@ -300,6 +300,25 @@ public:
 	ATTR(int, Index_ReloadWhenEmpty, -1);		// If left at -1, ReloadWhenNotEmpty is used instead.
 	ATTR(int, Index_ReloadWhenNotEmpty, -1);
 #undef ATTR
+
+	inline const CGenericWeaponAttributes_Sound& ReloadSounds() const
+	{
+		return m_ReloadSounds;
+	}
+
+	inline CGenericWeaponAtts_Animations& ReloadSounds(const CGenericWeaponAttributes_Sound& sound)
+	{
+		m_ReloadSounds = sound;
+		return *this;
+	}
+
+	inline bool HasSounds() const
+	{
+		return m_ReloadSounds.SoundList().Count() > 0;
+	}
+
+private:
+	CGenericWeaponAttributes_Sound m_ReloadSounds;
 };
 
 class CGenericWeaponAtts_IdleAnimations

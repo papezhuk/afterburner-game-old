@@ -33,6 +33,8 @@ protected:
 	void SetViewModelBody(int body, bool immediate = false);
 	float ViewModelAnimationDuration(int anim) const;
 
+	void PlaySound(const CGenericWeaponAttributes_Sound& sound, int channel = CHAN_WEAPON);
+
 	void DelayPendingActions(float secs, bool allowIfEarlier = false);
 	void DelayFiring(float secs, bool allowIfEarlier = false);
 

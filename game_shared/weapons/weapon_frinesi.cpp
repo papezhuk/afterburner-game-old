@@ -1,4 +1,5 @@
 #include "weapon_frinesi.h"
+#include "weaponinfo.h"
 
 namespace
 {
@@ -49,6 +50,7 @@ namespace
 	constexpr float FRINESI_BASE_SPREAD_PUMP = 0.1f;
 	constexpr float FRINESI_FIRE_RATE_PUMP = 1.0f;
 	constexpr float FRINESI_RECOIL_PUMP = -10.0f;
+	constexpr float FRINESI_PUMP_DELAY = 0.42f;
 
 #ifdef CLIENT_DLL
 	static CWeaponFrinesi PredictionWeapon;
@@ -64,7 +66,6 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 	.Flags(0)
 	.SwitchWeight(0)
 	.PrimaryAmmoDef(&AmmoDef_Frinesi)
-	.SecondaryAmmoDef(&AmmoDef_Frinesi)
 	.MaxClip(8)
 	.PrimaryAmmoOnFirstPickup(8)
 	.UsesSpecialReload(true)
@@ -118,6 +119,14 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 	.Extension("shotgun")
 	.Index_Draw(FRINESI_DRAW)
 	.Index_ReloadWhenNotEmpty(FRINESI_START_RELOAD)
+	.ReloadSounds(CGenericWeaponAttributes_Sound()
+		.Sound("weapons/weapon_frinesi/frinesi_reload1.wav")
+		.Sound("weapons/weapon_frinesi/frinesi_reload2.wav")
+		.MinVolume(1.0f)
+		.MaxVolume(1.0f)
+		.MinPitch(98)
+		.MaxPitch(102)
+	)
 );
 
 LINK_ENTITY_TO_CLASS(weapon_frinesi, CWeaponFrinesi)
@@ -126,13 +135,15 @@ CWeaponFrinesi::CWeaponFrinesi()
 	: CGenericWeapon(),
 	  m_flReloadStartDuration(0.0f),
 	  m_flReloadDuration(0.0f),
-	  m_flPumpDuration(0.0f)
+	  m_flPumpDuration(0.0f),
+	  m_flNextPumpTime(0.0f)
 {
 }
 
 void CWeaponFrinesi::Precache()
 {
 	CGenericWeapon::Precache();
+	PRECACHE_SOUND("weapons/weapon_frinesi/frinesi_cock.wav");
 
 	// Cache the durations for our reload animations, so we can use them later.
 	m_flReloadStartDuration = ViewModelAnimationDuration(FRINESI_START_RELOAD);
@@ -154,10 +165,11 @@ void CWeaponFrinesi::SecondaryAttack()
 {
 	if ( FlagReloadInterrupt() )
 	{
-		WeaponIdle();
+		return;
 	}
 
 	CGenericWeapon::SecondaryAttack();
+	m_flNextPumpTime = gpGlobals->time + FRINESI_PUMP_DELAY;
 }
 
 void CWeaponFrinesi::Holster(int skipLocal)
@@ -170,10 +182,16 @@ void CWeaponFrinesi::WeaponTick()
 {
 	// If we're reloading and have already flagged an interrupt, clear the input buttons.
 	// This is to prevent the player holding down attack buttons and preventing
-	// the weapon going into idle state.
+	// the weapon going into an idle state.
 	if ( (m_fInSpecialReload & RELOAD_MASK) && (m_fInSpecialReload & RELOAD_FLAG_INTERRUPTED) )
 	{
 		m_pPlayer->pev->button &= ~(IN_ATTACK | IN_ATTACK2);
+	}
+
+	if ( m_flNextPumpTime != 0.0f && m_flNextPumpTime < gpGlobals->time )
+	{
+		PlayPumpSound();
+		m_flNextPumpTime = 0.0f;
 	}
 }
 
@@ -195,6 +213,7 @@ int CWeaponFrinesi::HandleSpecialReload(int currentState)
 	{
 		case RELOAD_IDLE:
 		{
+			m_flNextPumpTime = 0.0f;
 			SendWeaponAnim(FRINESI_START_RELOAD);
 
 			// Set both our next firing times to be now.
@@ -221,22 +240,14 @@ int CWeaponFrinesi::HandleSpecialReload(int currentState)
 				 m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] < 1 )
 			{
 				// Reloading has finished. Do a pump and delay any further activity until it's finished.
+				m_flNextPumpTime = FRINESI_PUMP_DELAY;
 				SendWeaponAnim(FRINESI_PUMP);
 				DelayPendingActions(m_flPumpDuration, true);
 
 				return NextReloadState(0, RELOAD_IDLE);
 			}
 
-			// TODO: Make these come from the MDL?
-			if( RANDOM_LONG( 0, 1 ) )
-			{
-				EMIT_SOUND_DYN( ENT( m_pPlayer->pev ), CHAN_ITEM, "weapons/reload1.wav", 1, ATTN_NORM, 0, 85 + RANDOM_LONG( 0, 0x1f ) );
-			}
-			else
-			{
-				EMIT_SOUND_DYN( ENT( m_pPlayer->pev ), CHAN_ITEM, "weapons/reload3.wav", 1, ATTN_NORM, 0, 85 + RANDOM_LONG( 0, 0x1f ) );
-			}
-
+			PlaySound(WeaponAttributes().Animations().ReloadSounds(), CHAN_ITEM);
 			SendWeaponAnim(FRINESI_RELOAD);
 
 			// Go into the increment clip state once this animation has finished.
@@ -260,6 +271,39 @@ int CWeaponFrinesi::HandleSpecialReload(int currentState)
 			return NextReloadState(0, RELOAD_IDLE);
 		}
 	};
+}
+
+void CWeaponFrinesi::PlayPumpSound()
+{
+	EMIT_SOUND_DYN(ENT(m_pPlayer->pev),
+					   CHAN_ITEM,
+					   "weapons/weapon_frinesi/frinesi_cock.wav",
+					   1.0f,
+					   ATTN_NORM,
+					   0,
+					   UTIL_SharedRandomLong(m_pPlayer->random_seed, 98, 101));
+}
+
+bool CWeaponFrinesi::ReadPredictionData(const weapon_data_t* from)
+{
+	if ( !CGenericWeapon::ReadPredictionData(from) )
+	{
+		return false;
+	}
+
+	m_flNextPumpTime = from->fuser1;
+	return true;
+}
+
+bool CWeaponFrinesi::WritePredictionData(weapon_data_t* to)
+{
+	if ( !CGenericWeapon::WritePredictionData(to) )
+	{
+		return false;
+	}
+
+	to->fuser1 = m_flNextPumpTime;
+	return true;
 }
 
 const CGenericWeaponAttributes& CWeaponFrinesi::WeaponAttributes() const
