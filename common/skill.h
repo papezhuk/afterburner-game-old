@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -109,7 +109,7 @@ struct skilldata_t
 	float plrDmgHandGrenade;
 	float plrDmgSatchel;
 	float plrDmgTripmine;
-	
+
 	// weapons shared by monsters
 	float monDmg9MM;
 	float monDmgMP5;
@@ -136,6 +136,11 @@ struct skilldata_t
 	float plrStomach;
 	float plrLeg;
 	float plrArm;
+
+	// Nightfire weapon damage
+	float plrDmgP99;
+	float plrDmgFrinesiAuto;
+	float plrDmgFrinesiPump;
 };
 
 extern	DLL_GLOBAL	skilldata_t	gSkillData;

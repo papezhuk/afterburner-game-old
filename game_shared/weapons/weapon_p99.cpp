@@ -1,6 +1,7 @@
 #include "weapon_p99.h"
 #include "weaponregistry.h"
 #include "weaponinfo.h"
+#include "skill.h"
 
 enum P99Animations_e
 {
@@ -59,7 +60,7 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 	&((*new CGenericWeaponAtts_HitscanFireMode("events/weapon_p99/fire01.sc"))
 	.FireRate(P99_FIRE_RATE)
 	.UniformSpread(P99_BASE_SPREAD)
-	.DamagePerShot(P99_BASE_DAMAGE)
+	.DamagePerShot([](){return gSkillData.plrDmgP99;})
 	.AutoAim(P99_AUTOAIM_DEG)
 	.ShellModelName("models/shell.mdl") // TODO: Does Nightfire have shell models? Could we make some?
 	.ViewModelBodyOverride(P99BODY_UNSILENCED)
@@ -80,7 +81,7 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 	&((*new CGenericWeaponAtts_HitscanFireMode("events/weapon_p99/fire02.sc"))
 	.FireRate(P99_FIRE_RATE)
 	.UniformSpread(P99_BASE_SPREAD)
-	.DamagePerShot(P99_BASE_DAMAGE)
+	.DamagePerShot([](){return gSkillData.plrDmgP99;})
 	.AutoAim(P99_AUTOAIM_DEG)
 	.ShellModelName("models/shell.mdl") // TODO: Does Nightfire have shell models? Could we make some?
 	.ViewModelBodyOverride(P99BODY_SILENCED)

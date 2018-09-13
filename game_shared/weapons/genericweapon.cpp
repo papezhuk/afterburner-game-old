@@ -539,6 +539,12 @@ Vector CGenericWeapon::FireBulletsPlayer(const CGenericWeaponAtts_HitscanFireMod
 	ClearMultiDamage();
 	gMultiDamage.type = DMG_BULLET | DMG_NEVERGIB;
 
+	float damagePerShot = 1.0f;
+	if ( fireMode.DamagePerShot() )
+	{
+		damagePerShot = (*fireMode.DamagePerShot())();
+	}
+
 	const uint32_t numShots = fireMode.BulletsPerShot();
 	for( uint32_t shot = 1; shot <= numShots; shot++ )
 	{
@@ -557,7 +563,7 @@ Vector CGenericWeapon::FireBulletsPlayer(const CGenericWeaponAtts_HitscanFireMod
 		{
 			CBaseEntity *pEntity = CBaseEntity::Instance(tr.pHit);
 
-			pEntity->TraceAttack(pevAttacker, fireMode.DamagePerShot(), vecDir, &tr, DMG_BULLET);
+			pEntity->TraceAttack(pevAttacker, damagePerShot, vecDir, &tr, DMG_BULLET);
 			TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, BULLET_GENERIC);
 		}
 

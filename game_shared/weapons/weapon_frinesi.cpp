@@ -1,5 +1,6 @@
 #include "weapon_frinesi.h"
 #include "weaponinfo.h"
+#include "skill.h"
 
 namespace
 {
@@ -80,7 +81,7 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 	.FireRate(FRINESI_FIRE_RATE_AUTO)
 	.UniformSpread(FRINESI_BASE_SPREAD_AUTO)
 	.BulletsPerShot(FRINESI_PELLETS_PER_SHOT)
-	.DamagePerShot(FRINESI_BASE_DAMAGE_AUTO)
+	.DamagePerShot([](){return gSkillData.plrDmgFrinesiAuto;})
 	.AutoAim(FRINESI_AUTOAIM_DEG)
 	.ShellModelName("models/shell.mdl") // TODO: Nightfire has a shell model - use that? Multiple skins?
 	.AnimIndex_FireNotEmpty(FRINESI_SHOOT)
@@ -99,7 +100,7 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 	.FireRate(FRINESI_FIRE_RATE_PUMP)
 	.UniformSpread(FRINESI_BASE_SPREAD_PUMP)
 	.BulletsPerShot(FRINESI_PELLETS_PER_SHOT)
-	.DamagePerShot(FRINESI_BASE_DAMAGE_PUMP)
+	.DamagePerShot([](){return gSkillData.plrDmgFrinesiPump;})
 	.AutoAim(FRINESI_AUTOAIM_DEG)
 	.ShellModelName("models/shell.mdl") // TODO: Nightfire has a shell model - use that? Multiple skins?
 	.AnimIndex_FireNotEmpty(FRINESI_SHOOT_BIG)

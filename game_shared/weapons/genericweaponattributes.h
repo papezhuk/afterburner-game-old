@@ -185,6 +185,8 @@ public:
 		Hitscan = 0
 	};
 
+	typedef float(*DamageFunc_t)();
+
 	struct FireModeSignature
 	{
 		WeaponId_e m_iWeaponId;
@@ -261,7 +263,7 @@ public:
 	ATTR(bool, UsesSecondaryAmmo, false);
 	ATTR(float, FireRate, 1.0f);	// Cycles per second
 	ATTR(uint8_t, BulletsPerShot, 1);
-	ATTR(float, DamagePerShot, 1.0f);
+	ATTR(DamageFunc_t, DamagePerShot, NULL);
 	ATTR(float, SpreadX, 0.01f);
 	ATTR(float, SpreadY, 0.01f);
 	ATTR(bool, FullAuto, false);
