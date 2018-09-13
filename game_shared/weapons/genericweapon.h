@@ -72,18 +72,18 @@ protected:
 
 private:
 	void PrecacheFireMode(uint8_t fireModeIndex);
-	void PrecacheHitscanResources(const CGenericWeaponAtts_HitscanFireMode& fireMode);
+	void PrecacheHitscanResources(const CGenericWeaponAtts_HitscanFireMechanic& fireMode);
 	void PrecacheCore(const CGenericWeaponAtts_Core& core);
 	void PrecacheSounds(const CGenericWeaponAttributes_Sound& sounds);
 
 	void SetFireOnEmptyState(uint8_t mode);
-	bool HitscanFire(int index, const CGenericWeaponAtts_HitscanFireMode& fireMode);
-	Vector FireBulletsPlayer(const CGenericWeaponAtts_HitscanFireMode& fireMode,
+	bool HitscanFire(int index, const CGenericWeaponAtts_HitscanFireMechanic& fireMode);
+	Vector FireBulletsPlayer(const CGenericWeaponAtts_HitscanFireMechanic& fireMode,
 							 const Vector& vecSrc,
 							 const Vector& vecDirShooting);
 
 #ifdef CLIENT_DLL
-	Vector FireBulletsPlayer_Client(const CGenericWeaponAtts_HitscanFireMode& fireMode);
+	Vector FireBulletsPlayer_Client(const CGenericWeaponAtts_HitscanFireMechanic& fireMode);
 #endif
 
 	// Return true if reload action occurred, or false otherwise.

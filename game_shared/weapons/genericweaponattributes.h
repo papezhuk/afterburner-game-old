@@ -177,37 +177,18 @@ private:
 	WeightedValueList<const char*> m_SoundNames;
 };
 
-class CGenericWeaponAtts_BaseFireMode
+class CGenericWeaponAtts_BaseFireMechanic
 {
 public:
-	enum e_FireMode
+	enum FireMechanic_e
 	{
 		Hitscan = 0
 	};
 
 	typedef float(*DamageFunc_t)();
 
-	struct FireModeSignature
-	{
-		WeaponId_e m_iWeaponId;
-		uint8_t m_iFireMode;
-
-		FireModeSignature()
-			: m_iWeaponId(WeaponId_e::WeaponNone),
-			  m_iFireMode(0)
-		{
-		}
-	};
-
-	CGenericWeaponAtts_BaseFireMode(const char* eventName, bool secondaryAmmo)
-		: m_szEventName(eventName),
-		  m_bUsesSecondaryAmmo(secondaryAmmo),
-		  m_Signature()
-	{
-	}
-
-	virtual e_FireMode Id() const = 0;
-	virtual CGenericWeaponAtts_BaseFireMode* Clone() const = 0;
+	virtual FireMechanic_e Id() const = 0;
+	virtual CGenericWeaponAtts_BaseFireMechanic* Clone() const = 0;
 
 	template<typename T>
 	T* AsType()
@@ -220,50 +201,24 @@ public:
 	{
 		return dynamic_cast<const T*>(this);
 	}
-
-	const char* EventName() const
-	{
-		return m_szEventName;
-	}
-
-	bool UsesSecondaryAmmo() const
-	{
-		return m_bUsesSecondaryAmmo;
-	}
-
-	void SetSignature(WeaponId_e weaponId, int fireMode)
-	{
-		m_Signature.m_iWeaponId = weaponId;
-		m_Signature.m_iFireMode = fireMode;
-	}
-
-	const FireModeSignature* Signature() const
-	{
-		return &m_Signature;
-	};
-
-private:
-	const char* m_szEventName;
-	bool m_bUsesSecondaryAmmo;
-	FireModeSignature m_Signature;
 };
 
-class CGenericWeaponAtts_HitscanFireMode : public CGenericWeaponAtts_BaseFireMode
+class CGenericWeaponAtts_HitscanFireMechanic : public CGenericWeaponAtts_BaseFireMechanic
 {
 public:
-	CGenericWeaponAtts_HitscanFireMode(const char* eventName, bool secondaryAmmo = false)
-		: CGenericWeaponAtts_BaseFireMode(eventName, secondaryAmmo)
+	CGenericWeaponAtts_HitscanFireMechanic()
+		: CGenericWeaponAtts_BaseFireMechanic()
 	{
 	}
 
-	virtual e_FireMode Id() const override { return CGenericWeaponAtts_BaseFireMode::e_FireMode::Hitscan; }
-	virtual CGenericWeaponAtts_BaseFireMode* Clone() const override { return new CGenericWeaponAtts_HitscanFireMode(*this); }
+	virtual FireMechanic_e Id() const override { return CGenericWeaponAtts_BaseFireMechanic::FireMechanic_e::Hitscan; }
+	virtual CGenericWeaponAtts_BaseFireMechanic* Clone() const override { return new CGenericWeaponAtts_HitscanFireMechanic(*this); }
 
-#define ATTR(type, name, defaultVal) BASE_ATTR(CGenericWeaponAtts_HitscanFireMode, type, name, defaultVal)
+#define ATTR(type, name, defaultVal) BASE_ATTR(CGenericWeaponAtts_HitscanFireMechanic, type, name, defaultVal)
 	ATTR(bool, UsesSecondaryAmmo, false);
 	ATTR(float, FireRate, 1.0f);	// Cycles per second
 	ATTR(uint8_t, BulletsPerShot, 1);
-	ATTR(DamageFunc_t, DamagePerShot, NULL);
+	ATTR(DamageFunc_t, BaseDamagePerShot, NULL);
 	ATTR(float, SpreadX, 0.01f);
 	ATTR(float, SpreadY, 0.01f);
 	ATTR(bool, FullAuto, false);
@@ -278,7 +233,7 @@ public:
 #undef ATTR
 
 	// Convenience:
-	CGenericWeaponAtts_HitscanFireMode& UniformSpread(float spread)
+	CGenericWeaponAtts_HitscanFireMechanic& UniformSpread(float spread)
 	{
 		return SpreadX(spread).SpreadY(spread);
 	}
@@ -288,7 +243,7 @@ public:
 		return m_Sounds;
 	}
 
-	inline CGenericWeaponAtts_HitscanFireMode& Sounds(const CGenericWeaponAttributes_Sound& sound)
+	inline CGenericWeaponAtts_HitscanFireMechanic& Sounds(const CGenericWeaponAttributes_Sound& sound)
 	{
 		m_Sounds = sound;
 		return *this;
@@ -301,6 +256,108 @@ public:
 
 private:
 	CGenericWeaponAttributes_Sound m_Sounds;
+};
+
+class CGenericWeaponAtts_FireMode
+{
+public:
+	enum class AmmoType_e
+	{
+		None = 0,
+		Primary,
+		Secondary
+	};
+
+	struct FireModeSignature
+	{
+		WeaponId_e m_iWeaponId;
+		uint8_t m_iFireMode;
+
+		FireModeSignature()
+			: m_iWeaponId(WeaponId_e::WeaponNone),
+			  m_iFireMode(0)
+		{
+		}
+	};
+
+	CGenericWeaponAtts_FireMode()
+	{
+	}
+
+	CGenericWeaponAtts_FireMode(const CGenericWeaponAtts_FireMode& other)
+		: m_Event(other.m_Event),
+		  m_FiresUnderwater(other.m_FiresUnderwater),
+		  m_UsesAmmo(other.m_UsesAmmo),
+		  m_Signature(other.m_Signature)
+	{
+		CGenericWeaponAtts_BaseFireMechanic* mechanicPtr = other.m_pMechanic.get();
+		if ( mechanicPtr )
+		{
+			m_pMechanic.reset(mechanicPtr->Clone());
+		}
+	}
+
+	CGenericWeaponAtts_FireMode& operator =(const CGenericWeaponAtts_FireMode& other)
+	{
+		m_Event = other.m_Event;
+		m_FiresUnderwater = other.m_FiresUnderwater;
+		m_UsesAmmo = other.m_UsesAmmo;
+		m_Signature = other.m_Signature;
+
+		CGenericWeaponAtts_BaseFireMechanic* mechanicPtr = other.m_pMechanic.get();
+		if ( mechanicPtr )
+		{
+			m_pMechanic.reset(mechanicPtr->Clone());
+		}
+
+		return *this;
+	}
+
+#define ATTR(type, name, defaultVal) BASE_ATTR(CGenericWeaponAtts_FireMode, type, name, defaultVal)
+	ATTR(const char*, Event, NULL)
+	ATTR(bool, FiresUnderwater, false);
+	ATTR(AmmoType_e, UsesAmmo, AmmoType_e::None);
+#undef ATTR
+
+	inline void Validate()
+	{
+		ASSERTSZ_Q(m_Event, "Weapon must have a fire event specified.");
+	}
+
+	inline const CGenericWeaponAtts_BaseFireMechanic* Mechanic() const
+	{
+		return m_pMechanic.get();
+	}
+
+	inline CGenericWeaponAtts_FireMode& Mechanic(CGenericWeaponAtts_BaseFireMechanic* value)
+	{
+		BaseFireMechanicPtr ptr(value);
+		m_pMechanic.swap(ptr);
+
+		return *this;
+	}
+
+	inline bool HasMechanic() const
+	{
+		return m_pMechanic.get() != NULL;
+	}
+
+	inline void SetSignature(WeaponId_e weaponId, int fireMode)
+	{
+		m_Signature.m_iWeaponId = weaponId;
+		m_Signature.m_iFireMode = fireMode;
+	}
+
+	inline const FireModeSignature* Signature() const
+	{
+		return &m_Signature;
+	};
+
+private:
+	typedef std::unique_ptr<CGenericWeaponAtts_BaseFireMechanic> BaseFireMechanicPtr;
+
+	BaseFireMechanicPtr m_pMechanic;
+	FireModeSignature m_Signature;
 };
 
 class CGenericWeaponAtts_Animations
@@ -362,7 +419,7 @@ class CGenericWeaponAttributes
 public:
 	CGenericWeaponAttributes(const CGenericWeaponAtts_Core& core)
 		: m_Core(core),
-		  m_FireModes{},
+		  m_NewFireModes{},
 		  m_Animations(),
 		  m_IdleAnimations()
 	{
@@ -370,24 +427,19 @@ public:
 
 	CGenericWeaponAttributes(const CGenericWeaponAttributes& other)
 		: m_Core(other.m_Core),
-		  m_FireModes{},
+		  m_NewFireModes{},
 		  m_Animations(other.m_Animations),
 		  m_IdleAnimations(other.m_IdleAnimations)
 	{
 		for ( int mode = 0; mode < 2; ++mode )
 		{
-			CGenericWeaponAtts_BaseFireMode* modePtr = other.m_FireModes[mode].get();
-			if ( modePtr )
-			{
-				m_FireModes[mode].reset(modePtr->Clone());
-			}
+			m_NewFireModes[mode] = other.m_NewFireModes[mode];
 		}
 
-		SetFireModeSignatures();
 		Register();
 	}
 
-	CGenericWeaponAttributes& operator =(const CGenericWeaponAttributes& other)
+	inline CGenericWeaponAttributes& operator =(const CGenericWeaponAttributes& other)
 	{
 		m_Core = other.m_Core;
 		m_Animations = other.m_Animations;
@@ -395,18 +447,9 @@ public:
 
 		for ( int mode = 0; mode < 2; ++mode )
 		{
-			CGenericWeaponAtts_BaseFireMode* modePtr = other.m_FireModes[mode].get();
-			if ( modePtr )
-			{
-				m_FireModes[mode].reset(modePtr->Clone());
-			}
-			else
-			{
-				m_FireModes[mode] = NULL;
-			}
+			m_NewFireModes[mode] = other.m_NewFireModes[mode];
 		}
 
-		SetFireModeSignatures();
 		Register();
 		return *this;
 	}
@@ -414,66 +457,69 @@ public:
 	// Implemented in .cpp to remove cyclic dependencies.
 	void Register();
 
-	const CGenericWeaponAtts_Core& Core() const
+	inline const CGenericWeaponAtts_Core& Core() const
 	{
 		return m_Core;
 	}
 
-	const CGenericWeaponAtts_Animations& Animations() const
+	inline const CGenericWeaponAtts_Animations& Animations() const
 	{
 		return m_Animations;
 	}
 
-	const CGenericWeaponAtts_IdleAnimations& IdleAnimations() const
+	inline const CGenericWeaponAtts_IdleAnimations& IdleAnimations() const
 	{
 		return m_IdleAnimations;
 	}
 
-	CGenericWeaponAttributes& Animations(const CGenericWeaponAtts_Animations& anims)
+	inline CGenericWeaponAttributes& Animations(const CGenericWeaponAtts_Animations& anims)
 	{
 		m_Animations = anims;
 		return *this;
 	}
 
-	CGenericWeaponAttributes& IdleAnimations(const CGenericWeaponAtts_IdleAnimations& anims)
+	inline CGenericWeaponAttributes& IdleAnimations(const CGenericWeaponAtts_IdleAnimations& anims)
 	{
 		m_IdleAnimations = anims;
 		return *this;
 	}
 
-	const CGenericWeaponAtts_BaseFireMode* FireMode(uint8_t mode) const
+	inline const CGenericWeaponAtts_FireMode& FireMode(uint8_t mode) const
 	{
-		return mode < 2 ? m_FireModes[mode].get() : NULL;
-	}
+		static const CGenericWeaponAtts_FireMode dummy;
 
-	CGenericWeaponAttributes& FireMode(uint8_t mode, CGenericWeaponAtts_BaseFireMode* value)
-	{
-		BaseFireModePtr ptr(value);
-
-		if ( mode < 2 )
+		if ( mode < 0 || mode > 1 )
 		{
-			m_FireModes[mode].swap(ptr);
+			ASSERTSZ_Q(false, "Invalid fire mode index");
+			return dummy;
 		}
 
+		return m_NewFireModes[mode];
+	}
+
+	inline CGenericWeaponAttributes& FireMode(uint8_t mode, const CGenericWeaponAtts_FireMode fireMode)
+	{
+		if ( mode < 0 || mode > 1 )
+		{
+			ASSERTSZ_Q(false, "Invalid fire mode index");
+			return *this;
+		}
+
+		m_NewFireModes[mode] = fireMode;
 		return *this;
 	}
 
 private:
-	typedef std::unique_ptr<CGenericWeaponAtts_BaseFireMode> BaseFireModePtr;
-
-	void SetFireModeSignatures()
+	inline void SetFireModeSignatures()
 	{
 		for ( int index = 0; index < 2; ++index )
 		{
-			if ( m_FireModes[index].get() )
-			{
-				m_FireModes[index]->SetSignature(m_Core.Id(), index);
-			}
+			m_NewFireModes[index].SetSignature(m_Core.Id(), index);
 		}
 	}
 
 	CGenericWeaponAtts_Core m_Core;
 	CGenericWeaponAtts_Animations m_Animations;
 	CGenericWeaponAtts_IdleAnimations m_IdleAnimations;
-	BaseFireModePtr m_FireModes[2];
+	CGenericWeaponAtts_FireMode m_NewFireModes[2];
 };

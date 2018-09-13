@@ -60,17 +60,17 @@ void Game_HookEvents( void )
 	{
 		for ( uint8_t fireModeIndex = 0; fireModeIndex < 2; ++fireModeIndex )
 		{
-			const CGenericWeaponAtts_BaseFireMode* fireMode = atts.FireMode(fireModeIndex);
-			if ( !fireMode )
+			const CGenericWeaponAtts_FireMode& fireMode = atts.FireMode(fireModeIndex);
+			if ( !fireMode.HasMechanic() )
 			{
 				continue;
 			}
 
-			switch (fireMode->Id())
+			switch ( fireMode.Mechanic()->Id() )
 			{
-				case CGenericWeaponAtts_BaseFireMode::e_FireMode::Hitscan:
+				case CGenericWeaponAtts_BaseFireMechanic::FireMechanic_e::Hitscan:
 				{
-					gEngfuncs.pfnHookEvent(fireMode->EventName(), EV_HandleGenericHitscanFire, (void*)fireMode->Signature());
+					gEngfuncs.pfnHookEvent(fireMode.Event(), EV_HandleGenericHitscanFire, (void*)fireMode.Signature());
 					break;
 				}
 

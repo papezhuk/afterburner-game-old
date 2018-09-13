@@ -52,22 +52,22 @@ void CGenericWeapon::Precache()
 void CGenericWeapon::PrecacheFireMode(uint8_t fireModeIndex)
 {
 	const CGenericWeaponAttributes& atts = WeaponAttributes();
-	const CGenericWeaponAtts_BaseFireMode* fireMode = atts.FireMode(fireModeIndex);
+	const CGenericWeaponAtts_FireMode& fireMode = atts.FireMode(fireModeIndex);
 
-	if ( !fireMode || !fireMode->EventName() )
+	if ( !fireMode.Event() || !fireMode.HasMechanic() )
 	{
 		m_FireEvents[fireModeIndex] = 0;
 	}
 	else
 	{
-		m_FireEvents[fireModeIndex] = PRECACHE_EVENT(1, fireMode->EventName());
+		m_FireEvents[fireModeIndex] = PRECACHE_EVENT(1, fireMode.Event());
 	}
 
-	switch ( fireMode->Id() )
+	switch ( fireMode.Mechanic()->Id() )
 	{
-		case CGenericWeaponAtts_BaseFireMode::e_FireMode::Hitscan:
+		case CGenericWeaponAtts_BaseFireMechanic::FireMechanic_e::Hitscan:
 		{
-			PrecacheHitscanResources(*fireMode->AsType<const CGenericWeaponAtts_HitscanFireMode>());
+			PrecacheHitscanResources(*fireMode.Mechanic()->AsType<const CGenericWeaponAtts_HitscanFireMechanic>());
 			break;
 		}
 
@@ -78,7 +78,7 @@ void CGenericWeapon::PrecacheFireMode(uint8_t fireModeIndex)
 	}
 }
 
-void CGenericWeapon::PrecacheHitscanResources(const CGenericWeaponAtts_HitscanFireMode& fireMode)
+void CGenericWeapon::PrecacheHitscanResources(const CGenericWeaponAtts_HitscanFireMechanic& fireMode)
 {
 	PRECACHE_MODEL(fireMode.ShellModelName());
 	PrecacheSounds(fireMode.Sounds());
@@ -182,18 +182,18 @@ bool CGenericWeapon::FireUsingMode(int index)
 		return false;
 	}
 
-	const CGenericWeaponAtts_BaseFireMode* fireMode = WeaponAttributes().FireMode(index);
+	const CGenericWeaponAtts_FireMode& fireMode = WeaponAttributes().FireMode(index);
 
-	if ( !fireMode )
+	if ( !fireMode.HasMechanic() )
 	{
 		return false;
 	}
 
-	switch ( fireMode->Id() )
+	switch ( fireMode.Mechanic()->Id() )
 	{
-		case CGenericWeaponAtts_BaseFireMode::e_FireMode::Hitscan:
+		case CGenericWeaponAtts_BaseFireMechanic::FireMechanic_e::Hitscan:
 		{
-			return HitscanFire(index, *fireMode->AsType<CGenericWeaponAtts_HitscanFireMode>());
+			return HitscanFire(index, *fireMode.Mechanic()->AsType<CGenericWeaponAtts_HitscanFireMechanic>());
 		}
 
 		default:
@@ -203,7 +203,7 @@ bool CGenericWeapon::FireUsingMode(int index)
 	}
 }
 
-bool CGenericWeapon::HitscanFire(int index, const CGenericWeaponAtts_HitscanFireMode& fireMode)
+bool CGenericWeapon::HitscanFire(int index, const CGenericWeaponAtts_HitscanFireMechanic& fireMode)
 {
 	if ( index < 0 || index > 1 || fireMode.FireRate() <= 0.0f || fireMode.BulletsPerShot() < 1 )
 	{
@@ -407,15 +407,15 @@ void CGenericWeapon::ItemPostFrame()
 
 void CGenericWeapon::SetFireOnEmptyState(uint8_t mode)
 {
-	const CGenericWeaponAtts_BaseFireMode* const fireMode = WeaponAttributes().FireMode(mode);
+	const CGenericWeaponAtts_FireMode& fireMode = WeaponAttributes().FireMode(mode);
 
-	if ( !fireMode )
+	if ( !fireMode.HasMechanic() || fireMode.UsesAmmo() == CGenericWeaponAtts_FireMode::AmmoType_e::None )
 	{
 		return;
 	}
 
-	const char* ammoName = fireMode->UsesSecondaryAmmo() ? pszAmmo2() : pszAmmo1();
-	int ammoIndex = fireMode->UsesSecondaryAmmo() ? SecondaryAmmoIndex() : PrimaryAmmoIndex();
+	const char* ammoName = fireMode.UsesAmmo() == CGenericWeaponAtts_FireMode::AmmoType_e::Primary ? pszAmmo1() : pszAmmo2();
+	int ammoIndex = fireMode.UsesAmmo() == CGenericWeaponAtts_FireMode::AmmoType_e::Primary ? SecondaryAmmoIndex() : PrimaryAmmoIndex();
 
 	if( ammoName && ammoIndex >= 0 && m_pPlayer->m_rgAmmo[ammoIndex] < 1 )
 	{
@@ -432,12 +432,13 @@ void CGenericWeapon::WeaponIdle()
 {
 	const CGenericWeaponAttributes& atts = WeaponAttributes();
 	const CGenericWeaponAtts_Core& core = atts.Core();
+	const CGenericWeaponAtts_BaseFireMechanic* const primaryMechanic = atts.FireMode(0).Mechanic();
 
 	ResetEmptySound();
 
-	if ( atts.FireMode(0) && atts.FireMode(0)->Id() == CGenericWeaponAtts_BaseFireMode::e_FireMode::Hitscan )
+	if ( primaryMechanic && primaryMechanic->Id() == CGenericWeaponAtts_BaseFireMechanic::FireMechanic_e::Hitscan )
 	{
-		m_pPlayer->GetAutoaimVector(atts.FireMode(0)->AsType<CGenericWeaponAtts_HitscanFireMode>()->AutoAim());
+		m_pPlayer->GetAutoaimVector(primaryMechanic->AsType<CGenericWeaponAtts_HitscanFireMechanic>()->AutoAim());
 	}
 
 	if( m_flTimeWeaponIdle > UTIL_WeaponTimeBase() )
@@ -518,7 +519,7 @@ void CGenericWeapon::PlaySound(const CGenericWeaponAttributes_Sound& sound, int 
 				   pitch);
 }
 
-Vector CGenericWeapon::FireBulletsPlayer(const CGenericWeaponAtts_HitscanFireMode& fireMode,
+Vector CGenericWeapon::FireBulletsPlayer(const CGenericWeaponAtts_HitscanFireMechanic& fireMode,
 										 const Vector& vecSrc,
 										 const Vector& vecDirShooting)
 {
@@ -539,15 +540,15 @@ Vector CGenericWeapon::FireBulletsPlayer(const CGenericWeaponAtts_HitscanFireMod
 	ClearMultiDamage();
 	gMultiDamage.type = DMG_BULLET | DMG_NEVERGIB;
 
-	float damagePerShot = 1.0f;
-	if ( fireMode.DamagePerShot() )
-	{
-		damagePerShot = (*fireMode.DamagePerShot())();
-	}
-
 	const uint32_t numShots = fireMode.BulletsPerShot();
 	for( uint32_t shot = 1; shot <= numShots; shot++ )
 	{
+		float damagePerShot = 1.0f;
+		if ( fireMode.BaseDamagePerShot() )
+		{
+			damagePerShot = (*fireMode.BaseDamagePerShot())();
+		}
+
 		GetSharedCircularGaussianSpread(shot, shared_rand, x, y);
 
 		Vector vecDir = vecDirShooting +
@@ -653,7 +654,7 @@ void CGenericWeapon::GetSharedCircularGaussianSpread(uint32_t shot, int shared_r
 }
 
 #ifdef CLIENT_DLL
-Vector CGenericWeapon::FireBulletsPlayer_Client(const CGenericWeaponAtts_HitscanFireMode& fireMode)
+Vector CGenericWeapon::FireBulletsPlayer_Client(const CGenericWeaponAtts_HitscanFireMechanic& fireMode)
 {
 	float x = 0, y = 0;
 

@@ -438,7 +438,7 @@ void GenericWeaponFireBullets(int idx,
 							  vec3_t& up,
 							  vec3_t& vecSrc,
 							  vec3_t& vecDirShooting,
-							  const CGenericWeaponAtts_HitscanFireMode& fireMode,
+							  const CGenericWeaponAtts_HitscanFireMechanic& fireMode,
 							  float flSpreadX,
 							  float flSpreadY,
 							  int randomSeed)
@@ -499,7 +499,7 @@ void GenericWeaponFireBullets(int idx,
 	}
 }
 
-static void GenericWeaponHitscanFire(event_args_t *args, const CGenericWeaponAttributes& atts, const CGenericWeaponAtts_HitscanFireMode& fireMode)
+static void GenericWeaponHitscanFire(event_args_t *args, const CGenericWeaponAttributes& atts, const CGenericWeaponAtts_HitscanFireMechanic& fireMode)
 {
 	const int idx = args->entindex;
 	const bool empty = args->bparam1;
@@ -592,8 +592,8 @@ static void GenericWeaponHitscanFire(event_args_t *args, const CGenericWeaponAtt
 
 void EV_HandleGenericHitscanFire(event_args_t* args)
 {
-	const CGenericWeaponAtts_BaseFireMode::FireModeSignature* signature =
-		(CGenericWeaponAtts_BaseFireMode::FireModeSignature*)args->localUserData;
+	const CGenericWeaponAtts_FireMode::FireModeSignature* signature =
+		(CGenericWeaponAtts_FireMode::FireModeSignature*)args->localUserData;
 
 	const WeaponId_e weaponId = static_cast<const WeaponId_e>(signature->m_iWeaponId);
 	const uint8_t fireModeIndex = static_cast<const uint8_t>(signature->m_iFireMode);
@@ -605,14 +605,14 @@ void EV_HandleGenericHitscanFire(event_args_t* args)
 		return;
 	}
 
-	const CGenericWeaponAtts_BaseFireMode* fireMode = atts->FireMode(fireModeIndex);
-	if ( !fireMode || fireMode->Id() != CGenericWeaponAtts_BaseFireMode::e_FireMode::Hitscan )
+	const CGenericWeaponAtts_BaseFireMechanic* mechanic = atts->FireMode(fireModeIndex).Mechanic();
+	if ( !mechanic || mechanic->Id() != CGenericWeaponAtts_BaseFireMechanic::FireMechanic_e::Hitscan )
 	{
 		ASSERT(false);
 		return;
 	}
 
-	GenericWeaponHitscanFire(args, *atts, *(fireMode->AsType<const CGenericWeaponAtts_HitscanFireMode>()));
+	GenericWeaponHitscanFire(args, *atts, *(mechanic->AsType<const CGenericWeaponAtts_HitscanFireMechanic>()));
 }
 
 //======================
