@@ -26,10 +26,10 @@ namespace
 		RELOAD_INCREMENT_CLIP
 	};
 
-	constexpr int RELOAD_MASK = 0x3;
-	constexpr int RELOAD_FLAG_INTERRUPTED = (1 << 2);
-	constexpr int RELOAD_FLAG_LOADED_ONCE = (1 << 3);
-	constexpr int NextReloadState(int orig, int next)
+	static constexpr int RELOAD_MASK = 0x3;
+	static constexpr int RELOAD_FLAG_INTERRUPTED = (1 << 2);
+	static constexpr int RELOAD_FLAG_LOADED_ONCE = (1 << 3);
+	static constexpr int NextReloadState(int orig, int next)
 	{
 		return (orig & ~(RELOAD_MASK)) | next;
 	}
@@ -39,20 +39,20 @@ namespace
 	// - 81 damage over all 6 shots in auto mode = 13.5 per shot
 	// - 159 damage over all 6 shots in pump mode = 26.5 per shot
 
-	constexpr uint8_t FRINESI_PELLETS_PER_SHOT = 6;
-	constexpr float FRINESI_AUTOAIM_DEG = AUTOAIM_5DEGREES;
-	constexpr int FRINESI_AMMOBOX_GIVE = 20;
+	static constexpr uint8_t FRINESI_PELLETS_PER_SHOT = 6;
+	static constexpr float FRINESI_AUTOAIM_DEG = AUTOAIM_5DEGREES;
+	static constexpr int FRINESI_AMMOBOX_GIVE = 20;
 
-	constexpr float FRINESI_BASE_DAMAGE_AUTO = 81.0f / static_cast<float>(FRINESI_PELLETS_PER_SHOT);
-	constexpr float FRINESI_BASE_SPREAD_AUTO = 0.05f;
-	constexpr float FRINESI_FIRE_RATE_AUTO = 4.0f;
-	constexpr float FRINESI_RECOIL_AUTO = -5.0f;
+	static constexpr float FRINESI_BASE_DAMAGE_AUTO = 81.0f / static_cast<float>(FRINESI_PELLETS_PER_SHOT);
+	static constexpr float FRINESI_BASE_SPREAD_AUTO = 0.05f;
+	static constexpr float FRINESI_FIRE_RATE_AUTO = 4.0f;
+	static constexpr float FRINESI_RECOIL_AUTO = -5.0f;
 
-	constexpr float FRINESI_BASE_DAMAGE_PUMP = 159.0f / static_cast<float>(FRINESI_PELLETS_PER_SHOT);
-	constexpr float FRINESI_BASE_SPREAD_PUMP = 0.1f;
-	constexpr float FRINESI_FIRE_RATE_PUMP = 1.0f;
-	constexpr float FRINESI_RECOIL_PUMP = -10.0f;
-	constexpr float FRINESI_PUMP_DELAY = 0.42f;
+	static constexpr float FRINESI_BASE_DAMAGE_PUMP = 159.0f / static_cast<float>(FRINESI_PELLETS_PER_SHOT);
+	static constexpr float FRINESI_BASE_SPREAD_PUMP = 0.1f;
+	static constexpr float FRINESI_FIRE_RATE_PUMP = 1.0f;
+	static constexpr float FRINESI_RECOIL_PUMP = -10.0f;
+	static constexpr float FRINESI_PUMP_DELAY = 0.42f;
 
 #ifdef CLIENT_DLL
 	static CWeaponFrinesi PredictionWeapon;

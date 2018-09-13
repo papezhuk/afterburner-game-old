@@ -31,7 +31,8 @@ const int WEAPON_HUD_SLOTS[MAX_WEAPON_SLOTS][MAX_WEAPON_POSITIONS] =
 		WEAPON_RPG,
 		WEAPON_GAUSS,
 		WEAPON_EGON,
-		WEAPON_HORNETGUN
+		WEAPON_HORNETGUN,
+		static_cast<int>(WeaponId_e::WeaponGrenadeLauncher)
 	},
 
 	// Slot 5

@@ -3,41 +3,41 @@
 #include "weaponinfo.h"
 #include "skill.h"
 
-enum P99Animations_e
+namespace
 {
-	P99_IDLE1 = 0,
-	P99_IDLE2,
-	P99_IDLE3,
-	P99_SHOOT,
-	P99_SHOOT_EMPTY,
-	P99_RELOAD,
-	P99_RELOAD_NOT_EMPTY,
-	P99_DRAW,
-	P99_HOLSTER,
-	P99_ADD_SILENCER,
-	P99_REMOVE_SILENCER,
-	P99_SHOOT_SILENCER,
-	P99_SHOOT_SILENCER_EMPTY,
-};
+	enum P99Animations_e
+	{
+		P99_IDLE1 = 0,
+		P99_IDLE2,
+		P99_IDLE3,
+		P99_SHOOT,
+		P99_SHOOT_EMPTY,
+		P99_RELOAD,
+		P99_RELOAD_NOT_EMPTY,
+		P99_DRAW,
+		P99_HOLSTER,
+		P99_ADD_SILENCER,
+		P99_REMOVE_SILENCER,
+		P99_SHOOT_SILENCER,
+		P99_SHOOT_SILENCER_EMPTY,
+	};
 
-enum P99Body_e
-{
-	P99BODY_UNSILENCED = 0,
-	P99BODY_SILENCED
-};
+	enum P99Body_e
+	{
+		P99BODY_UNSILENCED = 0,
+		P99BODY_SILENCED
+	};
+
+	static constexpr float P99_FIRE_RATE = 6.0f;
+	static constexpr float P99_AUTOAIM_DEG = AUTOAIM_10DEGREES;
+	static constexpr float P99_BASE_DAMAGE = 20.0f;
+	static constexpr float P99_BASE_SPREAD = 0.03f;
+	static constexpr int P99_AMMOBOX_GIVE = 32;
+}
 
 #ifdef CLIENT_DLL
 static CWeaponP99 PredictionWeapon;
 #endif
-
-namespace
-{
-	constexpr float P99_FIRE_RATE = 6.0f;
-	constexpr float P99_AUTOAIM_DEG = AUTOAIM_10DEGREES;
-	constexpr float P99_BASE_DAMAGE = 20.0f;
-	constexpr float P99_BASE_SPREAD = 0.03f;
-	constexpr int P99_AMMOBOX_GIVE = 32;
-}
 
 static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAttributes(
 	CGenericWeaponAtts_Core()

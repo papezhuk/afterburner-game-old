@@ -149,6 +149,7 @@ set (SVDLL_SOURCES
 	../game_shared/weapons/weapon_generictest.cpp
 	../game_shared/weapons/weapon_p99.cpp
 	../game_shared/weapons/weapon_frinesi.cpp
+	../game_shared/weapons/weapon_grenadelauncher.cpp
 )
 
 include_directories (. ../common ../engine ../pm_shared ../game_shared ../public ../game_shared/weapons)

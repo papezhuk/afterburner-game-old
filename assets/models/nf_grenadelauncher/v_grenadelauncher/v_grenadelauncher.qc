@@ -40,14 +40,14 @@ $hbox 0 "R_Arm_bone" -2.520000 -2.140000 -1.840000 10.940000 1.820000 1.710000
 $sequence "idle1" "idle1_ani" fps 15
 $sequence "idle2" "idle2_ani" fps 15 loop
 $sequence "fire" "fire_ani" {
-	event 5004 0 "weapons/grenade_launcher_fire.wav"
+	event 5001 0 "33"
 }
 $sequence "reload" "reload_ani" fps 45 {
-	event 5004 0 "weapons/grenade_launcher_reload.wav"
+	event 5004 0 "weapons/weapon_grenadelauncher/grenade_launcher_reload.wav"
 }
 $sequence "draw" "draw_ani" {
-	event 5004 0 "weapons/grenade_launcher_draw.wav"
+	event 5005 0 "weapons/weapon_grenadelauncher/grenade_launcher_draw.wav"
 }
 $sequence "holster" "holster_ani" {
-	event 5004 0 "weapons/grenade_launcher_holster.wav"
+	event 5005 0 "weapons/weapon_grenadelauncher/grenade_launcher_holster.wav"
 }

@@ -70,6 +70,7 @@ set (CLDLL_SOURCES
 	../game_shared/weapons/weapon_generictest.cpp
 	../game_shared/weapons/weapon_p99.cpp
 	../game_shared/weapons/weapon_frinesi.cpp
+	../game_shared/weapons/weapon_grenadelauncher.cpp
 	ev_hldm.cpp
 	hl/hl_baseentity.cpp
 	hl/hl_events.cpp

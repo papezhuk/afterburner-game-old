@@ -57,11 +57,10 @@ void CGenericWeapon::PrecacheFireMode(uint8_t fireModeIndex)
 	if ( !fireMode.Event() || !fireMode.HasMechanic() )
 	{
 		m_FireEvents[fireModeIndex] = 0;
+		return;
 	}
-	else
-	{
-		m_FireEvents[fireModeIndex] = PRECACHE_EVENT(1, fireMode.Event());
-	}
+
+	m_FireEvents[fireModeIndex] = PRECACHE_EVENT(1, fireMode.Event());
 
 	switch ( fireMode.Mechanic()->Id() )
 	{

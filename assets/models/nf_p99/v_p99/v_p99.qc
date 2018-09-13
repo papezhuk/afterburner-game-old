@@ -51,20 +51,20 @@ $sequence "shoot_empty" "shoot_empty_ani" {
 	event 5001 1 "22"
 }
 $sequence "reload" "reload_ani" fps 45 {
-	event 5005 1 "weapons/weapon_p99/p99_reload_empty.wav"
+	event 5005 0 "weapons/weapon_p99/p99_reload_empty.wav"
 }
 $sequence "reload_noshot" "reload_noshot_ani" fps 45 {
-	event 5005 1 "weapons/weapon_p99/p99_reload.wav"
+	event 5005 0 "weapons/weapon_p99/p99_reload.wav"
 }
 $sequence "draw" "draw_ani" {
-	event 5005 1 "weapons/weapon_p99/p99_draw.wav"
+	event 5005 0 "weapons/weapon_p99/p99_draw.wav"
 }
 $sequence "holster" "holster_ani"
 $sequence "silencer_draw" "silencer_draw_ani" {
-	event 5005 1 "weapons/weapon_p99/p99_draw_sil.wav"
+	event 5005 0 "weapons/weapon_p99/p99_draw_sil.wav"
 }
 $sequence "silencer_holster" "silencer_holster_ani" {
-	event 5005 1 "weapons/weapon_p99/p99_holster_sil.wav"
+	event 5005 0 "weapons/weapon_p99/p99_holster_sil.wav"
 }
 $sequence "SILENCER_shoot" "SILENCER_shoot_ani"
 $sequence "SILENCER_shoot_empty" "SILENCER_shoot_empty_ani"

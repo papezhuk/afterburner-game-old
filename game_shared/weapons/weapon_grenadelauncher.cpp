@@ -1,0 +1,62 @@
+#include "weapon_grenadelauncher.h"
+#include "ammodefs.h"
+#include "skill.h"
+
+namespace
+{
+	enum GrenadeLauncherAnimations_e
+	{
+		GRENADELAUNCHER_IDLE1 = 0,
+		GRENADELAUNCHER_IDLE2,
+		GRENADELAUNCHER_FIRE,
+		GRENADELAUNCHER_RELOAD,
+		GRENADELAUNCHER_DRAW,
+		GRENADELAUNCHER_HOLSTER
+	};
+
+#ifdef CLIENT_DLL
+	CWeaponGrenadeLauncher PredictionWeapon;
+#endif
+}
+
+static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAttributes(
+	CGenericWeaponAtts_Core()
+	.Id(WeaponId_e::WeaponGrenadeLauncher)
+	.Classname("weapon_grenadelauncher")
+	.Flags(0)
+	.SwitchWeight(0)
+	.PrimaryAmmoDef(&AmmoDef_GrenadeLauncher)
+	.PrimaryAmmoClassname("ammo_grenadelauncher")
+	.MaxClip(6)
+	.PrimaryAmmoOnFirstPickup(6)
+	.ViewModelName("models/weapon_grenadelauncher/v_grenadelauncher.mdl")
+	.PlayerModelName("models/weapon_grenadelauncher/p_grenadelauncher.mdl")
+	.WorldModelName("models/weapon_grenadelauncher/w_grenadelauncher.mdl")
+#ifdef CLIENT_DLL
+	.ClientPredictionWeapon(&PredictionWeapon)
+#endif
+)
+// Contact
+.FireMode(0, CGenericWeaponAtts_FireMode()
+	.Event("events/weapon_frinesi/fire01.sc")
+	.FiresUnderwater(false)
+	.UsesAmmo(CGenericWeaponAtts_FireMode::AmmoType_e::Primary)
+)
+// Timed
+.FireMode(1, CGenericWeaponAtts_FireMode()
+	.Event("events/weapon_frinesi/fire01.sc")
+	.FiresUnderwater(false)
+	.UsesAmmo(CGenericWeaponAtts_FireMode::AmmoType_e::Primary)
+)
+.Animations(CGenericWeaponAtts_Animations()
+	.Extension("gauss")
+	.Index_Draw(GRENADELAUNCHER_DRAW)
+	.Index_ReloadWhenNotEmpty(GRENADELAUNCHER_RELOAD)
+);
+
+LINK_ENTITY_TO_CLASS(weapon_grenadelauncher, CWeaponGrenadeLauncher);
+
+const CGenericWeaponAttributes& CWeaponGrenadeLauncher::WeaponAttributes() const
+{
+	return StaticWeaponAttributes;
+}
