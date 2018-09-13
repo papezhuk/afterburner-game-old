@@ -1,5 +1,5 @@
 $cd "."
-$cdtexture "." "..\..\..\common"
+$cdtexture "." "..\..\common"
 $modelname "v_frinesi.mdl"
 
 $root "Bip01"
