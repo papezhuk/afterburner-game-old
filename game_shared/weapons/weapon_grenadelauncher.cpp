@@ -14,6 +14,8 @@ namespace
 		GRENADELAUNCHER_HOLSTER
 	};
 
+	static constexpr float GRENADELAUNCHER_AMMOBOX_GIVE = 6;
+
 #ifdef CLIENT_DLL
 	CWeaponGrenadeLauncher PredictionWeapon;
 #endif
@@ -60,3 +62,14 @@ const CGenericWeaponAttributes& CWeaponGrenadeLauncher::WeaponAttributes() const
 {
 	return StaticWeaponAttributes;
 }
+
+class CAmmoGrenadeLauncher : public CGenericAmmo
+{
+public:
+	CAmmoGrenadeLauncher()
+		: CGenericAmmo("models/weapon_grenadelauncher/w_ammo_grenadelauncher.mdl", AmmoDef_GrenadeLauncher, GRENADELAUNCHER_AMMOBOX_GIVE)
+	{
+	}
+};
+
+LINK_ENTITY_TO_CLASS(ammo_grenadelauncher, CAmmoGrenadeLauncher)
