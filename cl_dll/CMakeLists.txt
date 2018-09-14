@@ -63,6 +63,8 @@ set (CLDLL_SOURCES
 	../game_shared/weapons/glock.cpp
 	../game_shared/weapons/weaponregistry.cpp
 	../game_shared/weapons/genericweapon.cpp
+	../game_shared/weapons/generichitscanweapon.cpp
+	../game_shared/weapons/genericprojectileweapon.cpp
 	../game_shared/weapons/genericweaponattributes.cpp
 	../game_shared/weapons/ammodefs.cpp
 	../game_shared/weapons/weaponslots.cpp

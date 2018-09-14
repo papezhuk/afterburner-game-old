@@ -145,7 +145,7 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 LINK_ENTITY_TO_CLASS(weapon_frinesi, CWeaponFrinesi)
 
 CWeaponFrinesi::CWeaponFrinesi()
-	: CGenericWeapon(),
+	: CGenericHitscanWeapon(),
 	  m_flReloadStartDuration(0.0f),
 	  m_flReloadDuration(0.0f),
 	  m_flPumpDuration(0.0f),

@@ -126,7 +126,7 @@ LINK_ENTITY_TO_CLASS(weapon_p99, CWeaponP99)
 LINK_ENTITY_TO_CLASS(weapon_pp9, CWeaponP99)	// NF devs called it "PP9" for some reason.
 
 CWeaponP99::CWeaponP99()
-	: CGenericWeapon(),
+	: CGenericHitscanWeapon(),
 	  m_bSilenced(false)
 {
 }

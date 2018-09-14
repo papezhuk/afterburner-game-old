@@ -1,9 +1,9 @@
 #pragma once
 
 #include "standard_includes.h"
-#include "genericweapon.h"
+#include "generichitscanweapon.h"
 
-class CWeaponGenericTest : public CGenericWeapon
+class CWeaponGenericTest : public CGenericHitscanWeapon
 {
 public:
 	virtual void Precache() override;

@@ -1,9 +1,9 @@
 #pragma once
 
 #include "standard_includes.h"
-#include "genericweapon.h"
+#include "generichitscanweapon.h"
 
-class CWeaponFrinesi : public CGenericWeapon
+class CWeaponFrinesi : public CGenericHitscanWeapon
 {
 public:
 	CWeaponFrinesi();

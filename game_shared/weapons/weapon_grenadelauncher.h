@@ -1,9 +1,9 @@
 #pragma once
 
 #include "standard_includes.h"
-#include "genericweapon.h"
+#include "genericprojectileweapon.h"
 
-class CWeaponGrenadeLauncher : public CGenericWeapon
+class CWeaponGrenadeLauncher : public CGenericProjectileWeapon
 {
 public:
 	virtual const CGenericWeaponAttributes& WeaponAttributes() const override;

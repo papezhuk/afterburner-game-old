@@ -36,6 +36,13 @@ protected:
 
 	// Returns true if firing succeeded.
 	bool FireUsingMode(int index);
+	virtual bool SwitchFire(int index,
+							const CGenericWeaponAtts_FireMode& fireMode,
+							const CGenericWeaponAtts_BaseFireMechanic& mechanic) = 0;
+
+	virtual void SwitchPrecache(const CGenericWeaponAtts_BaseFireMechanic& mechanic) = 0;
+	void PrecacheSounds(const CGenericWeaponAttributes_Sound& sounds);
+
 	void DelayPendingActions(float secs, bool allowIfEarlier = false);
 	void DelayFiring(float secs, bool allowIfEarlier = false, int mode = -1);
 	bool HasAmmo(const CGenericWeaponAtts_FireMode& fireMode, int minCount = 1, bool useClip = true) const;
@@ -72,27 +79,14 @@ protected:
 		}
 	}
 
+	unsigned short m_FireEvents[2];
+
 private:
 	void PrecacheFireMode(uint8_t fireModeIndex);
 	void PrecacheHitscanResources(const CGenericWeaponAtts_HitscanFireMechanic& fireMode);
 	void PrecacheCore(const CGenericWeaponAtts_Core& core);
-	void PrecacheSounds(const CGenericWeaponAttributes_Sound& sounds);
 
 	void SetFireOnEmptyState(uint8_t mode);
-	bool HitscanFire(int index,
-					 const CGenericWeaponAtts_FireMode& fireMode,
-					 const CGenericWeaponAtts_HitscanFireMechanic& mechanic);
-	Vector FireBulletsPlayer(const CGenericWeaponAtts_HitscanFireMechanic& fireMode,
-							 const Vector& vecSrc,
-							 const Vector& vecDirShooting);
-
-	bool ProjectileFire(int index,
-						const CGenericWeaponAtts_FireMode& fireMode,
-						const CGenericWeaponAtts_ProjectileFireMechanic& mechanic);
-
-#ifdef CLIENT_DLL
-	Vector FireBulletsPlayer_Client(const CGenericWeaponAtts_HitscanFireMechanic& fireMode);
-#endif
 
 	// Return true if reload action occurred, or false otherwise.
 	bool IdleProcess_CheckReload();
@@ -101,7 +95,6 @@ private:
 
 	void FindWeaponSlotInfo();
 
-	unsigned short m_FireEvents[2];
 	int m_iViewModelIndex;
 	int m_iViewModelBody;
 	std::vector<float> m_ViewAnimDurations;

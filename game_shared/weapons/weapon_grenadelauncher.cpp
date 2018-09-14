@@ -14,6 +14,7 @@ namespace
 		GRENADELAUNCHER_HOLSTER
 	};
 
+	static constexpr float GRENADELAUNCHER_FIRE_INTERVAL = 0.8f;	// Secs
 	static constexpr float GRENADELAUNCHER_AMMOBOX_GIVE = 6;
 
 #ifdef CLIENT_DLL
@@ -47,7 +48,7 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 		.AnimIndex_FireNotEmpty(GRENADELAUNCHER_FIRE)
 		.Volume(LOUD_GUN_VOLUME)
 		.MuzzleFlashBrightness(BRIGHT_GUN_FLASH)
-		.FireRate(1.0f / 1.5f)
+		.FireRate(1.0f / GRENADELAUNCHER_FIRE_INTERVAL)
 		.FullAuto(false)
 		.UniformSpread(1.0f)
 		.Projectile([](){/*TODO*/ return (CGrenade*)NULL;})
