@@ -7,6 +7,7 @@
 #include "weapons.h"
 #include "weaponids.h"
 #include "ammodefs.h"
+#include "skill.h"
 
 class CGenericWeapon;
 
@@ -188,8 +189,6 @@ public:
 		Projectile
 	};
 
-	typedef float(*DamageFunc_t)();
-
 	virtual FireMechanic_e Id() const = 0;
 	virtual CGenericWeaponAtts_BaseFireMechanic* Clone() const = 0;
 
@@ -209,50 +208,17 @@ public:
 class CGenericWeaponAtts_HitscanFireMechanic : public CGenericWeaponAtts_BaseFireMechanic
 {
 public:
+	typedef float skilldata_t::* SkillBasedDamagePtr;
+
 	virtual FireMechanic_e Id() const override { return CGenericWeaponAtts_BaseFireMechanic::FireMechanic_e::Hitscan; }
 	virtual CGenericWeaponAtts_BaseFireMechanic* Clone() const override { return new CGenericWeaponAtts_HitscanFireMechanic(*this); }
 
 #define ATTR(type, name, defaultVal) BASE_ATTR(CGenericWeaponAtts_HitscanFireMechanic, type, name, defaultVal)
-	ATTR(float, FireRate, 1.0f);	// Cycles per second
 	ATTR(uint8_t, BulletsPerShot, 1);
-	ATTR(DamageFunc_t, BaseDamagePerShot, NULL);
-	ATTR(float, SpreadX, 0.0f);
-	ATTR(float, SpreadY, 0.0f);
-	ATTR(bool, FullAuto, false);
+	ATTR(SkillBasedDamagePtr, BaseDamagePerShot, NULL);
 	ATTR(float, AutoAim, 0.0f);
-	ATTR(int, Volume, NORMAL_GUN_VOLUME);
-	ATTR(int, MuzzleFlashBrightness, NORMAL_GUN_FLASH);
 	ATTR(const char*, ShellModelName, NULL);
-	ATTR(int, AnimIndex_FireNotEmpty, -1);
-	ATTR(int, AnimIndex_FireEmpty, -1);		// If left at -1, FireNotEmpty used instead.
-	ATTR(float, ViewPunchY, 0.0f);
-	ATTR(int, ViewModelBodyOverride, -1);	// If specified, event uses this body index for the view model.
 #undef ATTR
-
-	// Convenience:
-	inline CGenericWeaponAtts_HitscanFireMechanic& UniformSpread(float spread)
-	{
-		return SpreadX(spread).SpreadY(spread);
-	}
-
-	inline const CGenericWeaponAttributes_Sound& Sounds() const
-	{
-		return m_Sounds;
-	}
-
-	inline CGenericWeaponAtts_HitscanFireMechanic& Sounds(const CGenericWeaponAttributes_Sound& sound)
-	{
-		m_Sounds = sound;
-		return *this;
-	}
-
-	inline bool HasSounds() const
-	{
-		return m_Sounds.SoundList().Count() > 0;
-	}
-
-private:
-	CGenericWeaponAttributes_Sound m_Sounds;
 };
 
 class CGenericWeaponAtts_ProjectileFireMechanic : public CGenericWeaponAtts_BaseFireMechanic
@@ -262,43 +228,8 @@ public:
 	virtual CGenericWeaponAtts_BaseFireMechanic* Clone() const override { return new CGenericWeaponAtts_ProjectileFireMechanic(*this); }
 
 #define ATTR(type, name, defaultVal) BASE_ATTR(CGenericWeaponAtts_ProjectileFireMechanic, type, name, defaultVal)
-	// TODO: Make this stuff common
-	ATTR(float, FireRate, 1.0f);	// Cycles per second
-	ATTR(bool, FullAuto, false);
-	ATTR(float, SpreadX, 0.0f);
-	ATTR(float, SpreadY, 0.0f);
-	ATTR(int, Volume, NORMAL_GUN_VOLUME);
-	ATTR(int, MuzzleFlashBrightness, NORMAL_GUN_FLASH);
-	ATTR(int, AnimIndex_FireNotEmpty, -1);
-	ATTR(int, AnimIndex_FireEmpty, -1);		// If left at -1, FireNotEmpty used instead.
-	ATTR(float, ViewPunchY, 0.0f);
-	ATTR(int, ViewModelBodyOverride, -1);	// If specified, event uses this body index for the view model.
+	// Nothing yet
 #undef ATTR
-
-		// Convenience:
-	inline CGenericWeaponAtts_ProjectileFireMechanic& UniformSpread(float spread)
-	{
-		return SpreadX(spread).SpreadY(spread);
-	}
-
-	inline const CGenericWeaponAttributes_Sound& Sounds() const
-	{
-		return m_Sounds;
-	}
-
-	inline CGenericWeaponAtts_ProjectileFireMechanic& Sounds(const CGenericWeaponAttributes_Sound& sound)
-	{
-		m_Sounds = sound;
-		return *this;
-	}
-
-	inline bool HasSounds() const
-	{
-		return m_Sounds.SoundList().Count() > 0;
-	}
-
-private:
-	CGenericWeaponAttributes_Sound m_Sounds;
 };
 
 class CGenericWeaponAtts_FireMode
@@ -328,31 +259,13 @@ public:
 	}
 
 	CGenericWeaponAtts_FireMode(const CGenericWeaponAtts_FireMode& other)
-		: m_Event(other.m_Event),
-		  m_FiresUnderwater(other.m_FiresUnderwater),
-		  m_UsesAmmo(other.m_UsesAmmo),
-		  m_Signature(other.m_Signature)
 	{
-		CGenericWeaponAtts_BaseFireMechanic* mechanicPtr = other.m_pMechanic.get();
-		if ( mechanicPtr )
-		{
-			m_pMechanic.reset(mechanicPtr->Clone());
-		}
+		CopyFrom(other);
 	}
 
 	CGenericWeaponAtts_FireMode& operator =(const CGenericWeaponAtts_FireMode& other)
 	{
-		m_Event = other.m_Event;
-		m_FiresUnderwater = other.m_FiresUnderwater;
-		m_UsesAmmo = other.m_UsesAmmo;
-		m_Signature = other.m_Signature;
-
-		CGenericWeaponAtts_BaseFireMechanic* mechanicPtr = other.m_pMechanic.get();
-		if ( mechanicPtr )
-		{
-			m_pMechanic.reset(mechanicPtr->Clone());
-		}
-
+		CopyFrom(other);
 		return *this;
 	}
 
@@ -360,11 +273,44 @@ public:
 	ATTR(const char*, Event, NULL)
 	ATTR(bool, FiresUnderwater, false);
 	ATTR(AmmoType_e, UsesAmmo, AmmoType_e::None);
+	ATTR(float, FireRate, 1.0f);	// Cycles per second
+	ATTR(bool, FullAuto, false);
+	ATTR(float, SpreadX, 0.0f);
+	ATTR(float, SpreadY, 0.0f);
+	ATTR(int, Volume, NORMAL_GUN_VOLUME);
+	ATTR(int, MuzzleFlashBrightness, NORMAL_GUN_FLASH);
+	ATTR(int, AnimIndex_FireNotEmpty, -1);
+	ATTR(int, AnimIndex_FireEmpty, -1);		// If left at -1, FireNotEmpty used instead.
+	ATTR(float, ViewPunchY, 0.0f);
+	ATTR(int, ViewModelBodyOverride, -1);	// If specified, event uses this body index for the view model.
 #undef ATTR
 
 	inline void Validate()
 	{
 		ASSERTSZ_Q(m_Event, "Weapon must have a fire event specified.");
+		ASSERTSZ_Q(m_AnimIndex_FireNotEmpty >= 0, "FireNotEmpty animation must be specified.");
+	}
+
+	// Convenience:
+	inline CGenericWeaponAtts_FireMode& UniformSpread(float spread)
+	{
+		return SpreadX(spread).SpreadY(spread);
+	}
+
+	inline const CGenericWeaponAttributes_Sound& Sounds() const
+	{
+		return m_Sounds;
+	}
+
+	inline CGenericWeaponAtts_FireMode& Sounds(const CGenericWeaponAttributes_Sound& sound)
+	{
+		m_Sounds = sound;
+		return *this;
+	}
+
+	inline bool HasSounds() const
+	{
+		return m_Sounds.SoundList().Count() > 0;
 	}
 
 	inline const CGenericWeaponAtts_BaseFireMechanic* Mechanic() const
@@ -399,8 +345,34 @@ public:
 private:
 	typedef std::unique_ptr<CGenericWeaponAtts_BaseFireMechanic> BaseFireMechanicPtr;
 
+	inline void CopyFrom(const CGenericWeaponAtts_FireMode& other)
+	{
+		m_AnimIndex_FireEmpty = other.m_AnimIndex_FireEmpty;
+		m_AnimIndex_FireNotEmpty = other.m_AnimIndex_FireNotEmpty;
+		m_Event = other.m_Event;
+		m_FireRate = other.m_FireRate;
+		m_FiresUnderwater = other.m_FiresUnderwater;
+		m_FullAuto = other.m_FullAuto;
+		m_MuzzleFlashBrightness = other.m_MuzzleFlashBrightness;
+		m_Signature = other.m_Signature;
+		m_Sounds = other.m_Sounds;
+		m_SpreadX = other.m_SpreadX;
+		m_SpreadY = other.m_SpreadY;
+		m_UsesAmmo = other.m_UsesAmmo;
+		m_ViewModelBodyOverride = other.m_ViewModelBodyOverride;
+		m_ViewPunchY = other.m_ViewPunchY;
+		m_Volume = other.m_Volume;
+
+		CGenericWeaponAtts_BaseFireMechanic* mechanicPtr = other.m_pMechanic.get();
+		if ( mechanicPtr )
+		{
+			m_pMechanic.reset(mechanicPtr->Clone());
+		}
+	}
+
 	BaseFireMechanicPtr m_pMechanic;
 	FireModeSignature m_Signature;
+	CGenericWeaponAttributes_Sound m_Sounds;
 };
 
 class CGenericWeaponAtts_Animations

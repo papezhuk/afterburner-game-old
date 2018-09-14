@@ -30,13 +30,13 @@ bool CGenericProjectileWeapon::SwitchFire(int index,
 
 bool CGenericProjectileWeapon::ProjectileFire(int index, const CGenericWeaponAtts_FireMode& fireMode, const CGenericWeaponAtts_ProjectileFireMechanic& mechanic)
 {
-	if ( index < 0 || index > 1 || mechanic.FireRate() <= 0.0f )
+	if ( index < 0 || index > 1 || fireMode.FireRate() <= 0.0f )
 	{
 		return false;
 	}
 
-	m_pPlayer->m_iWeaponVolume = mechanic.Volume();
-	m_pPlayer->m_iWeaponFlash = mechanic.MuzzleFlashBrightness();
+	m_pPlayer->m_iWeaponVolume = fireMode.Volume();
+	m_pPlayer->m_iWeaponFlash = fireMode.MuzzleFlashBrightness();
 
 	m_pPlayer->m_iExtraSoundTypes = bits_SOUND_DANGER;
 	m_pPlayer->m_flStopExtraSoundTime = UTIL_WeaponTimeBase() + 0.2;
@@ -53,7 +53,7 @@ bool CGenericProjectileWeapon::ProjectileFire(int index, const CGenericWeaponAtt
 
 	PLAYBACK_EVENT(DefaultEventFlags(), m_pPlayer->edict(), m_FireEvents[index]);
 
-	DelayFiring(1.0f / mechanic.FireRate());
+	DelayFiring(1.0f / fireMode.FireRate());
 	SetNextIdleTime(5, true);
 
 	if ( !HasAmmo(fireMode, 1, true) && !HasAmmo(fireMode, 1, false) )

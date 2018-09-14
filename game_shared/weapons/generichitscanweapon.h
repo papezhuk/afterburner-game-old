@@ -15,11 +15,13 @@ private:
 	bool HitscanFire(int index,
 					 const CGenericWeaponAtts_FireMode& fireMode,
 					 const CGenericWeaponAtts_HitscanFireMechanic& mechanic);
-	Vector FireBulletsPlayer(const CGenericWeaponAtts_HitscanFireMechanic& fireMode,
+	Vector FireBulletsPlayer(const CGenericWeaponAtts_FireMode& fireMode,
+							 const CGenericWeaponAtts_HitscanFireMechanic& mechanic,
 							 const Vector& vecSrc,
 							 const Vector& vecDirShooting);
 
 #ifdef CLIENT_DLL
-	Vector FireBulletsPlayer_Client(const CGenericWeaponAtts_HitscanFireMechanic& fireMode);
+	Vector FireBulletsPlayer_Client(const CGenericWeaponAtts_FireMode& fireMode,
+									const CGenericWeaponAtts_HitscanFireMechanic& mechanic);
 #endif
 };

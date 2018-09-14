@@ -1,4 +1,5 @@
 #include "generichitscanweapon.h"
+#include "skill.h"
 
 void CGenericHitscanWeapon::SwitchPrecache(const CGenericWeaponAtts_BaseFireMechanic& mechanic)
 {
@@ -13,7 +14,6 @@ void CGenericHitscanWeapon::SwitchPrecache(const CGenericWeaponAtts_BaseFireMech
 void CGenericHitscanWeapon::Precache(const CGenericWeaponAtts_HitscanFireMechanic& mechanic)
 {
 	PRECACHE_MODEL(mechanic.ShellModelName());
-	PrecacheSounds(mechanic.Sounds());
 }
 
 bool CGenericHitscanWeapon::SwitchFire(int index,
@@ -32,7 +32,7 @@ bool CGenericHitscanWeapon::HitscanFire(int index,
 										const CGenericWeaponAtts_FireMode& fireMode,
 										const CGenericWeaponAtts_HitscanFireMechanic& mechanic)
 {
-	if ( index < 0 || index > 1 || mechanic.FireRate() <= 0.0f || mechanic.BulletsPerShot() < 1 )
+	if ( index < 0 || index > 1 || fireMode.FireRate() <= 0.0f || mechanic.BulletsPerShot() < 1 )
 	{
 		return false;
 	}
@@ -44,8 +44,8 @@ bool CGenericHitscanWeapon::HitscanFire(int index,
 	// player "shoot" animation
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
-	m_pPlayer->m_iWeaponVolume = mechanic.Volume();
-	m_pPlayer->m_iWeaponFlash = mechanic.MuzzleFlashBrightness();
+	m_pPlayer->m_iWeaponVolume = fireMode.Volume();
+	m_pPlayer->m_iWeaponFlash = fireMode.MuzzleFlashBrightness();
 
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	Vector vecAiming;
@@ -60,10 +60,10 @@ bool CGenericHitscanWeapon::HitscanFire(int index,
 	}
 
 	Vector vecDir;
-	const float spreadX = mechanic.SpreadX();
-	const float spreadY = mechanic.SpreadY();
+	const float spreadX = fireMode.SpreadX();
+	const float spreadY = fireMode.SpreadY();
 
-	vecDir = FireBulletsPlayer(mechanic, vecSrc, vecAiming);
+	vecDir = FireBulletsPlayer(fireMode, mechanic, vecSrc, vecAiming);
 
 	if ( m_FireEvents[index] )
 	{
@@ -81,7 +81,7 @@ bool CGenericHitscanWeapon::HitscanFire(int index,
 							0);
 	}
 
-	DelayFiring(1.0f / mechanic.FireRate());
+	DelayFiring(1.0f / fireMode.FireRate());
 
 	if ( !HasAmmo(fireMode, 1, true) && !HasAmmo(fireMode, 1, false) )
 	{
@@ -93,14 +93,15 @@ bool CGenericHitscanWeapon::HitscanFire(int index,
 	return true;
 }
 
-Vector CGenericHitscanWeapon::FireBulletsPlayer(const CGenericWeaponAtts_HitscanFireMechanic& fireMode,
-										 const Vector& vecSrc,
-										 const Vector& vecDirShooting)
+Vector CGenericHitscanWeapon::FireBulletsPlayer(const CGenericWeaponAtts_FireMode& fireMode,
+												const CGenericWeaponAtts_HitscanFireMechanic& mechanic,
+												const Vector& vecSrc,
+										 		const Vector& vecDirShooting)
 {
 #ifdef CLIENT_DLL
 	// The client doesn't actually do any bullet simulation, we just make sure that
 	// the generated random vectors match up.
-	return FireBulletsPlayer_Client(fireMode);
+	return FireBulletsPlayer_Client(fireMode, mechanic);
 #else
 	TraceResult tr;
 	Vector vecRight = gpGlobals->v_right;
@@ -114,13 +115,14 @@ Vector CGenericHitscanWeapon::FireBulletsPlayer(const CGenericWeaponAtts_Hitscan
 	ClearMultiDamage();
 	gMultiDamage.type = DMG_BULLET | DMG_NEVERGIB;
 
-	const uint32_t numShots = fireMode.BulletsPerShot();
+	const uint32_t numShots = mechanic.BulletsPerShot();
 	for( uint32_t shot = 1; shot <= numShots; shot++ )
 	{
 		float damagePerShot = 1.0f;
-		if ( fireMode.BaseDamagePerShot() )
+		const CGenericWeaponAtts_HitscanFireMechanic::SkillBasedDamagePtr dmgPtr = mechanic.BaseDamagePerShot();
+		if ( dmgPtr )
 		{
-			damagePerShot = (*fireMode.BaseDamagePerShot())();
+			damagePerShot = gSkillData.*dmgPtr;
 		}
 
 		GetSharedCircularGaussianSpread(shot, shared_rand, x, y);
@@ -153,11 +155,12 @@ Vector CGenericHitscanWeapon::FireBulletsPlayer(const CGenericWeaponAtts_Hitscan
 }
 
 #ifdef CLIENT_DLL
-Vector CGenericHitscanWeapon::FireBulletsPlayer_Client(const CGenericWeaponAtts_HitscanFireMechanic& fireMode)
+Vector CGenericHitscanWeapon::FireBulletsPlayer_Client(const CGenericWeaponAtts_FireMode& fireMode,
+													   const CGenericWeaponAtts_HitscanFireMechanic& mechanic)
 {
 	float x = 0, y = 0;
 
-	const uint32_t numShots = fireMode.BulletsPerShot();
+	const uint32_t numShots = mechanic.BulletsPerShot();
 	for( uint32_t shot = 1; shot <= numShots; shot++ )
 	{
 		GetSharedCircularGaussianSpread(shot, m_pPlayer->random_seed, x, y);

@@ -438,6 +438,7 @@ void GenericWeaponFireBullets(int idx,
 							  vec3_t& up,
 							  vec3_t& vecSrc,
 							  vec3_t& vecDirShooting,
+							  const CGenericWeaponAtts_FireMode& fireMode,
 							  const CGenericWeaponAtts_HitscanFireMechanic& mechanic,
 							  float flSpreadX,
 							  float flSpreadY,
@@ -462,7 +463,7 @@ void GenericWeaponFireBullets(int idx,
 
 			for( i = 0 ; i < 3; i++ )
 			{
-				vecDir[i] = vecDirShooting[i] + x * mechanic.SpreadX() * right[i] + y * mechanic.SpreadY() * up [i];
+				vecDir[i] = vecDirShooting[i] + x * fireMode.SpreadX() * right[i] + y * fireMode.SpreadY() * up [i];
 			}
 		}
 		else
@@ -499,7 +500,7 @@ void GenericWeaponFireBullets(int idx,
 	}
 }
 
-static void GenericWeaponHitscanFire(event_args_t *args, const CGenericWeaponAttributes& atts, const CGenericWeaponAtts_HitscanFireMechanic& mechanic)
+static void GenericWeaponHitscanFire(event_args_t *args, const CGenericWeaponAtts_FireMode& fireMode, const CGenericWeaponAtts_HitscanFireMechanic& mechanic)
 {
 	const int idx = args->entindex;
 	const bool empty = args->bparam1;
@@ -520,13 +521,13 @@ static void GenericWeaponHitscanFire(event_args_t *args, const CGenericWeaponAtt
 	{
 		EV_MuzzleFlash();
 
-		int animIndex = empty ? mechanic.AnimIndex_FireEmpty() : mechanic.AnimIndex_FireNotEmpty();
+		int animIndex = empty ? fireMode.AnimIndex_FireEmpty() : fireMode.AnimIndex_FireNotEmpty();
 		if ( empty && animIndex < 0 )
 		{
-			animIndex = mechanic.AnimIndex_FireNotEmpty();
+			animIndex = fireMode.AnimIndex_FireNotEmpty();
 		}
 
-		int body = mechanic.ViewModelBodyOverride();
+		int body = fireMode.ViewModelBodyOverride();
 		if ( body < 0 )
 		{
 			const struct cl_entity_s* const viewModelEnt = GetViewEntity();
@@ -541,7 +542,7 @@ static void GenericWeaponHitscanFire(event_args_t *args, const CGenericWeaponAtt
 		}
 
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(animIndex, body);
-		V_PunchAxis(0, mechanic.ViewPunchY());
+		V_PunchAxis(0, fireMode.ViewPunchY());
 	}
 
 	vec3_t ShellVelocity;
@@ -549,9 +550,9 @@ static void GenericWeaponHitscanFire(event_args_t *args, const CGenericWeaponAtt
 	EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20, -12, 4 );
 	EV_EjectBrass( ShellOrigin, ShellVelocity, angles[YAW], shell, TE_BOUNCE_SHELL );
 
-	if ( mechanic.HasSounds() )
+	if ( fireMode.HasSounds() )
 	{
-		const CGenericWeaponAttributes_Sound& fireSound = mechanic.Sounds();
+		const CGenericWeaponAttributes_Sound& fireSound = fireMode.Sounds();
 		const float volume = (fireSound.MinVolume() < fireSound.MaxVolume())
 			? gEngfuncs.pfnRandomFloat(fireSound.MinVolume(), fireSound.MaxVolume())
 			: fireSound.MaxVolume();
@@ -584,13 +585,14 @@ static void GenericWeaponHitscanFire(event_args_t *args, const CGenericWeaponAtt
 						up,
 						vecSrc,
 						vecAiming,
+						fireMode,
 						mechanic,
 						args->fparam1,
 						args->fparam2,
 						args->iparam1);
 }
 
-static void GenericWeaponProjectileFire(event_args_t *args, const CGenericWeaponAttributes& atts, const CGenericWeaponAtts_ProjectileFireMechanic& mechanic)
+static void GenericWeaponProjectileFire(event_args_t *args, const CGenericWeaponAtts_FireMode& fireMode, const CGenericWeaponAtts_ProjectileFireMechanic& mechanic)
 {
 	const int idx = args->entindex;
 	const bool empty = args->bparam1;
@@ -602,13 +604,13 @@ static void GenericWeaponProjectileFire(event_args_t *args, const CGenericWeapon
 	{
 		EV_MuzzleFlash();
 
-		int animIndex = empty ? mechanic.AnimIndex_FireEmpty() : mechanic.AnimIndex_FireNotEmpty();
+		int animIndex = empty ? fireMode.AnimIndex_FireEmpty() : fireMode.AnimIndex_FireNotEmpty();
 		if ( empty && animIndex < 0 )
 		{
-			animIndex = mechanic.AnimIndex_FireNotEmpty();
+			animIndex = fireMode.AnimIndex_FireNotEmpty();
 		}
 
-		int body = mechanic.ViewModelBodyOverride();
+		int body = fireMode.ViewModelBodyOverride();
 		if ( body < 0 )
 		{
 			const struct cl_entity_s* const viewModelEnt = GetViewEntity();
@@ -623,12 +625,12 @@ static void GenericWeaponProjectileFire(event_args_t *args, const CGenericWeapon
 		}
 
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(animIndex, body);
-		V_PunchAxis(0, mechanic.ViewPunchY());
+		V_PunchAxis(0, fireMode.ViewPunchY());
 	}
 
-	if ( mechanic.HasSounds() )
+	if ( fireMode.HasSounds() )
 	{
-		const CGenericWeaponAttributes_Sound& fireSound = mechanic.Sounds();
+		const CGenericWeaponAttributes_Sound& fireSound = fireMode.Sounds();
 		const float volume = (fireSound.MinVolume() < fireSound.MaxVolume())
 			? gEngfuncs.pfnRandomFloat(fireSound.MinVolume(), fireSound.MaxVolume())
 			: fireSound.MaxVolume();
@@ -663,14 +665,15 @@ void EV_HandleGenericHitscanFire(event_args_t* args)
 		return;
 	}
 
-	const CGenericWeaponAtts_BaseFireMechanic* mechanic = atts->FireMode(fireModeIndex).Mechanic();
+	const CGenericWeaponAtts_FireMode& fireMode = atts->FireMode(fireModeIndex);
+	const CGenericWeaponAtts_BaseFireMechanic* mechanic = fireMode.Mechanic();
 	if ( !mechanic || mechanic->Id() != CGenericWeaponAtts_BaseFireMechanic::FireMechanic_e::Hitscan )
 	{
 		ASSERT(false);
 		return;
 	}
 
-	GenericWeaponHitscanFire(args, *atts, *(mechanic->AsType<const CGenericWeaponAtts_HitscanFireMechanic>()));
+	GenericWeaponHitscanFire(args, fireMode, *(mechanic->AsType<const CGenericWeaponAtts_HitscanFireMechanic>()));
 }
 
 void EV_HandleGenericProjectileFire(event_args_t* args)
@@ -688,14 +691,15 @@ void EV_HandleGenericProjectileFire(event_args_t* args)
 		return;
 	}
 
-	const CGenericWeaponAtts_BaseFireMechanic* mechanic = atts->FireMode(fireModeIndex).Mechanic();
+	const CGenericWeaponAtts_FireMode& fireMode = atts->FireMode(fireModeIndex);
+	const CGenericWeaponAtts_BaseFireMechanic* mechanic = fireMode.Mechanic();
 	if ( !mechanic || mechanic->Id() != CGenericWeaponAtts_BaseFireMechanic::FireMechanic_e::Projectile )
 	{
 		ASSERT(false);
 		return;
 	}
 
-	GenericWeaponProjectileFire(args, *atts, *(mechanic->AsType<const CGenericWeaponAtts_ProjectileFireMechanic>()));
+	GenericWeaponProjectileFire(args, fireMode, *(mechanic->AsType<const CGenericWeaponAtts_ProjectileFireMechanic>()));
 }
 
 //======================
