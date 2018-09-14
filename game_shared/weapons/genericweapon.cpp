@@ -2,6 +2,7 @@
 #include "studio_utils_shared.h"
 #include "weaponslots.h"
 #include "gamerules.h"
+#include "soundent.h"
 
 #ifdef CLIENT_DLL
 #include "cl_dll.h"
@@ -188,11 +189,27 @@ bool CGenericWeapon::FireUsingMode(int index)
 		return false;
 	}
 
+	if ( (m_pPlayer->pev->waterlevel == 3 && !fireMode.FiresUnderwater()) || !HasAmmo(fireMode) )
+	{
+		if( m_fFireOnEmpty )
+		{
+			PlayEmptySound();
+			DelayFiring(0.2f, false, index);
+		}
+
+		return false;
+	}
+
 	switch ( fireMode.Mechanic()->Id() )
 	{
 		case CGenericWeaponAtts_BaseFireMechanic::FireMechanic_e::Hitscan:
 		{
-			return HitscanFire(index, *fireMode.Mechanic()->AsType<CGenericWeaponAtts_HitscanFireMechanic>());
+			return HitscanFire(index, fireMode, *fireMode.Mechanic()->AsType<const CGenericWeaponAtts_HitscanFireMechanic>());
+		}
+
+		case CGenericWeaponAtts_BaseFireMechanic::FireMechanic_e::Projectile:
+		{
+			return ProjectileFire(index, fireMode, *fireMode.Mechanic()->AsType<const CGenericWeaponAtts_ProjectileFireMechanic>());
 		}
 
 		default:
@@ -202,49 +219,36 @@ bool CGenericWeapon::FireUsingMode(int index)
 	}
 }
 
-bool CGenericWeapon::HitscanFire(int index, const CGenericWeaponAtts_HitscanFireMechanic& fireMode)
+bool CGenericWeapon::HitscanFire(int index,
+								 const CGenericWeaponAtts_FireMode& fireMode,
+								 const CGenericWeaponAtts_HitscanFireMechanic& mechanic)
 {
-	if ( index < 0 || index > 1 || fireMode.FireRate() <= 0.0f || fireMode.BulletsPerShot() < 1 )
+	if ( index < 0 || index > 1 || mechanic.FireRate() <= 0.0f || mechanic.BulletsPerShot() < 1 )
 	{
 		return false;
 	}
 
-	const CGenericWeaponAttributes& atts = WeaponAttributes();
-
-	if( m_iClip <= 0 )
-	{
-		if( m_fFireOnEmpty )
-		{
-			PlayEmptySound();
-			DelayFiring(0.2f);
-		}
-
-		return false;
-	}
-
-	m_iClip--;
+	DecrementAmmo(fireMode, 1);
 
 	m_pPlayer->pev->effects = (int)( m_pPlayer->pev->effects ) | EF_MUZZLEFLASH;
 
-	int flags;
+	int flags = 0;
 #if defined( CLIENT_WEAPONS )
 	flags = FEV_NOTHOST;
-#else
-	flags = 0;
 #endif
 
 	// player "shoot" animation
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
-	m_pPlayer->m_iWeaponVolume = fireMode.Volume();
-	m_pPlayer->m_iWeaponFlash = fireMode.MuzzleFlashBrightness();
+	m_pPlayer->m_iWeaponVolume = mechanic.Volume();
+	m_pPlayer->m_iWeaponFlash = mechanic.MuzzleFlashBrightness();
 
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	Vector vecAiming;
 
-	if( fireMode.AutoAim() > 0.0f )
+	if( mechanic.AutoAim() > 0.0f )
 	{
-		vecAiming = m_pPlayer->GetAutoaimVector(fireMode.AutoAim());
+		vecAiming = m_pPlayer->GetAutoaimVector(mechanic.AutoAim());
 	}
 	else
 	{
@@ -252,10 +256,10 @@ bool CGenericWeapon::HitscanFire(int index, const CGenericWeaponAtts_HitscanFire
 	}
 
 	Vector vecDir;
-	const float spreadX = fireMode.SpreadX();
-	const float spreadY = fireMode.SpreadY();
+	const float spreadX = mechanic.SpreadX();
+	const float spreadY = mechanic.SpreadY();
 
-	vecDir = FireBulletsPlayer(fireMode, vecSrc, vecAiming);
+	vecDir = FireBulletsPlayer(mechanic, vecSrc, vecAiming);
 
 	if ( m_FireEvents[index] )
 	{
@@ -273,17 +277,61 @@ bool CGenericWeapon::HitscanFire(int index, const CGenericWeaponAtts_HitscanFire
 							0);
 	}
 
-	DelayFiring(1.0f / fireMode.FireRate());
+	DelayFiring(1.0f / mechanic.FireRate());
 
-	if( !m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 )
+	if ( !HasAmmo(fireMode, 1, true) && !HasAmmo(fireMode, 1, false) )
 	{
 		// HEV suit - indicate out of ammo condition
-		m_pPlayer->SetSuitUpdate( "!HEV_AMO0", FALSE, 0 );
+		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
 	}
 
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat( m_pPlayer->random_seed, 10, 15 );
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
 	return true;
 };
+
+bool CGenericWeapon::ProjectileFire(int index, const CGenericWeaponAtts_FireMode& fireMode, const CGenericWeaponAtts_ProjectileFireMechanic& mechanic)
+{
+	if ( index < 0 || index > 1 || mechanic.FireRate() <= 0.0f || !mechanic.Projectile() )
+	{
+		return false;
+	}
+
+	m_pPlayer->m_iWeaponVolume = mechanic.Volume();
+	m_pPlayer->m_iWeaponFlash = mechanic.MuzzleFlashBrightness();
+
+	m_pPlayer->m_iExtraSoundTypes = bits_SOUND_DANGER;
+	m_pPlayer->m_flStopExtraSoundTime = UTIL_WeaponTimeBase() + 0.2;
+
+	DecrementAmmo(fireMode, 1);
+
+	// player "shoot" animation
+	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
+
+ 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
+
+	// TODO: Use the fire mechanic callback.
+	CGrenade::ShootContact(m_pPlayer->pev,
+						   m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs + gpGlobals->v_forward * 16,
+						   gpGlobals->v_forward * 800 );
+
+	int flags = 0;
+#if defined( CLIENT_WEAPONS )
+	flags = FEV_NOTHOST;
+#endif
+
+	PLAYBACK_EVENT(flags, m_pPlayer->edict(), m_FireEvents[index]);
+
+	DelayFiring(1.0f / mechanic.FireRate());
+	SetNextIdleTime(5, true);
+
+	if ( !HasAmmo(fireMode, 1, true) && !HasAmmo(fireMode, 1, false) )
+	{
+		// HEV suit - indicate out of ammo condition
+		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
+	}
+
+	return true;
+}
 
 void CGenericWeapon::Reload()
 {
@@ -609,10 +657,75 @@ void CGenericWeapon::DelayPendingActions(float secs, bool allowIfEarlier)
 	SetNextIdleTime(secs, allowIfEarlier);
 }
 
-void CGenericWeapon::DelayFiring(float secs, bool allowIfEarlier)
+void CGenericWeapon::DelayFiring(float secs, bool allowIfEarlier, int mode)
 {
-	SetNextPrimaryAttack(secs, allowIfEarlier);
-	SetNextSecondaryAttack(secs, allowIfEarlier);
+	if ( mode < 0 || mode == 0 )
+	{
+		SetNextPrimaryAttack(secs, allowIfEarlier);
+	}
+
+	if ( mode < 0 || mode == 1 )
+	{
+		SetNextSecondaryAttack(secs, allowIfEarlier);
+	}
+}
+
+bool CGenericWeapon::HasAmmo(const CGenericWeaponAtts_FireMode& fireMode, int minCount, bool useClip) const
+{
+	switch ( fireMode.UsesAmmo() )
+	{
+		case CGenericWeaponAtts_FireMode::AmmoType_e::Primary:
+		{
+			return useClip
+				? (m_iClip >= minCount)
+				: (m_iPrimaryAmmoType >= 0 && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] >= minCount);
+		}
+
+		case CGenericWeaponAtts_FireMode::AmmoType_e::Secondary:
+		{
+			return m_iSecondaryAmmoType >= 0 && m_pPlayer->m_rgAmmo[m_iSecondaryAmmoType] >= minCount;
+		}
+
+		default:
+		{
+			// Treat as an infinite pool.
+			return true;
+		}
+	}
+}
+
+bool CGenericWeapon::DecrementAmmo(const CGenericWeaponAtts_FireMode& fireMode, int decrement)
+{
+	switch ( fireMode.UsesAmmo() )
+	{
+		case CGenericWeaponAtts_FireMode::AmmoType_e::Primary:
+		{
+			if ( m_iClip < decrement )
+			{
+				return false;
+			}
+
+			m_iClip -= decrement;
+			return true;
+		}
+
+		case CGenericWeaponAtts_FireMode::AmmoType_e::Secondary:
+		{
+			if ( m_iSecondaryAmmoType < 0 || m_pPlayer->m_rgAmmo[m_iSecondaryAmmoType] < decrement )
+			{
+				return false;
+			}
+
+			m_pPlayer->m_rgAmmo[m_iSecondaryAmmoType] -= decrement;
+			return true;
+		}
+
+		default:
+		{
+			// Treat as an infinite pool.
+			return true;
+		}
+	}
 }
 
 int CGenericWeapon::iItemSlot()

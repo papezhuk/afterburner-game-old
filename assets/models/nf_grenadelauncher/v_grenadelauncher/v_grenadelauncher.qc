@@ -43,7 +43,7 @@ $sequence "fire" "fire_ani" {
 	event 5001 0 "33"
 }
 $sequence "reload" "reload_ani" fps 45 {
-	event 5004 0 "weapons/weapon_grenadelauncher/grenade_launcher_reload.wav"
+	event 5005 0 "weapons/weapon_grenadelauncher/grenade_launcher_reload.wav"
 }
 $sequence "draw" "draw_ani" {
 	event 5005 0 "weapons/weapon_grenadelauncher/grenade_launcher_draw.wav"

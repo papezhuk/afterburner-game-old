@@ -74,6 +74,12 @@ void Game_HookEvents( void )
 					break;
 				}
 
+				case CGenericWeaponAtts_BaseFireMechanic::FireMechanic_e::Projectile:
+				{
+					gEngfuncs.pfnHookEvent(fireMode.Event(), EV_HandleGenericProjectileFire, (void*)fireMode.Signature());
+					break;
+				}
+
 				default:
 				{
 					break;

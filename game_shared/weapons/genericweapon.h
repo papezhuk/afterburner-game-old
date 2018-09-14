@@ -37,7 +37,9 @@ protected:
 	// Returns true if firing succeeded.
 	bool FireUsingMode(int index);
 	void DelayPendingActions(float secs, bool allowIfEarlier = false);
-	void DelayFiring(float secs, bool allowIfEarlier = false);
+	void DelayFiring(float secs, bool allowIfEarlier = false, int mode = -1);
+	bool HasAmmo(const CGenericWeaponAtts_FireMode& fireMode, int minCount = 1, bool useClip = true) const;
+	bool DecrementAmmo(const CGenericWeaponAtts_FireMode& fireMode, int decrement);
 
 	// Return the value to set m_fInSpecialReload to next.
 	virtual int HandleSpecialReload(int currentState);
@@ -77,10 +79,16 @@ private:
 	void PrecacheSounds(const CGenericWeaponAttributes_Sound& sounds);
 
 	void SetFireOnEmptyState(uint8_t mode);
-	bool HitscanFire(int index, const CGenericWeaponAtts_HitscanFireMechanic& fireMode);
+	bool HitscanFire(int index,
+					 const CGenericWeaponAtts_FireMode& fireMode,
+					 const CGenericWeaponAtts_HitscanFireMechanic& mechanic);
 	Vector FireBulletsPlayer(const CGenericWeaponAtts_HitscanFireMechanic& fireMode,
 							 const Vector& vecSrc,
 							 const Vector& vecDirShooting);
+
+	bool ProjectileFire(int index,
+						const CGenericWeaponAtts_FireMode& fireMode,
+						const CGenericWeaponAtts_ProjectileFireMechanic& mechanic);
 
 #ifdef CLIENT_DLL
 	Vector FireBulletsPlayer_Client(const CGenericWeaponAtts_HitscanFireMechanic& fireMode);

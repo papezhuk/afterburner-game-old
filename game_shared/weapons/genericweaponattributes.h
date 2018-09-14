@@ -8,6 +8,8 @@
 #include "weaponids.h"
 #include "ammodefs.h"
 
+class CGrenade;
+
 template<typename T>
 class WeightedValueList
 {
@@ -182,7 +184,8 @@ class CGenericWeaponAtts_BaseFireMechanic
 public:
 	enum FireMechanic_e
 	{
-		Hitscan = 0
+		Hitscan = 0,
+		Projectile
 	};
 
 	typedef float(*DamageFunc_t)();
@@ -215,12 +218,11 @@ public:
 	virtual CGenericWeaponAtts_BaseFireMechanic* Clone() const override { return new CGenericWeaponAtts_HitscanFireMechanic(*this); }
 
 #define ATTR(type, name, defaultVal) BASE_ATTR(CGenericWeaponAtts_HitscanFireMechanic, type, name, defaultVal)
-	ATTR(bool, UsesSecondaryAmmo, false);
 	ATTR(float, FireRate, 1.0f);	// Cycles per second
 	ATTR(uint8_t, BulletsPerShot, 1);
 	ATTR(DamageFunc_t, BaseDamagePerShot, NULL);
-	ATTR(float, SpreadX, 0.01f);
-	ATTR(float, SpreadY, 0.01f);
+	ATTR(float, SpreadX, 0.0f);
+	ATTR(float, SpreadY, 0.0f);
 	ATTR(bool, FullAuto, false);
 	ATTR(float, AutoAim, 0.0f);
 	ATTR(int, Volume, NORMAL_GUN_VOLUME);
@@ -233,7 +235,7 @@ public:
 #undef ATTR
 
 	// Convenience:
-	CGenericWeaponAtts_HitscanFireMechanic& UniformSpread(float spread)
+	inline CGenericWeaponAtts_HitscanFireMechanic& UniformSpread(float spread)
 	{
 		return SpreadX(spread).SpreadY(spread);
 	}
@@ -244,6 +246,59 @@ public:
 	}
 
 	inline CGenericWeaponAtts_HitscanFireMechanic& Sounds(const CGenericWeaponAttributes_Sound& sound)
+	{
+		m_Sounds = sound;
+		return *this;
+	}
+
+	inline bool HasSounds() const
+	{
+		return m_Sounds.SoundList().Count() > 0;
+	}
+
+private:
+	CGenericWeaponAttributes_Sound m_Sounds;
+};
+
+class CGenericWeaponAtts_ProjectileFireMechanic : public CGenericWeaponAtts_BaseFireMechanic
+{
+public:
+	typedef CGrenade* (*ProjectileFactoryFunc_t)();
+
+	CGenericWeaponAtts_ProjectileFireMechanic()
+		: CGenericWeaponAtts_BaseFireMechanic()
+	{
+	}
+
+	virtual FireMechanic_e Id() const override { return CGenericWeaponAtts_BaseFireMechanic::FireMechanic_e::Projectile; }
+	virtual CGenericWeaponAtts_BaseFireMechanic* Clone() const override { return new CGenericWeaponAtts_ProjectileFireMechanic(*this); }
+
+#define ATTR(type, name, defaultVal) BASE_ATTR(CGenericWeaponAtts_ProjectileFireMechanic, type, name, defaultVal)
+	ATTR(float, FireRate, 1.0f);	// Cycles per second
+	ATTR(bool, FullAuto, false);
+	ATTR(ProjectileFactoryFunc_t, Projectile, NULL);
+	ATTR(float, SpreadX, 0.0f);
+	ATTR(float, SpreadY, 0.0f);
+	ATTR(int, Volume, NORMAL_GUN_VOLUME);
+	ATTR(int, MuzzleFlashBrightness, NORMAL_GUN_FLASH);
+	ATTR(int, AnimIndex_FireNotEmpty, -1);
+	ATTR(int, AnimIndex_FireEmpty, -1);		// If left at -1, FireNotEmpty used instead.
+	ATTR(float, ViewPunchY, 0.0f);
+	ATTR(int, ViewModelBodyOverride, -1);	// If specified, event uses this body index for the view model.
+#undef ATTR
+
+		// Convenience:
+	inline CGenericWeaponAtts_ProjectileFireMechanic& UniformSpread(float spread)
+	{
+		return SpreadX(spread).SpreadY(spread);
+	}
+
+	inline const CGenericWeaponAttributes_Sound& Sounds() const
+	{
+		return m_Sounds;
+	}
+
+	inline CGenericWeaponAtts_ProjectileFireMechanic& Sounds(const CGenericWeaponAttributes_Sound& sound)
 	{
 		m_Sounds = sound;
 		return *this;
