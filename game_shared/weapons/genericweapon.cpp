@@ -462,7 +462,7 @@ void CGenericWeapon::SetFireOnEmptyState(uint8_t mode)
 	}
 
 	const char* ammoName = fireMode.UsesAmmo() == CGenericWeaponAtts_FireMode::AmmoType_e::Primary ? pszAmmo1() : pszAmmo2();
-	int ammoIndex = fireMode.UsesAmmo() == CGenericWeaponAtts_FireMode::AmmoType_e::Primary ? SecondaryAmmoIndex() : PrimaryAmmoIndex();
+	int ammoIndex = fireMode.UsesAmmo() == CGenericWeaponAtts_FireMode::AmmoType_e::Primary ? PrimaryAmmoIndex() : SecondaryAmmoIndex();
 
 	if( ammoName && ammoIndex >= 0 && m_pPlayer->m_rgAmmo[ammoIndex] < 1 )
 	{
