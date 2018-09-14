@@ -29,6 +29,7 @@ void DeactivateSatchels( CBasePlayer *pOwner );
 class CGrenade : public CBaseMonster
 {
 public:
+	CGrenade();
 	void Spawn( void );
 
 	typedef enum { SATCHEL_DETONATE = 0, SATCHEL_RELEASE } SATCHELCODE;
@@ -55,7 +56,13 @@ public:
 	virtual int	BloodColor( void ) { return DONT_BLEED; }
 	virtual void Killed( entvars_t *pevAttacker, int iGib );
 
+	inline unsigned char ExplodeSpriteScale() const { return m_iExplodeSpriteScale; }
+	inline void SetExplodeSpriteScale(unsigned char val) { m_iExplodeSpriteScale = val; }
+
 	BOOL m_fRegisteredSound;// whether or not this grenade has issued its DANGER sound to the world sound list yet.
+
+private:
+	unsigned char m_iExplodeSpriteScale;
 };
 
 // constant items

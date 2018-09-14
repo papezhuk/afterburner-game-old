@@ -79,6 +79,15 @@ protected:
 		}
 	}
 
+	inline int DefaultEventFlags()
+	{
+#ifdef CLIENT_WEAPONS
+		return FEV_NOTHOST;
+#else
+		return 0;
+#endif
+	}
+
 	unsigned short m_FireEvents[2];
 
 private:

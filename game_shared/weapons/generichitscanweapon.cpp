@@ -41,11 +41,6 @@ bool CGenericHitscanWeapon::HitscanFire(int index,
 
 	m_pPlayer->pev->effects = (int)( m_pPlayer->pev->effects ) | EF_MUZZLEFLASH;
 
-	int flags = 0;
-#if defined( CLIENT_WEAPONS )
-	flags = FEV_NOTHOST;
-#endif
-
 	// player "shoot" animation
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
@@ -72,7 +67,7 @@ bool CGenericHitscanWeapon::HitscanFire(int index,
 
 	if ( m_FireEvents[index] )
 	{
-		PLAYBACK_EVENT_FULL(flags,
+		PLAYBACK_EVENT_FULL(DefaultEventFlags(),
 							m_pPlayer->edict(),
 							m_FireEvents[index],
 							0.0,

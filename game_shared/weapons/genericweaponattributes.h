@@ -8,7 +8,7 @@
 #include "weaponids.h"
 #include "ammodefs.h"
 
-class CGrenade;
+class CGenericWeapon;
 
 template<typename T>
 class WeightedValueList
@@ -209,11 +209,6 @@ public:
 class CGenericWeaponAtts_HitscanFireMechanic : public CGenericWeaponAtts_BaseFireMechanic
 {
 public:
-	CGenericWeaponAtts_HitscanFireMechanic()
-		: CGenericWeaponAtts_BaseFireMechanic()
-	{
-	}
-
 	virtual FireMechanic_e Id() const override { return CGenericWeaponAtts_BaseFireMechanic::FireMechanic_e::Hitscan; }
 	virtual CGenericWeaponAtts_BaseFireMechanic* Clone() const override { return new CGenericWeaponAtts_HitscanFireMechanic(*this); }
 
@@ -263,20 +258,13 @@ private:
 class CGenericWeaponAtts_ProjectileFireMechanic : public CGenericWeaponAtts_BaseFireMechanic
 {
 public:
-	typedef CGrenade* (*ProjectileFactoryFunc_t)();
-
-	CGenericWeaponAtts_ProjectileFireMechanic()
-		: CGenericWeaponAtts_BaseFireMechanic()
-	{
-	}
-
 	virtual FireMechanic_e Id() const override { return CGenericWeaponAtts_BaseFireMechanic::FireMechanic_e::Projectile; }
 	virtual CGenericWeaponAtts_BaseFireMechanic* Clone() const override { return new CGenericWeaponAtts_ProjectileFireMechanic(*this); }
 
 #define ATTR(type, name, defaultVal) BASE_ATTR(CGenericWeaponAtts_ProjectileFireMechanic, type, name, defaultVal)
+	// TODO: Make this stuff common
 	ATTR(float, FireRate, 1.0f);	// Cycles per second
 	ATTR(bool, FullAuto, false);
-	ATTR(ProjectileFactoryFunc_t, Projectile, NULL);
 	ATTR(float, SpreadX, 0.0f);
 	ATTR(float, SpreadY, 0.0f);
 	ATTR(int, Volume, NORMAL_GUN_VOLUME);

@@ -14,7 +14,16 @@ namespace
 		GRENADELAUNCHER_HOLSTER
 	};
 
+	static constexpr const char* GRENADELAUNCHER_GRENADE_MODEL = "models/weapon_grenadelauncher/w_grenade_projectile.mdl";
+	static const Vector GRENADELAUNCHER_HALF_BBOX = Vector(4,4,4);
+	static constexpr float GRENADELAUNCHER_GRENADE_FRICTION = 0.95;
+	static constexpr float GRENADELAUNCHER_GRENADE_EXPLOSION_SCALE = 60;
+
 	static constexpr float GRENADELAUNCHER_FIRE_INTERVAL = 0.8f;	// Secs
+	static constexpr float GRENADELAUNCHER_LAUNCH_SPEED = 1000.0f;
+	static constexpr float GRENADELAUNCHER_TUMBLEVEL_MIN = -100.0f;
+	static constexpr float GRENADELAUNCHER_TUMBLEVEL_MAX = -500.0f;
+	static constexpr float GRENADELAUNCHER_FUSE_TIME = 4.0f;
 	static constexpr float GRENADELAUNCHER_AMMOBOX_GIVE = 6;
 
 #ifdef CLIENT_DLL
@@ -51,7 +60,6 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 		.FireRate(1.0f / GRENADELAUNCHER_FIRE_INTERVAL)
 		.FullAuto(false)
 		.UniformSpread(1.0f)
-		.Projectile([](){/*TODO*/ return (CGrenade*)NULL;})
 		.Sounds(CGenericWeaponAttributes_Sound()
 			.Sound("weapons/weapon_grenadelauncher/grenade_launcher_fire.wav")
 			.MinPitch(98)
@@ -64,6 +72,19 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 	.Event("events/weapon_grenadelauncher/fire02.sc")
 	.FiresUnderwater(false)
 	.UsesAmmo(CGenericWeaponAtts_FireMode::AmmoType_e::Primary)
+	.Mechanic(&((*new CGenericWeaponAtts_ProjectileFireMechanic())
+		.AnimIndex_FireNotEmpty(GRENADELAUNCHER_FIRE)
+		.Volume(LOUD_GUN_VOLUME)
+		.MuzzleFlashBrightness(BRIGHT_GUN_FLASH)
+		.FireRate(1.0f / GRENADELAUNCHER_FIRE_INTERVAL)
+		.FullAuto(false)
+		.UniformSpread(1.0f)
+		.Sounds(CGenericWeaponAttributes_Sound()
+			.Sound("weapons/weapon_grenadelauncher/grenade_launcher_fire.wav")
+			.MinPitch(98)
+			.MaxPitch(100)
+		)
+	))
 )
 .Animations(CGenericWeaponAtts_Animations()
 	.Extension("gauss")
@@ -77,6 +98,102 @@ const CGenericWeaponAttributes& CWeaponGrenadeLauncher::WeaponAttributes() const
 {
 	return StaticWeaponAttributes;
 }
+
+#ifndef CLIENT_DLL
+void CWeaponGrenadeLauncher::CreateProjectile(int index,
+											  const CGenericWeaponAtts_FireMode& fireMode,
+											  const CGenericWeaponAtts_BaseFireMechanic& mechanic)
+{
+	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
+	const Vector forward = gpGlobals->v_forward;
+	const Vector location = m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs + forward * 16.0f;
+
+	CWeaponGrenadeLauncher_Grenade* grenade = CreateGrenade(m_pPlayer->pev, location, forward);
+	grenade->SetExplodeOnContact(index == 0);
+	grenade->SetRandomTumbleAngVel(GRENADELAUNCHER_TUMBLEVEL_MIN, GRENADELAUNCHER_TUMBLEVEL_MAX);
+	grenade->SetDamageOnExplode(gSkillData.plrDmgGrenadeLauncher);
+	grenade->SetSpeed(GRENADELAUNCHER_LAUNCH_SPEED);
+	grenade->SetFuseTime(index == 1 ? GRENADELAUNCHER_FUSE_TIME : -1);
+}
+
+CWeaponGrenadeLauncher_Grenade* CWeaponGrenadeLauncher::CreateGrenade(entvars_t *pevOwner, const Vector& location, const Vector& launchDir)
+{
+	CWeaponGrenadeLauncher_Grenade *pGrenade = GetClassPtr<CWeaponGrenadeLauncher_Grenade>(NULL);
+	pGrenade->Spawn();
+
+	UTIL_SetOrigin(pGrenade->pev, location);
+	pGrenade->pev->velocity = launchDir;
+	pGrenade->pev->angles = UTIL_VecToAngles(pGrenade->pev->velocity);
+	pGrenade->pev->owner = ENT(pevOwner);
+	pGrenade->SetFuseTime(-1.0f);
+	pGrenade->SetExplodeSpriteScale(GRENADELAUNCHER_GRENADE_EXPLOSION_SCALE);
+
+	return pGrenade;
+}
+#endif
+
+void CWeaponGrenadeLauncher_Grenade::Spawn()
+{
+	CGrenade::Spawn();
+	SET_MODEL(ENT(pev), GRENADELAUNCHER_GRENADE_MODEL);
+	UTIL_SetSize(pev, -GRENADELAUNCHER_HALF_BBOX, GRENADELAUNCHER_HALF_BBOX);
+	pev->friction = GRENADELAUNCHER_GRENADE_FRICTION;
+}
+
+#ifndef CLIENT_DLL
+void CWeaponGrenadeLauncher_Grenade::SetExplodeOnContact(bool explodeOnContact)
+{
+	SetTouch(explodeOnContact ? &CGrenade::ExplodeTouch : &CGrenade::BounceTouch);
+}
+
+void CWeaponGrenadeLauncher_Grenade::SetTumbleAngVel(float vel)
+{
+	pev->avelocity.x = vel;
+}
+
+void CWeaponGrenadeLauncher_Grenade::SetRandomTumbleAngVel(float min, float max)
+{
+	SetTumbleAngVel(RANDOM_FLOAT(min, max));
+}
+
+void CWeaponGrenadeLauncher_Grenade::SetDamageOnExplode(float damage)
+{
+	pev->dmg = damage;
+}
+
+void CWeaponGrenadeLauncher_Grenade::SetSpeed(float speed)
+{
+	Vector& vel = pev->velocity;
+
+	if ( vel.Length() == 0.0f )
+	{
+		return;
+	}
+
+	vel = vel.Normalize() * speed;
+}
+
+void CWeaponGrenadeLauncher_Grenade::SetFuseTime(float fuseTime)
+{
+	if ( fuseTime < 0.0f )
+	{
+		SetThink(&CGrenade::DangerSoundThink);
+		pev->nextthink = gpGlobals->time;
+		return;
+	}
+
+	SetThink(&CGrenade::TumbleThink);
+
+	pev->dmgtime = gpGlobals->time + fuseTime;
+	pev->nextthink = gpGlobals->time + 0.1;
+
+	if( fuseTime < 0.1 )
+	{
+		pev->nextthink = gpGlobals->time;
+		pev->velocity = Vector(0, 0, 0);
+	}
+}
+#endif
 
 class CAmmoGrenadeLauncher : public CGenericAmmo
 {

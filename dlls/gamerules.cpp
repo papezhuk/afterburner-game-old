@@ -306,6 +306,7 @@ void CGameRules::RefreshSkillData ( void )
 	gSkillData.plrDmgP99 = GetSkillCvar("sk_plr_dmg_p99");
 	gSkillData.plrDmgFrinesiAuto = GetSkillCvar("sk_plr_dmg_frinesi_auto");
 	gSkillData.plrDmgFrinesiPump = GetSkillCvar("sk_plr_dmg_frinesi_pump");
+	gSkillData.plrDmgGrenadeLauncher = GetSkillCvar("sk_plr_dmg_grenadelauncher");
 }
 
 //=========================================================

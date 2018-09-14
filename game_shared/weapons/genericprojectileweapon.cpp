@@ -30,7 +30,7 @@ bool CGenericProjectileWeapon::SwitchFire(int index,
 
 bool CGenericProjectileWeapon::ProjectileFire(int index, const CGenericWeaponAtts_FireMode& fireMode, const CGenericWeaponAtts_ProjectileFireMechanic& mechanic)
 {
-	if ( index < 0 || index > 1 || mechanic.FireRate() <= 0.0f || !mechanic.Projectile() )
+	if ( index < 0 || index > 1 || mechanic.FireRate() <= 0.0f )
 	{
 		return false;
 	}
@@ -46,19 +46,12 @@ bool CGenericProjectileWeapon::ProjectileFire(int index, const CGenericWeaponAtt
 	// player "shoot" animation
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
- 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
-
-	// TODO: Use the fire mechanic callback.
-	CGrenade::ShootContact(m_pPlayer->pev,
-						   m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs + gpGlobals->v_forward * 16,
-						   gpGlobals->v_forward * 800 );
-
-	int flags = 0;
-#if defined( CLIENT_WEAPONS )
-	flags = FEV_NOTHOST;
+#ifndef CLIENT_DLL
+	// Only create the actual projectile on the server.
+	CreateProjectile(index, fireMode, mechanic);
 #endif
 
-	PLAYBACK_EVENT(flags, m_pPlayer->edict(), m_FireEvents[index]);
+	PLAYBACK_EVENT(DefaultEventFlags(), m_pPlayer->edict(), m_FireEvents[index]);
 
 	DelayFiring(1.0f / mechanic.FireRate());
 	SetNextIdleTime(5, true);

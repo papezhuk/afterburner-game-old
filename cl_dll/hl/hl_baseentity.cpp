@@ -90,6 +90,7 @@ int CBaseToggle::Save( class CSave & ) { return 1; }
 void CBaseToggle::KeyValue( struct KeyValueData_s * ) { }
 
 // CGrenade Stubs
+CGrenade::CGrenade() : CBaseMonster(), m_iExplodeSpriteScale(0) {}
 void CGrenade::BounceSound( void ) { }
 void CGrenade::Explode( Vector, Vector ) { }
 void CGrenade::Explode( TraceResult *, int ) { }
