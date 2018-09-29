@@ -15,7 +15,8 @@ const int WEAPON_HUD_SLOTS[MAX_WEAPON_SLOTS][MAX_WEAPON_POSITIONS] =
 		WEAPON_GLOCK,
 		WEAPON_PYTHON,
 		static_cast<int>(WeaponId_e::WeaponGenericTest),
-		static_cast<int>(WeaponId_e::WeaponP99)
+		static_cast<int>(WeaponId_e::WeaponP99),
+		static_cast<int>(WeaponId_e::WeaponRaptor),
 	},
 
 	// Slot 3

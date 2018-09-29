@@ -41,19 +41,19 @@ $sequence "shoot" "shoot_ani" {
 	event 5001 0 "32"
 }
 $sequence "reload" "reload_ani" {
-	event 5005 0 "weapons/raptor_reload.wav"
+	event 5005 0 "weapons/weapon_raptor/raptor_reload.wav"
 }
 $sequence "shoot_last" "shoot_last_ani" {
 	event 5001 0 "32"
 }
 $sequence "reload" "reload_ani" {
-	event 5005 0 "weapons/raptor_reload_empty.wav"
+	event 5005 0 "weapons/weapon_raptor/raptor_reload_empty.wav"
 }
 $sequence "idle1_empty" "idle1_empty_ani" fps 15
 $sequence "idle2_empty" "idle2_empty_ani" fps 15
 $sequence "idle3_empty" "idle3_empty_ani" fps 15
 $sequence "idle4_empty" "idle4_empty_ani" fps 15
 $sequence "draw" "draw_ani" {
-	event 5005 0 "weapons/raptor_draw.wav"
+	event 5005 0 "weapons/weapon_raptor/raptor_draw.wav"
 }
 $sequence "holster" "holster_ani"

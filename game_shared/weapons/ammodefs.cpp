@@ -17,3 +17,4 @@ const CAmmoDef AmmoDef_Uranium = { "uranium", 100 };
 const CAmmoDef AmmoDef_P99 = { "ammodef_p99", 200 };
 const CAmmoDef AmmoDef_Frinesi = { "ammodef_frinesi", 125 };
 const CAmmoDef AmmoDef_GrenadeLauncher = { "ammodef_grenadelauncher", 12 };
+const CAmmoDef AmmoDef_Raptor = { "ammodef_raptor", 72 };

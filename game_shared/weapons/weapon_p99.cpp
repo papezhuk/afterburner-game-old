@@ -33,11 +33,11 @@ namespace
 	static constexpr float P99_BASE_DAMAGE = 20.0f;
 	static constexpr float P99_BASE_SPREAD = 0.03f;
 	static constexpr int P99_AMMOBOX_GIVE = 32;
-}
 
 #ifdef CLIENT_DLL
-static CWeaponP99 PredictionWeapon;
+	static CWeaponP99 PredictionWeapon;
 #endif
+}
 
 static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAttributes(
 	CGenericWeaponAtts_Core()

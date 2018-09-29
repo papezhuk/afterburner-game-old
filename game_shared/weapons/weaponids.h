@@ -6,5 +6,6 @@ enum class WeaponId_e
 	WeaponGenericTest = 17,	// TODO: Change once other weapons are gone
 	WeaponP99,
 	WeaponFrinesi,
-	WeaponGrenadeLauncher
+	WeaponGrenadeLauncher,
+	WeaponRaptor
 };
