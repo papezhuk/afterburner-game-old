@@ -1,9 +1,13 @@
+# Waf seems pretty cool, now that Xash3D has introduced me to it.
+# At some point this Python/CMake hybrid should be moved over to it.
+
 import argparse
 import os
 import sys
 import platform
 import glob
 import shutil
+import runpy
 from subprocess import call
 
 SUPPORTED_PLATFORMS = [
@@ -43,35 +47,34 @@ def parseCommandLineArguments():
 						help="Cleans and rebuilds engine libraries.",
 						action="store_true")
 
-	# TODO: A better way of doing this would be to import the engine build scripts
-	# and call functions directly, so that we don't actually have to worry about
-	# the interpreter name.
-	parser.add_argument("--python-executable",
-						help="Name of Python executable, if different from 'python', eg. 'python3'.",
-						default="python")
-
 	return parser.parse_args()
 
-def buildEngine(enginePath, buildDirectory, pythonExecutable, buildConfig, forceRebuild):
+def buildEngine(enginePath, outputDirectory, buildConfig, forceRebuild):
 	print("Building engine located in:", enginePath)
-	print("Build output:", buildDirectory)
+	print("Build output:", outputDirectory)
 
-	configureScriptPath = os.path.join(enginePath, "build-util", "create-build.py")
-	makeScriptPath = os.path.join(enginePath, "build-util", "make-and-install.py")
-
-	# Run cmake if no directory exists yet for the engine, or if we're forcibly rebuilding.
-	if forceRebuild or not os.path.isdir(buildDirectory):
-		configureCallArgs = [pythonExecutable, configureScriptPath, "--no-vgui", "--build-dir", buildDirectory]
-
-		if buildConfig == "debug":
-			configureCallArgs.append("--debug")
-
-		callProcess(configureCallArgs)
+	wafBuildDir = os.path.join(enginePath, "build")
 
 	oldPath = os.getcwd()
-	os.chdir(buildDirectory)
+	os.chdir(enginePath)
 
-	callProcess([pythonExecutable, makeScriptPath, "--no-install", "--build-dir", buildDirectory])
+	if forceRebuild:
+		if os.path.exists(outputDirectory):
+			shutil.rmtree(outputDirectory)
+
+		if os.path.exists(wafBuildDir):
+			shutil.rmtree(wafBuildDir)
+
+		callProcess(["python",
+					"waf",
+					"configure",
+					"--disable-vgui",
+					f"--build-type={buildConfig}",
+					"--win-style-install",
+					f"--prefix={outputDirectory}"])
+
+	callProcess(["python", "waf", "build"])
+	callProcess(["python", "waf", "install"])
 
 	os.chdir(oldPath)
 	print("*** Engine build complete.")
@@ -159,8 +162,7 @@ if platform.system() not in SUPPORTED_PLATFORMS:
 
 scriptPath = os.path.dirname(os.path.realpath(sys.argv[0]))
 buildBasePath = os.path.realpath(os.path.join(scriptPath, "build"))
-engineBuildPath = os.path.join(buildBasePath, "engine")
-engineGameLaunchPath = os.path.join(engineBuildPath, "game_launch")
+engineOutputPath = os.path.join(buildBasePath, "engine")
 gameBuildPath = os.path.join(buildBasePath, "game")
 gameContentPath = os.path.join(scriptPath, "content", "afterburner")
 enginePath = os.path.join(scriptPath, "dependencies", "afterburner-engine")
@@ -169,8 +171,8 @@ os.makedirs(buildBasePath, exist_ok=True)
 
 args = parseCommandLineArguments()
 
-buildEngine(enginePath, engineBuildPath, args.python_executable, args.config, args.rebuild_engine)
+buildEngine(enginePath, engineOutputPath, args.config, args.rebuild_engine)
 buildGame(scriptPath, gameBuildPath, args.config, args.rebuild_engine or args.rebuild_game)
-copyGameContent(scriptPath, gameBuildPath, gameContentPath, engineGameLaunchPath, args.config)
+copyGameContent(scriptPath, gameBuildPath, gameContentPath, engineOutputPath, args.config)
 
 sys.exit(0)
