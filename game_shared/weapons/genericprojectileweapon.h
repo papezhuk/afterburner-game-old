@@ -4,6 +4,8 @@
 
 class CGenericProjectileWeapon : public CGenericWeapon
 {
+public:
+	virtual void Precache() override;
 protected:
 	virtual bool SwitchFire(int index,
 							const CGenericWeaponAtts_FireMode& fireMode,

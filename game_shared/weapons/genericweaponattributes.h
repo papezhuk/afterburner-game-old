@@ -189,6 +189,8 @@ public:
 		Projectile
 	};
 
+	virtual ~CGenericWeaponAtts_BaseFireMechanic() {}
+
 	virtual FireMechanic_e Id() const = 0;
 	virtual CGenericWeaponAtts_BaseFireMechanic* Clone() const = 0;
 
@@ -210,6 +212,8 @@ class CGenericWeaponAtts_HitscanFireMechanic : public CGenericWeaponAtts_BaseFir
 public:
 	typedef float skilldata_t::* SkillBasedDamagePtr;
 
+	virtual ~CGenericWeaponAtts_HitscanFireMechanic() {}
+
 	virtual FireMechanic_e Id() const override { return CGenericWeaponAtts_BaseFireMechanic::FireMechanic_e::Hitscan; }
 	virtual CGenericWeaponAtts_BaseFireMechanic* Clone() const override { return new CGenericWeaponAtts_HitscanFireMechanic(*this); }
 
@@ -224,6 +228,8 @@ public:
 class CGenericWeaponAtts_ProjectileFireMechanic : public CGenericWeaponAtts_BaseFireMechanic
 {
 public:
+	virtual ~CGenericWeaponAtts_ProjectileFireMechanic() {}
+
 	virtual FireMechanic_e Id() const override { return CGenericWeaponAtts_BaseFireMechanic::FireMechanic_e::Projectile; }
 	virtual CGenericWeaponAtts_BaseFireMechanic* Clone() const override { return new CGenericWeaponAtts_ProjectileFireMechanic(*this); }
 

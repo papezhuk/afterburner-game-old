@@ -97,6 +97,13 @@ const CGenericWeaponAttributes& CWeaponGrenadeLauncher::WeaponAttributes() const
 	return StaticWeaponAttributes;
 }
 
+void CWeaponGrenadeLauncher::Precache()
+{
+	CGenericProjectileWeapon::Precache();
+
+	PRECACHE_MODEL(GRENADELAUNCHER_GRENADE_MODEL);
+}
+
 #ifndef CLIENT_DLL
 void CWeaponGrenadeLauncher::CreateProjectile(int index,
 											  const CGenericWeaponAtts_FireMode& fireMode,

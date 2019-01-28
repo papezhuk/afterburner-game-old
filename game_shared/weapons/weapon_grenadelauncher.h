@@ -10,6 +10,7 @@ class CWeaponGrenadeLauncher : public CGenericProjectileWeapon
 {
 public:
 	virtual const CGenericWeaponAttributes& WeaponAttributes() const override;
+	virtual void Precache() override;
 
 protected:
 #ifndef CLIENT_DLL

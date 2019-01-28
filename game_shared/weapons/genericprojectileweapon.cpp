@@ -1,6 +1,11 @@
 #include "genericprojectileweapon.h"
 #include "soundent.h"
 
+void CGenericProjectileWeapon::Precache()
+{
+	CGenericWeapon::Precache();
+}
+
 void CGenericProjectileWeapon::SwitchPrecache(const CGenericWeaponAtts_BaseFireMechanic& mechanic)
 {
 	if ( mechanic.Id() != CGenericWeaponAtts_BaseFireMechanic::FireMechanic_e::Projectile )
