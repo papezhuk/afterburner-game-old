@@ -333,7 +333,7 @@ void EV_HLDM_CheckTracer( int idx, float *vecSrc, float *end, float *forward, fl
 	case BULLET_MONSTER_9MM:
 	case BULLET_MONSTER_12MM:
 	default:
-		EV_CreateTracer( vecTracerSrc, end );
+		EV_CreateBulletTracer( vecTracerSrc, end );
 		break;
 	}
 }

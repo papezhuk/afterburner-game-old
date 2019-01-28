@@ -23,6 +23,7 @@ void EV_GetDefaultShellInfo( struct event_args_s *args, float *origin, float *ve
 qboolean EV_IsLocal( int idx );
 qboolean EV_IsPlayer( int idx );
 void EV_CreateTracer( float *start, float *end );
+void EV_CreateBulletTracer(float* start, float* end);
 
 struct cl_entity_s *GetEntity( int idx );
 struct cl_entity_s *GetViewEntity( void );

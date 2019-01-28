@@ -63,6 +63,11 @@ void EV_CreateTracer( float *start, float *end )
 	gEngfuncs.pEfxAPI->R_TracerEffect( start, end );
 }
 
+void EV_CreateBulletTracer(float* start, float* end)
+{
+	gEngfuncs.pEfxAPI->R_BulletTracerEffect(start, end);
+}
+
 /*
 =================
 EV_IsPlayer

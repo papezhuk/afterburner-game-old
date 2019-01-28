@@ -47,9 +47,13 @@ def parseCommandLineArguments():
 						help="Cleans and rebuilds engine libraries.",
 						action="store_true")
 
+	parser.add_argument("--sdl2",
+						help="Override path to SDL2.",
+						default="")
+
 	return parser.parse_args()
 
-def buildEngine(enginePath, outputDirectory, buildConfig, forceRebuild):
+def buildEngine(enginePath, outputDirectory, buildConfig, forceRebuild, sdl2Path=None):
 	print("Building engine located in:", enginePath)
 	print("Build output:", outputDirectory)
 
@@ -65,13 +69,21 @@ def buildEngine(enginePath, outputDirectory, buildConfig, forceRebuild):
 		if os.path.exists(wafBuildDir):
 			shutil.rmtree(wafBuildDir)
 
-		callProcess(["python",
-					"waf",
-					"configure",
-					"--disable-vgui",
-					f"--build-type={buildConfig}",
-					"--win-style-install",
-					f"--prefix={outputDirectory}"])
+		callArgs = [
+			"python",
+			"waf",
+			"configure",
+			"--disable-vgui",
+			f"--build-type={buildConfig}",
+			"--win-style-install",
+			f"--prefix={outputDirectory}"
+		]
+
+		if sdl2Path is not None:
+			print("Override SDL2 path:", sdl2Path)
+			callArgs.append(f"--sdl2={sdl2Path}")
+
+		callProcess(callArgs)
 
 	callProcess(["python", "waf", "build"])
 	callProcess(["python", "waf", "install"])
@@ -170,8 +182,9 @@ enginePath = os.path.join(scriptPath, "dependencies", "afterburner-engine")
 os.makedirs(buildBasePath, exist_ok=True)
 
 args = parseCommandLineArguments()
+sdl2Path = args.sdl2 if len(args.sdl2) > 0 else None
 
-buildEngine(enginePath, engineOutputPath, args.config, args.rebuild_engine)
+buildEngine(enginePath, engineOutputPath, args.config, args.rebuild_engine, sdl2Path)
 buildGame(scriptPath, gameBuildPath, args.config, args.rebuild_engine or args.rebuild_game)
 copyGameContent(scriptPath, gameBuildPath, gameContentPath, engineOutputPath, args.config)
 
