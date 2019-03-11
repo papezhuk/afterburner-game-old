@@ -1,5 +1,10 @@
-# Waf seems pretty cool, now that Xash3D has introduced me to it.
-# At some point this Python/CMake hybrid should be moved over to it.
+# Note that the engine uses the Waf build system. It seems pretty cool,
+# but under investigation it appears that it's difficult to use Waf here
+# to call through to the engine's wscript file. The engine imports
+# custom Waf utilities and if Waf is used from this repo's root, the
+# import paths for these turn out wrong. Therefore we just continue to
+# use this Python script wrapper around CMake, and call through to the
+# engine's Waf script file via the shell when we need to.
 
 import argparse
 import os
@@ -10,6 +15,11 @@ import shutil
 import runpy
 from subprocess import call
 
+PYTHON_EXE = sys.executable
+
+# TODO: Add Windows support when I have a system we can do builds on.
+# I can't 100% remember, but hopefully it'll just require adding "dll"
+# to the library extensions dict.
 SUPPORTED_PLATFORMS = [
 	"Darwin",
 	"Linux"
@@ -62,6 +72,8 @@ def buildEngine(enginePath, outputDirectory, buildConfig, forceRebuild, sdl2Path
 	oldPath = os.getcwd()
 	os.chdir(enginePath)
 
+	callArgs = [PYTHON_EXE, "waf"]
+
 	if forceRebuild:
 		if os.path.exists(outputDirectory):
 			shutil.rmtree(outputDirectory)
@@ -69,9 +81,8 @@ def buildEngine(enginePath, outputDirectory, buildConfig, forceRebuild, sdl2Path
 		if os.path.exists(wafBuildDir):
 			shutil.rmtree(wafBuildDir)
 
-		callArgs = [
-			"python",
-			"waf",
+		callArgs += \
+		[
 			"configure",
 			"--disable-vgui",
 			f"--build-type={buildConfig}",
@@ -83,10 +94,8 @@ def buildEngine(enginePath, outputDirectory, buildConfig, forceRebuild, sdl2Path
 			print("Override SDL2 path:", sdl2Path)
 			callArgs.append(f"--sdl2={sdl2Path}")
 
-		callProcess(callArgs)
-
-	callProcess(["python", "waf", "build"])
-	callProcess(["python", "waf", "install"])
+	callArgs += ["build", "install"]
+	callProcess(callArgs)
 
 	os.chdir(oldPath)
 	print("*** Engine build complete.")
@@ -166,26 +175,31 @@ def copyGameContent(scriptPath, gameBuildPath, gameContentPath, engineGameLaunch
 	print("*** Game content copy complete.")
 	print()
 
-print("Platform detected:", platform.system())
+def main():
+	print("Platform detected:", platform.system())
 
-if platform.system() not in SUPPORTED_PLATFORMS:
-	print("Platform '" + platform.system() + "' is not currently supported by this build script.", file=sys.stderr)
-	sys.exit(1)
+	if platform.system() not in SUPPORTED_PLATFORMS:
+		print("Platform '" + platform.system() + "' is not currently supported by this build script.", file=sys.stderr)
+		sys.exit(1)
 
-scriptPath = os.path.dirname(os.path.realpath(sys.argv[0]))
-buildBasePath = os.path.realpath(os.path.join(scriptPath, "build"))
-engineOutputPath = os.path.join(buildBasePath, "engine")
-gameBuildPath = os.path.join(buildBasePath, "game")
-gameContentPath = os.path.join(scriptPath, "content", "afterburner")
-enginePath = os.path.join(scriptPath, "dependencies", "afterburner-engine")
+	scriptPath = os.path.dirname(os.path.realpath(sys.argv[0]))
+	buildBasePath = os.path.realpath(os.path.join(scriptPath, "build"))
+	engineOutputPath = os.path.join(buildBasePath, "engine")
+	gameBuildPath = os.path.join(buildBasePath, "game")
+	gameContentPath = os.path.join(scriptPath, "content", "afterburner")
+	enginePath = os.path.join(scriptPath, "dependencies", "afterburner-engine")
 
-os.makedirs(buildBasePath, exist_ok=True)
+	os.makedirs(buildBasePath, exist_ok=True)
 
-args = parseCommandLineArguments()
-sdl2Path = args.sdl2 if len(args.sdl2) > 0 else None
+	args = parseCommandLineArguments()
+	sdl2Path = args.sdl2 if len(args.sdl2) > 0 else None
 
-buildEngine(enginePath, engineOutputPath, args.config, args.rebuild_engine, sdl2Path)
-buildGame(scriptPath, gameBuildPath, args.config, args.rebuild_engine or args.rebuild_game)
-copyGameContent(scriptPath, gameBuildPath, gameContentPath, engineOutputPath, args.config)
+	buildEngine(enginePath, engineOutputPath, args.config, args.rebuild_engine, sdl2Path)
+	buildGame(scriptPath, gameBuildPath, args.config, args.rebuild_engine or args.rebuild_game)
+	copyGameContent(scriptPath, gameBuildPath, gameContentPath, engineOutputPath, args.config)
 
-sys.exit(0)
+	sys.exit(0)
+
+
+if __name__ == "__main__":
+	main()
