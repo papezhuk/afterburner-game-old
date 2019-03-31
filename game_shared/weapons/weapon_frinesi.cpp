@@ -140,6 +140,11 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 		.MinPitch(98)
 		.MaxPitch(102)
 	)
+)
+.Skill(
+	CGenericWeaponAttributes_Skill()
+	.Record("sk_plr_dmg_frinesi_auto", &skilldata_t::plrDmgFrinesiAuto)
+	.Record("sk_plr_dmg_frinesi_pump", &skilldata_t::plrDmgFrinesiPump)
 );
 
 LINK_ENTITY_TO_CLASS(weapon_frinesi, CWeaponFrinesi)

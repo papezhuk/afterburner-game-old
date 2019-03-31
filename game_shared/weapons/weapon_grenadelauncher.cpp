@@ -88,6 +88,10 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 	.Extension("gauss")
 	.Index_Draw(GRENADELAUNCHER_DRAW)
 	.Index_ReloadWhenNotEmpty(GRENADELAUNCHER_RELOAD)
+)
+.Skill(
+	CGenericWeaponAttributes_Skill()
+	.Record("sk_plr_dmg_grenadelauncher", &skilldata_t::plrDmgGrenadeLauncher)
 );
 
 LINK_ENTITY_TO_CLASS(weapon_grenadelauncher, CWeaponGrenadeLauncher);

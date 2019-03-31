@@ -87,6 +87,10 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 	.Animation(RAPTOR_IDLE2)
 	.Animation(RAPTOR_IDLE3)
 	.Animation(RAPTOR_IDLE4)
+)
+.Skill(
+	CGenericWeaponAttributes_Skill()
+	.Record("sk_plr_dmg_raptor", &skilldata_t::plrDmgRaptor)
 );
 
 LINK_ENTITY_TO_CLASS(weapon_raptor, CWeaponRaptor)

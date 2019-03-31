@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -23,7 +23,7 @@ skilldata_t gSkillData;
 
 //=========================================================
 // take the name of a cvar, tack a digit for the skill level
-// on, and return the value.of that Cvar 
+// on, and return the value.of that Cvar
 //=========================================================
 float GetSkillCvar( const char *pName )
 {
@@ -36,7 +36,7 @@ float GetSkillCvar( const char *pName )
 
 	if( flValue <= 0 )
 	{
-		ALERT( at_console, "\n\n** GetSkillCVar Got a zero for %s **\n\n", szBuffer );
+		ALERT( at_warning, "GetSkillCVar: Got invalid value %f for %s. Make sure the cvar exists and that its value value is correct.\n", szBuffer );
 	}
 
 	return flValue;

@@ -152,6 +152,65 @@ public:
 	}
 };
 
+class CGenericWeaponAttributes_SkillRecord
+{
+public:
+	typedef float skilldata_t::* SkillDataEntryPtr;
+
+	CGenericWeaponAttributes_SkillRecord(const char* cvarBaseName, SkillDataEntryPtr entry);
+	CGenericWeaponAttributes_SkillRecord(const CGenericWeaponAttributes_SkillRecord& other);
+
+	// After registring cvars, the instance of the class must persist until shutdown.
+	// This class is designed to be used statically, so it should be OK.
+	void RegisterCvars() const;
+	void UpdateSkillValue(skilldata_t* instance) const;
+
+private:
+	SkillDataEntryPtr m_Entry;
+	std::string m_BaseName;
+	std::string m_NameBuffers[TOTAL_SKILL_LEVELS];
+	mutable cvar_t m_Cvars[TOTAL_SKILL_LEVELS];
+};
+
+class CGenericWeaponAttributes_Skill
+{
+public:
+	CGenericWeaponAttributes_Skill();
+	CGenericWeaponAttributes_Skill(const CGenericWeaponAttributes_Skill& other);
+	CGenericWeaponAttributes_Skill& operator =(const CGenericWeaponAttributes_Skill& other);
+
+	inline CGenericWeaponAttributes_Skill& Record(const CGenericWeaponAttributes_SkillRecord& record)
+	{
+		m_Records.push_back(record);
+		return *this;
+	}
+
+	inline CGenericWeaponAttributes_Skill& Record(const char* cvarBaseName, CGenericWeaponAttributes_SkillRecord::SkillDataEntryPtr entry)
+	{
+		m_Records.push_back(CGenericWeaponAttributes_SkillRecord(cvarBaseName, entry));
+		return *this;
+	}
+
+	inline void RegisterCvars() const
+	{
+		for ( const CGenericWeaponAttributes_SkillRecord& record: m_Records )
+		{
+			record.RegisterCvars();
+		}
+	}
+
+	inline void UpdateSkillValues(skilldata_t* instance) const
+	{
+		for ( const CGenericWeaponAttributes_SkillRecord& record : m_Records )
+		{
+			record.UpdateSkillValue(instance);
+		}
+	}
+
+private:
+	std::vector<CGenericWeaponAttributes_SkillRecord> m_Records;
+};
+
 class CGenericWeaponAttributes_Sound
 {
 public:
@@ -210,7 +269,7 @@ public:
 class CGenericWeaponAtts_HitscanFireMechanic : public CGenericWeaponAtts_BaseFireMechanic
 {
 public:
-	typedef float skilldata_t::* SkillBasedDamagePtr;
+	typedef CGenericWeaponAttributes_SkillRecord::SkillDataEntryPtr SkillBasedDamagePtr;
 
 	virtual ~CGenericWeaponAtts_HitscanFireMechanic() {}
 
@@ -440,6 +499,7 @@ class CGenericWeaponAttributes
 public:
 	CGenericWeaponAttributes(const CGenericWeaponAtts_Core& core)
 		: m_Core(core),
+		  m_Skill(),
 		  m_NewFireModes{},
 		  m_Animations(),
 		  m_IdleAnimations()
@@ -448,6 +508,7 @@ public:
 
 	CGenericWeaponAttributes(const CGenericWeaponAttributes& other)
 		: m_Core(other.m_Core),
+		  m_Skill(other.m_Skill),
 		  m_NewFireModes{},
 		  m_Animations(other.m_Animations),
 		  m_IdleAnimations(other.m_IdleAnimations)
@@ -483,6 +544,11 @@ public:
 		return m_Core;
 	}
 
+	inline const CGenericWeaponAttributes_Skill& Skill() const
+	{
+		return m_Skill;
+	}
+
 	inline const CGenericWeaponAtts_Animations& Animations() const
 	{
 		return m_Animations;
@@ -491,6 +557,12 @@ public:
 	inline const CGenericWeaponAtts_IdleAnimations& IdleAnimations() const
 	{
 		return m_IdleAnimations;
+	}
+
+	inline CGenericWeaponAttributes& Skill(const CGenericWeaponAttributes_Skill& skill)
+	{
+		m_Skill = skill;
+		return *this;
 	}
 
 	inline CGenericWeaponAttributes& Animations(const CGenericWeaponAtts_Animations& anims)
@@ -540,6 +612,7 @@ private:
 	}
 
 	CGenericWeaponAtts_Core m_Core;
+	CGenericWeaponAttributes_Skill m_Skill;
 	CGenericWeaponAtts_Animations m_Animations;
 	CGenericWeaponAtts_IdleAnimations m_IdleAnimations;
 	CGenericWeaponAtts_FireMode m_NewFireModes[2];

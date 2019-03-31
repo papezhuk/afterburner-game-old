@@ -153,4 +153,5 @@ extern DLL_GLOBAL int		g_iSkillLevel;
 #define SKILL_EASY		1
 #define SKILL_MEDIUM	2
 #define SKILL_HARD		3
+#define TOTAL_SKILL_LEVELS 3
 #endif // SKILL_H

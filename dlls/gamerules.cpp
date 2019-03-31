@@ -25,6 +25,8 @@
 #include	"teamplay_gamerules.h"
 #include	"skill.h"
 #include	"game.h"
+#include	"weaponregistry.h"
+#include	"genericweaponattributes.h"
 
 extern edict_t *EntSelectSpawnPoint( CBaseEntity *pPlayer );
 
@@ -128,7 +130,7 @@ void CGameRules::RefreshSkillData ( void )
 
 	gSkillData.iSkillLevel = iSkill;
 
-	ALERT( at_console, "\nGAME SKILL LEVEL:%d\n",iSkill );
+	ALERT( at_console, "GAME SKILL LEVEL:%d\n",iSkill );
 
 	//Agrunt
 	gSkillData.agruntHealth = GetSkillCvar( "sk_agrunt_health" );
@@ -303,10 +305,10 @@ void CGameRules::RefreshSkillData ( void )
 	gSkillData.plrArm = GetSkillCvar( "sk_player_arm" );
 
 	// Nightfire weapons
-	gSkillData.plrDmgP99 = GetSkillCvar("sk_plr_dmg_p99");
-	gSkillData.plrDmgFrinesiAuto = GetSkillCvar("sk_plr_dmg_frinesi_auto");
-	gSkillData.plrDmgFrinesiPump = GetSkillCvar("sk_plr_dmg_frinesi_pump");
-	gSkillData.plrDmgGrenadeLauncher = GetSkillCvar("sk_plr_dmg_grenadelauncher");
+	CWeaponRegistry::StaticInstance().ForEach([](const CGenericWeaponAttributes& atts)
+	{
+		atts.Skill().UpdateSkillValues(&gSkillData);
+	});
 }
 
 //=========================================================

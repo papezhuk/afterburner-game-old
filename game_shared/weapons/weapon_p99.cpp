@@ -120,6 +120,10 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 	.Animation(P99_IDLE1)
 	.Animation(P99_IDLE2)
 	.Animation(P99_IDLE3)
+)
+.Skill(
+	CGenericWeaponAttributes_Skill()
+	.Record("sk_plr_dmg_p99", &skilldata_t::plrDmgP99)
 );
 
 LINK_ENTITY_TO_CLASS(weapon_p99, CWeaponP99)
