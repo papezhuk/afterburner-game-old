@@ -58,7 +58,7 @@ void CGenericWeaponAttributes_SkillRecord::UpdateSkillValue(skilldata_t* instanc
 
 	if ( value <= 0.0f )
 	{
-		ALERT(at_warning, "UpdateSkillValue: Got invalid value of %f for %s at skill level %d.\n", value, m_BaseName, instance->iSkillLevel);
+		ALERT(at_warning, "UpdateSkillValue: Got invalid value of %f for %s at skill level %d.\n", value, m_BaseName.c_str(), instance->iSkillLevel);
 		value = 0.0f;
 	}
 
