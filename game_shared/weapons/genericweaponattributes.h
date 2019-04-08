@@ -139,6 +139,7 @@ public:
 	ATTR(const char*, ViewModelName, NULL);
 	ATTR(const char*, PlayerModelName, NULL);
 	ATTR(const char*, WorldModelName, NULL);
+	ATTR(const char*, PickupSoundOverride, NULL);
 #undef ATTR
 
 	inline void Validate() const
