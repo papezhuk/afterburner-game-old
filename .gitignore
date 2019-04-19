@@ -28,3 +28,4 @@ waf3-*
 .waf3-*
 waf2-*
 .waf2-*
+__pycache__
