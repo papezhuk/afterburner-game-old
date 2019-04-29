@@ -22,12 +22,14 @@ PYTHON_EXE = sys.executable
 # to the library extensions dict.
 SUPPORTED_PLATFORMS = [
 	"Darwin",
-	"Linux"
+	"Linux",
+	"Windows"
 ]
 
 LIBRARY_EXTENSIONS = {
 	"Darwin": "dylib",
-	"Linux": "so"
+	"Linux": "so",
+	"Windows": "dll"
 }
 
 def callProcess(args):
