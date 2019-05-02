@@ -124,7 +124,10 @@ def buildGame(gamePath, buildDirectory, config, forceRebuild):
 	cmakeArgs.append(gamePath)
 	callProcess(cmakeArgs)
 
-	callProcess(["make", "-j8"])
+	if platform.system() == "Windows":
+		callProcess(["cmake", "--build", "."])
+	else:
+		callProcess(["make", "-j8"])
 
 	os.chdir(oldPath)
 	print("*** Game build complete.")
