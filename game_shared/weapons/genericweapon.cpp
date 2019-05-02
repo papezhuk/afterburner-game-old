@@ -10,7 +10,7 @@
 
 namespace
 {
-	static constexpr char* DEFAULT_WEAPON_PICKUP_SOUND = "items/gunpickup1.wav";
+	static constexpr const char* DEFAULT_WEAPON_PICKUP_SOUND = "items/gunpickup1.wav";
 }
 
 CGenericWeapon::CGenericWeapon()
