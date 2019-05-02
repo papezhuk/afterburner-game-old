@@ -17,9 +17,6 @@ from subprocess import call
 
 PYTHON_EXE = sys.executable
 
-# TODO: Add Windows support when I have a system we can do builds on.
-# I can't 100% remember, but hopefully it'll just require adding "dll"
-# to the library extensions dict.
 SUPPORTED_PLATFORMS = [
 	"Darwin",
 	"Linux",
@@ -119,6 +116,10 @@ def buildGame(gamePath, buildDirectory, config, forceRebuild):
 
 	if config == "debug":
 		cmakeArgs.append("-DCMAKE_BUILD_TYPE=Debug")
+	
+	if platform.system() == "Windows":
+		# TODO: Can we auto-detect the version of VS that's installed?
+		cmakeArgs += ["-G", "Visual Studio 16 2019", "-A" "Win32"]
 
 	cmakeArgs.append(gamePath)
 	callProcess(cmakeArgs)

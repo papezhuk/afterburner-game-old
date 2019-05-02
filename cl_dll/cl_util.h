@@ -156,7 +156,9 @@ inline void PlaySound( int iSound, float vol ) { gEngfuncs.pfnPlaySoundByIndex( 
 #define MIN(a, b)  (((a) < (b)) ? (a) : (b))
 #endif
 
-#ifndef fabs
+// This seems to break the Windows compile in mysterious ways if it's defined.
+// Just use the standard library fabs(), people, none of this macro bullshittery.
+#if !defined(WIN32) && !defined(fabs)
 #define fabs(x)	   ((x) > 0 ? (x) : 0 - (x))
 #endif
 
