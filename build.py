@@ -170,8 +170,19 @@ def copyGameContent(scriptPath, gameBuildPath, gameContentPath, engineGameLaunch
 
 	libExtension = LIBRARY_EXTENSIONS[platform.system()]
 
-	copyLibraries(os.path.join(gameBuildPath, "cl_dll"), os.path.join(gameContentPathInEngine, "cl_dlls"), libExtension)
-	copyLibraries(os.path.join(gameBuildPath, "dlls"), os.path.join(gameContentPathInEngine, "dlls"), libExtension)
+	cldllPath = os.path.join(gameBuildPath, "cl_dll")
+	dllPath = os.path.join(gameBuildPath, "dlls")
+
+	if platform.system() == "Windows":
+		if config == "debug":
+			cldllPath = os.path.join(cldllPath, "Debug")
+			dllPath = os.path.join(dllPath, "Debug")
+		else:
+			cldllPath = os.path.join(cldllPath, "Release")
+			dllPath = os.path.join(dllPath, "Release")
+
+	copyLibraries(cldllPath, os.path.join(gameContentPathInEngine, "cl_dlls"), libExtension)
+	copyLibraries(dllPath, os.path.join(gameContentPathInEngine, "dlls"), libExtension)
 
 	if platform.system() == "Linux":
 		srcPath = os.path.join(scriptPath, "xash3d-gdb.py")
