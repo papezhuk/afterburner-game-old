@@ -9,6 +9,64 @@ import smd_writer
 from smd_reader import SMDReader
 from smd_bones import SMDBone
 
+# This is taken from a HLDM model, once the unneeded bones are stripped out.
+IDEAL_BONE_ORDER = \
+[
+	"Bip01",
+	"Bip01 Footsteps",
+	"Bip01 Pelvis",
+	"Bip01 L Leg",
+	"Bip01 L Leg1",
+	"Bip01 L Foot",
+	"Bip01 L Toe0",
+	"Bip01 R Leg",
+	"Bip01 R Leg1",
+	"Bip01 R Foot",
+	"Bip01 R Toe0",
+	"Bip01 Spine",
+	"Bip01 Spine1",
+	"Bip01 Spine2",
+	"Bip01 Spine3",
+	"Bip01 Neck",
+	"Bip01 Head",
+	"Bip01 L Arm",
+	"Bip01 L Arm1",
+	"Bip01 L Arm2",
+	"Bip01 L Hand",
+	"Bip01 L Finger0",
+	"Bip01 L Finger01",
+	"Bip01 L Finger02",
+	"Bip01 L Finger1",
+	"Bip01 L Finger11",
+	"Bip01 L Finger12",
+	"Bip01 R Arm",
+	"Bip01 R Arm1",
+	"Bip01 R Arm2",
+	"Bip01 R Hand",
+	"Bip01 R Finger0",
+	"Bip01 R Finger01",
+	"Bip01 R Finger02",
+	"Bip01 R Finger1",
+	"Bip01 R Finger11",
+	"Bip01 R Finger12",
+	"Player_Mesh"
+]
+
+BONE_RENAME = \
+{
+	"Bip01 L Thigh": "Bip01 L Leg",
+	"Bip01 L Calf": "Bip01 L Leg1",
+	"Bip01 L Clavicle": "Bip01 L Arm",
+	"Bip01 L UpperArm": "Bip01 L Arm1",
+	"Bip01 L Forearm": "Bip01 L Arm2",
+
+	"Bip01 R Thigh": "Bip01 R Leg",
+	"Bip01 R Calf": "Bip01 R Leg1",
+	"Bip01 R Clavicle": "Bip01 R Arm",
+	"Bip01 R UpperArm": "Bip01 R Arm1",
+	"Bip01 R Forearm": "Bip01 R Arm2"
+}
+
 def __parseArgs():
 	parser = argparse.ArgumentParser(description="Script for converting Nightfire player model skeleton to HLDM.")
 	parser.add_argument("ref", help="Reference SMD file to edit.")
@@ -67,8 +125,8 @@ def __calculateFingerRemap(bones, boneMap):
 				if bone is None:
 					raise ValueError(f"Could not find bone '{boneName}'.")
 
-				# Map the index of this bone to the corresponding index of the general hand bones.
-				boneMap[bone.index()] = handBones[subIndex].index()
+				# Map the name of this bone to the corresponding name of the general hand bones.
+				boneMap[bone.name()] = handBones[subIndex].name()
 
 # Creates a "PlayerMesh" bone, which may or may not be used by HLDM
 # (but I'm playing it safe).
@@ -80,6 +138,16 @@ def __createPlayerMeshBone(bones):
 		raise ValueError(f"Could not find bone 'Bip01 Pelvis'.")
 
 	bones.list().append(SMDBone(len(bones.list()), "Player_Mesh", pelvis))
+
+def __createFootstepsBone(bones):
+	print("Creating Footsteps bone")
+
+	root = bones.getByName("Bip01")
+	if root is None:
+		raise ValueError(f"Could not find bone 'Bip01'.")
+
+	# Just append - re-ordering will occur later.
+	bones.list().append(SMDBone(len(bones.list()), "Bip01 Footsteps", root))
 
 # Creates the corresponding skeleton entry for the new Player_Mesh bone.
 def __createPlayerMeshSkeletonEntry(bones, skeleton):
@@ -93,44 +161,92 @@ def __createPlayerMeshSkeletonEntry(bones, skeleton):
 	# The model proportions seem to be the same anyway.
 	skeleton.append((bone.index(), 3.279230, 2.542519, -1.277027, -1.571592, -1.570451, 0.000000))
 
-# Given remapped finger bones, reorders bones and writes their new mappings.
-# Assumes that original finger bones should no longer exist in the model.
-def __generateBoneMap(bones, fingerRemap, boneMap, inverseBoneMap):
-	print("Mapping and re-ordering bones")
+def __createFootstepsSkeletonEntry(bones, skeleton):
+	print("Creating Footsteps skeleton entry")
 
-	boneList = bones.list()
-	renumber = 0
+	bone = bones.getByName("Bip01 Footsteps")
+	if bone is None:
+		raise ValueError(f"Could not find bone 'Bip01 Footsteps'.")
 
-	for index in range(0, len(boneList)):
-		if index not in fingerRemap:
-			# Bone still exists in new set, so add.
-			boneMap[index] = renumber			# Map to renumbered index.
-			inverseBoneMap[renumber] = index	# Record new to old as well.
-			renumber += 1
+	# Gonna assume that the HLDM position is fine for Nightfire models too.
+	# The model proportions seem to be the same anyway.
+	skeleton.append((bone.index(), -0.000000, 0.000000, -39.526119, 0.000000, 0.000000, 1.570795))
 
-	for index in fingerRemap:
-		# Add mappings from old to new bones.
-		# Note that boneMap holds renumbered indices now,
-		# So we need to translate through that.
-		boneMap[index] = boneMap[fingerRemap[index]]
-		boneList[index] = None
+def __finaliseBoneList(bones, aliases):
+	print("Finalising bone list")
 
-	# Update all indices on the physical bone items.
-	# We do this backwards because we remove invalid bones.
-	for index in range(len(boneList) - 1, -1, -1):
-		bone = boneList[index]
-		if bone is None:
-			del boneList[index]
+	newBoneList = []
+	boneOrderInverseMap = {}	# Name to index
+	oldBoneToNewBone = {}		# Index to index
+	newBoneToOldBone = {}		# Index to index
+
+	# Create blank bones, ready to be filled in.
+	for index in range(0, len(IDEAL_BONE_ORDER)):
+		newBoneList.append(SMDBone(index, ""))
+		boneOrderInverseMap[IDEAL_BONE_ORDER[index]] = index
+
+	# First pass: rename appropriately.
+	for bone in bones.list():
+		name = bone.name()
+
+		if name in BONE_RENAME:
+			name = BONE_RENAME[name]
+
+		if name not in boneOrderInverseMap:
+			oldBoneToNewBone[bone.index()] = None
 			continue
 
-		# Should never happen:
-		if bone.index() in fingerRemap:
-			raise AssertionError()
+		newBone = newBoneList[boneOrderInverseMap[name]]
+		newBone.setName(name)
+		oldBoneToNewBone[bone.index()] = newBone.index()
+		newBoneToOldBone[newBone.index()] = bone.index()
 
-		bone.setIndex(boneMap[bone.index()])
+	# Second pass: link up parents.
+	for bone in bones.list():
+		parent = bone.parent()
+
+		if parent is None:
+			continue
+
+		if oldBoneToNewBone[bone.index()] is None or oldBoneToNewBone[parent.index()] is None:
+			continue
+
+		newBone = newBoneList[oldBoneToNewBone[bone.index()]]
+		newParent = newBoneList[oldBoneToNewBone[parent.index()]]
+		newBone.setParent(newParent)
+
+	# Record aliases.
+	for name in aliases:
+		bone = bones.getByName(name)
+		oldIndex = bone.index()
+
+		mappedName = aliases[name]
+		if mappedName in BONE_RENAME:
+			mappedName = BONE_RENAME[mappedName]
+
+		oldBoneToNewBone[oldIndex] = boneOrderInverseMap[mappedName]
+
+	# Sanity:
+	for bone in newBoneList:
+		if bone.index() not in newBoneToOldBone:
+			raise AssertionError(f"New bone {bone.index()} did not have a mapping to an old bone!")
+
+	for bone in bones.list():
+		if bone.index() not in oldBoneToNewBone:
+			raise AssertionError(f"Old bone '{bone.name()}' ({bone.index()}) did not have a mapping to a new bone!")
+
+	info = [oldBoneToNewBone[index] for index in range(0, len(bones.list()))]
+	for index in range(0, len(info)):
+		oldBone = bones.list()[index]
+		newBone = newBoneList[oldBoneToNewBone[oldBone.index()]]
+
+		print(f"  Bone {oldBone.index()} '{oldBone.name()}': -> {newBone.index()} '{newBone.name()}'")
+
+	bones.setList(newBoneList)
+	return (oldBoneToNewBone, newBoneToOldBone)
 
 # Renumbers skeleton items due to bone re-ordering.
-def __renumberSkeletonEntries(skeleton, boneList, inverseBoneMap):
+def __renumberSkeletonEntries(skeleton, boneList, newBoneToOldBone):
 	print("Renumbering skeleton entries")
 
 	newSkeleton = []
@@ -138,7 +254,7 @@ def __renumberSkeletonEntries(skeleton, boneList, inverseBoneMap):
 	for bone in boneList.list():
 		# Get the original skeleton entry index that this bone referenced
 		# before it was re-ordered.
-		skeletonIndex = inverseBoneMap[bone.index()]
+		skeletonIndex = newBoneToOldBone[bone.index()]
 
 		# Update the index of this entry to point to the new bone.
 		item = list(skeleton[skeletonIndex])
@@ -147,7 +263,7 @@ def __renumberSkeletonEntries(skeleton, boneList, inverseBoneMap):
 		# Add to new skeleton list.
 		newSkeleton.append(tuple(item))
 
-	return newSkeleton
+	return sorted(newSkeleton, key=lambda item: item[0])
 
 # Changes bones that triangle vertices map to, due to bone re-ordering.
 def __remapTriangleBones(boneMap, triangles):
@@ -167,23 +283,34 @@ def __readSmd(refSmd):
 	with SMDReader(refSmd) as reader:
 		reader.expect("version 1")
 
+		# Load bones and create those that don't exist yet.
 		bones = reader.readBones()
+		__createFootstepsBone(bones)
 		__createPlayerMeshBone(bones)
+
+		# Load bone orientations.
+		skeleton = reader.readSkeleton()
+		__createFootstepsSkeletonEntry(bones, skeleton)
+		__createPlayerMeshSkeletonEntry(bones, skeleton)
+
+		# Re-parent legs to pelvis, as per HLDM structure.
 		__reparentLegs(bones)
 
+		# Calculate mapping from unused finger bones to index finger
+		# bone structure, which will function as the hand bones.
 		fingerRemap = {}
 		__calculateFingerRemap(bones, fingerRemap)
 
-		boneMap = {}
-		inverseBoneMap = {}
-		__generateBoneMap(bones, fingerRemap, boneMap, inverseBoneMap)
+		# Regenerate bone list according to desired order and bone names.
+		# The old -> new (and inverse) mappings are returned.
+		(oldBoneToNewBone, newBoneToOldBone) = __finaliseBoneList(bones, fingerRemap)
 
-		skeleton = reader.readSkeleton()
-		__createPlayerMeshSkeletonEntry(bones, skeleton)
-		skeleton = __renumberSkeletonEntries(skeleton, bones, inverseBoneMap)
+		# Renumber skeleton entries according to new bone indices.
+		skeleton = __renumberSkeletonEntries(skeleton, bones, newBoneToOldBone)
 
+		# Read triangles and modify which bones the vertices use, as per the new bone list.
 		triangles = reader.readTriangles()
-		__remapTriangleBones(boneMap, triangles)
+		__remapTriangleBones(oldBoneToNewBone, triangles)
 
 		return (bones, skeleton, triangles)
 

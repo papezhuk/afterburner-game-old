@@ -44,13 +44,15 @@ class SMDBoneList():
 	def list(self):
 		return self.__list
 
+	def setList(self, newList):
+		if not isinstance(newList, list):
+			raise TypeError("Bones must be provided as a list.")
+
+		self.__list = newList
+
 	def getByName(self, name):
 		for bone in self.__list:
 			if bone.name() == name:
 				return bone
 
 		return None
-
-	def renumberAllBones(self):
-		for index in range(0, len(self.__list)):
-			self.__list[index].setIndex(index)
