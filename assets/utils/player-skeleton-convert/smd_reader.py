@@ -54,40 +54,7 @@ class SMDReader():
 		return SMDBoneList(bones)
 
 	def readSkeleton(self):
-		self.expect("skeleton")
-
-		skeleton = []
-
-		while True:
-			line = self.__readLine()
-			text = self.__textNoNewlines(line)
-
-			if text == "end":
-				break
-
-			tokens = shlex.split(text)
-
-			if len(tokens) == 2 and tokens[0] == "time":
-				if tokens[1] == "0":
-					continue
-				else:
-					raise ValueError(f"Expected 'time' declaration specifying 0, but got {tokens[1]}.")
-
-			if len(tokens) != 7:
-				raise ValueError(f"Expected 7 tokens for bone position, but got {len(tokens)}.")
-
-			try:
-				for index in range(0, len(tokens)):
-					if index == 0:
-						tokens[index] = int(tokens[index])
-					else:
-						tokens[index] = float(tokens[index])
-			except ValueError as ex:
-				raise ValueError(f"File {self.__fileName}, line: {line[0]}: {str(ex)}")
-
-			skeleton.append(tuple(tokens))
-
-		return skeleton
+		return self.__readSkeleton(0)[0]["bones"]
 
 	def readTriangles(self):
 		self.expect("triangles")
@@ -115,6 +82,51 @@ class SMDReader():
 				raise ValueError(f"File {self.__fileName}, line: {line[0]}: {str(ex)}")
 
 		return triangles
+
+	def __readSkeleton(self, maxFrame=-1):
+		self.expect("skeleton")
+
+		skeletonFrames = []
+
+		while True:
+			line = self.__readLine()
+			text = self.__textNoNewlines(line)
+
+			if text == "end":
+				break
+
+			tokens = shlex.split(text)
+
+			try:
+				if len(tokens) == 2 and tokens[0] == "time":
+					frameNumber = int(tokens[1])
+
+					if maxFrame >= 0 and frameNumber > maxFrame:
+						raise ValueError(f"Expected frames up to a max of {maxFrame}, but got frame with number {frameNumber}.")
+
+					item = \
+					{
+						"number": frameNumber,
+						"bones": []
+					}
+
+					skeletonFrames.append(item)
+				else:
+					if len(tokens) != 7:
+						raise ValueError(f"Expected 7 tokens for bone position, but got {len(tokens)}.")
+
+					for index in range(0, len(tokens)):
+						if index == 0:
+							tokens[index] = int(tokens[index])
+						else:
+							tokens[index] = float(tokens[index])
+
+					item = skeletonFrames[len(skeletonFrames) - 1]
+					item["bones"].append(tuple(tokens))
+			except ValueError as ex:
+				raise ValueError(f"File {self.__fileName}, line: {line[0]}: {str(ex)}")
+
+		return skeletonFrames
 
 	def __addComponentToTriangle(self, triangle, input):
 		if len(triangle) >= 4:
