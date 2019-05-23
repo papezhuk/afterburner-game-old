@@ -56,6 +56,9 @@ class SMDReader():
 	def readSkeleton(self):
 		return self.__readSkeleton(0)[0]["bones"]
 
+	def readAllSkeletonFrames(self):
+		return self.__readSkeleton()
+
 	def readTriangles(self):
 		self.expect("triangles")
 
