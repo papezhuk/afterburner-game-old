@@ -9,11 +9,8 @@ def __writeBones(outFile, bones):
 
 	__writeLine(outFile, "end")
 
-def __writeSkeleton(outFile, skeleton):
-	__writeLine(outFile, "skeleton")
-	__writeLine(outFile, "time 0")
-
-	for bone in skeleton:
+def __writeSkeletonFrameBones(outFile, frame):
+	for bone in frame:
 		outString = " "
 
 		for index in range(0, len(bone)):
@@ -24,7 +21,17 @@ def __writeSkeleton(outFile, skeleton):
 
 		__writeLine(outFile, outString)
 
+def __writeFullSkeleton(outFile, skeleton):
+	__writeLine(outFile, "skeleton")
+
+	for frame in skeleton:
+		__writeLine(outFile, f"time {frame['number']}")
+		__writeSkeletonFrameBones(outFile, frame["bones"])
+
 	__writeLine(outFile, "end")
+
+def __writeSimpleSkeleton(outFile, skeleton):
+	__writeFullSkeleton(outFile, [{"number": 0, "bones": skeleton}])
 
 def __writeTriangles(outFile, triangles):
 	__writeLine(outFile, "triangles")
@@ -37,9 +44,15 @@ def __writeTriangles(outFile, triangles):
 
 	__writeLine(outFile, "end")
 
-def write(fileName, bones, skeleton, triangles):
+def write(fileName, bones, skeleton, triangles=None):
 	with open(fileName, "w") as outFile:
 		__writeLine(outFile, "version 1")
 		__writeBones(outFile, bones)
-		__writeSkeleton(outFile, skeleton)
-		__writeTriangles(outFile, triangles)
+
+		if len(skeleton) > 0 and isinstance(skeleton[0], dict):
+			__writeFullSkeleton(outFile, skeleton)
+		else:
+			__writeSimpleSkeleton(outFile, skeleton)
+
+		if triangles is not None:
+			__writeTriangles(outFile, triangles)
