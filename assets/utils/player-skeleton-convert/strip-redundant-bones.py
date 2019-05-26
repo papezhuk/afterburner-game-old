@@ -1,4 +1,6 @@
 import argparse
+import smd_writer
+import os
 from smd_reader import SMDReader
 
 def __parseArgs():
@@ -12,6 +14,8 @@ def __parseArgs():
 	return parser.parse_args()
 
 def __parseBoneTemplate(filePath):
+	print("Reading allowed bone template from:", filePath)
+
 	with SMDReader(filePath) as reader:
 		reader.expect("version 1")
 		return reader.readBones()
@@ -60,7 +64,19 @@ def __modifySkeleton(skeleton, boneRenumberMap):
 	for frame in skeleton:
 		__modifySkeletonFrame(frame, boneRenumberMap)
 
-def __modifySmd(allowedBoneNames, filePath):
+def __outputFilePath(filePath):
+	directory = os.path.normpath(os.path.dirname(filePath))
+	fileName = os.path.basename(filePath)
+
+	outputDirectory = os.path.join(directory, "output")
+	if not os.path.isdir(outputDirectory):
+		os.mkdir(outputDirectory)
+
+	return os.path.join(outputDirectory, fileName)
+
+def __modifySmdFile(allowedBoneNames, filePath):
+	print("Modifying SMD file:", filePath)
+
 	(bones, skeleton) = __parseSmdBonesAndSkeleton(filePath)
 
 	bonesToRemove = __computeBonesToRemove(bones, allowedBoneNames)
@@ -68,17 +84,33 @@ def __modifySmd(allowedBoneNames, filePath):
 	boneRenumberMap = bones.renumber()
 	__modifySkeleton(skeleton, boneRenumberMap)
 
-	# TODO: Write data back to SMD.
-	pass
+	outputPath = __outputFilePath(filePath)
+	smd_writer.write(outputPath, bones, skeleton)
+
+def __modifySmdDirectory(allowedBoneNames, dirPath):
+	print("Finding SMD files in directory:", dirPath)
+
+	for item in os.listdir(dirPath):
+		fullPath = os.path.join(dirPath, item)
+		(_, fileExt) = os.path.splitext(os.path.basename(item))
+		if fileExt == ".smd" and os.path.isfile(fullPath):
+			__modifySmdFile(allowedBoneNames, fullPath)
+
+def __modifySmdByPath(allowedBoneNames, path):
+	if os.path.isdir(path):
+		__modifySmdDirectory(allowedBoneNames, os.path.abspath(path))
+	else:
+		__modifySmdFile(allowedBoneNames, os.path.abspath(path))
 
 def main():
 	args = __parseArgs()
 	boneList = __parseBoneTemplate(args.template)
 
 	allowedBoneNames = [bone.name() for bone in boneList.list()]
+	print("Allowed bones:", "\n".join(["  " + item for item in allowedBoneNames]))
 
 	for smdPath in args.smd:
-		__modifySmd(allowedBoneNames, smdPath)
+		__modifySmdByPath(allowedBoneNames, smdPath)
 
 if __name__ == "__main__":
 	main()
