@@ -50,6 +50,8 @@ class SMDReader():
 				raise ValueError(f"File {self.__fileName}, line: {line[0]}: {str(ex)}")
 			except TypeError as ex:
 				raise TypeError(f"File {self.__fileName}, line: {line[0]}: {str(ex)}")
+			except IndexError as ex:
+				raise IndexError(f"File {self.__fileName}, line: {line[0]}: {str(ex)}")
 
 		return SMDBoneList(bones)
 

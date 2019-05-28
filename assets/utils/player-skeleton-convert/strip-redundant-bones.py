@@ -9,7 +9,7 @@ def __parseArgs():
 						help="SMD file that lists valid bone structure.")
 	parser.add_argument("smd",
 						action="append",
-						help="SMD files to modify bones for")
+						help="SMD files, and/or directories containing files, to modify bones for.")
 
 	return parser.parse_args()
 
