@@ -9,6 +9,11 @@ import smd_writer
 from smd_reader import SMDReader
 from smd_bones import SMDBone
 
+# Making an actual index so that we can tweak which finger is best to keep.
+# It turns out that using the index finger makes the hands look messed up,
+# so we need to choose a more central finger.
+FINGER_INDEX_FOR_HAND_BONE = 2
+
 # This is taken from a HLDM model, once the unneeded bones are stripped out.
 IDEAL_BONE_ORDER = \
 [
@@ -36,9 +41,9 @@ IDEAL_BONE_ORDER = \
 	"Bip01 L Finger0",
 	"Bip01 L Finger01",
 	"Bip01 L Finger02",
-	"Bip01 L Finger1",
-	"Bip01 L Finger11",
-	"Bip01 L Finger12",
+	f"Bip01 L Finger{FINGER_INDEX_FOR_HAND_BONE}",
+	f"Bip01 L Finger{FINGER_INDEX_FOR_HAND_BONE}1",
+	f"Bip01 L Finger{FINGER_INDEX_FOR_HAND_BONE}2",
 	"Bip01 R Arm",
 	"Bip01 R Arm1",
 	"Bip01 R Arm2",
@@ -46,9 +51,9 @@ IDEAL_BONE_ORDER = \
 	"Bip01 R Finger0",
 	"Bip01 R Finger01",
 	"Bip01 R Finger02",
-	"Bip01 R Finger1",
-	"Bip01 R Finger11",
-	"Bip01 R Finger12",
+	f"Bip01 R Finger{FINGER_INDEX_FOR_HAND_BONE}",
+	f"Bip01 R Finger{FINGER_INDEX_FOR_HAND_BONE}1",
+	f"Bip01 R Finger{FINGER_INDEX_FOR_HAND_BONE}2",
 	"Player_Mesh"
 ]
 
@@ -105,7 +110,7 @@ def __calculateFingerRemap(bones, boneMap):
 		handBones = []
 
 		for boneIndex in range(0, 3):
-			boneName = f"Bip01 {side} Finger1{boneIndex if boneIndex > 0 else ''}"
+			boneName = f"Bip01 {side} Finger{FINGER_INDEX_FOR_HAND_BONE}{boneIndex if boneIndex > 0 else ''}"
 			bone = bones.getByName(boneName)
 
 			if bone is None:
@@ -117,7 +122,10 @@ def __calculateFingerRemap(bones, boneMap):
 		# The rest must be remapped. The index finger bones
 		# will be repurposed as general hand bones.
 
-		for fingerIndex in range(2, 5):
+		for fingerIndex in range(1, 5):
+			if fingerIndex == FINGER_INDEX_FOR_HAND_BONE:
+				continue
+
 			for subIndex in range(0, 3):
 				boneName = f"Bip01 {side} Finger{fingerIndex}{subIndex if subIndex > 0 else ''}"
 				bone = bones.getByName(boneName)
@@ -324,8 +332,9 @@ def main():
 		sys.exit(1)
 
 	if args.output is None:
+		outDir = os.path.dirname(refSmd)
 		fileWithExt = os.path.splitext(os.path.basename(refSmd))
-		args.output = fileWithExt[0] + "_new" + fileWithExt[1]
+		args.output = os.path.join(outDir, fileWithExt[0] + "_new" + fileWithExt[1])
 
 	print("Converting", refSmd, "to", args.output)
 	(bones, skeleton, triangles) = __readSmd(refSmd)
