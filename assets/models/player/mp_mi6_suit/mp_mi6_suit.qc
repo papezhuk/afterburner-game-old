@@ -1,3 +1,4 @@
+// QC file for: mp_mi6_suit
 $modelname mp_mi6_suit.mdl
 $cd "..\common_anims"
 $cdtexture .
@@ -11,6 +12,4 @@ $bodygroup body
 {
 studio "..\mp_mi6_suit\mp_mi6_suit_ref"
 }
-
 $include "..\common_anims\player_shared.qc"
-

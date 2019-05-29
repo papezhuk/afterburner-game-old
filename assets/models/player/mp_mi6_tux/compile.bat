@@ -1,3 +1,3 @@
 @echo off
-..\..\studiomdl.exe mp_mi6_tux.qc
+..\..\studiomdl.exe "mp_mi6_tux.qc"
 pause

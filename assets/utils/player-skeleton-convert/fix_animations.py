@@ -44,7 +44,25 @@ def __removeBones(bones, boneNamesToRemove):
 		if bone.name() in removalMap:
 			del boneList[index]
 
-def __modifySkeletonFrame(frame, boneRenumberMap):
+def __fixThumbBone(entryAsList, isLeft):
+	# Translate the thumb on this frame by a certain amount, so that
+	# it isn't positioned weirdly. The HLDM animations don't quite work
+	# right with the way the thumbs are positioned on NF models.
+	# Right now these translations are just manually calculated from the
+	# difference in position between the Nightfire reference skeleton
+	# and the HL Gman reference skeleton, because I CBA to do anything
+	# more complicated.
+
+	if isLeft:
+		entryAsList[1] += -0.785953
+		entryAsList[2] += 0.162361
+		entryAsList[3] += 0.968971
+	else:
+		entryAsList[1] += -0.672887
+		entryAsList[2] += 0.502195
+		entryAsList[3] += -0.931216
+
+def __modifySkeletonFrame(frame, boneRenumberMap, thumbIndices):
 	bones = frame["bones"]
 
 	# Reverse iteration to avoid index shifting issues.
@@ -54,15 +72,21 @@ def __modifySkeletonFrame(frame, boneRenumberMap):
 
 		if boneIndex in boneRenumberMap:
 			tempList = list(entry)
+
+			try:
+				__fixThumbBone(tempList, thumbIndices.index(boneIndex) == 0)
+			except:
+				pass
+
 			tempList[0] = boneRenumberMap[boneIndex]
+
 			bones[index] = tuple(tempList)
 		else:
 			del bones[index]
-			continue
 
-def __modifySkeleton(skeleton, boneRenumberMap):
+def __modifySkeleton(skeleton, boneRenumberMap, thumbIndices):
 	for frame in skeleton:
-		__modifySkeletonFrame(frame, boneRenumberMap)
+		__modifySkeletonFrame(frame, boneRenumberMap, thumbIndices)
 
 def __outputFilePath(filePath):
 	directory = os.path.normpath(os.path.dirname(filePath))
@@ -82,7 +106,9 @@ def __modifySmdFile(allowedBoneNames, refSkeleton, filePath):
 	bonesToRemove = __computeBonesToRemove(bones, allowedBoneNames)
 	__removeBones(bones, bonesToRemove)
 	boneRenumberMap = bones.renumber()
-	__modifySkeleton(skeleton, boneRenumberMap)
+
+	thumbIndices = [bones.getByName("Bip01 L Finger0").index(), bones.getByName("Bip01 R Finger0").index()]
+	__modifySkeleton(skeleton, boneRenumberMap, thumbIndices)
 
 	outputPath = __outputFilePath(filePath)
 	smd_writer.write(outputPath, bones, skeleton)
