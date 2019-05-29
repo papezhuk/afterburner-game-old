@@ -4,21 +4,21 @@ import os
 from smd_reader import SMDReader
 
 def __parseArgs():
-	parser = argparse.ArgumentParser(description="Script for removing unneeded bones from HLDM models.")
-	parser.add_argument("--template",
-						help="SMD file that lists valid bone structure.")
+	parser = argparse.ArgumentParser(description="Script for performing various compatibility fixes to existing HLDM animations.")
+	parser.add_argument("--ref",
+						help="Reference SMD containing converted model/skeleton of a Nightfire player model.")
 	parser.add_argument("smd",
 						action="append",
-						help="SMD files, and/or directories containing files, to modify bones for.")
+						help="SMD files, and/or directories containing files, to modify.")
 
 	return parser.parse_args()
 
-def __parseBoneTemplate(filePath):
-	print("Reading allowed bone template from:", filePath)
+def __parseReference(filePath):
+	print("Reading model reference from:", filePath)
 
 	with SMDReader(filePath) as reader:
 		reader.expect("version 1")
-		return reader.readBones()
+		return (reader.readBones(), reader.readSkeleton())
 
 def __parseSmdBonesAndSkeleton(filePath):
 	with SMDReader(filePath) as reader:
@@ -74,7 +74,7 @@ def __outputFilePath(filePath):
 
 	return os.path.join(outputDirectory, fileName)
 
-def __modifySmdFile(allowedBoneNames, filePath):
+def __modifySmdFile(allowedBoneNames, refSkeleton, filePath):
 	print("Modifying SMD file:", filePath)
 
 	(bones, skeleton) = __parseSmdBonesAndSkeleton(filePath)
@@ -87,30 +87,30 @@ def __modifySmdFile(allowedBoneNames, filePath):
 	outputPath = __outputFilePath(filePath)
 	smd_writer.write(outputPath, bones, skeleton)
 
-def __modifySmdDirectory(allowedBoneNames, dirPath):
+def __modifySmdDirectory(allowedBoneNames, skeleton, dirPath):
 	print("Finding SMD files in directory:", dirPath)
 
 	for item in os.listdir(dirPath):
 		fullPath = os.path.join(dirPath, item)
 		(_, fileExt) = os.path.splitext(os.path.basename(item))
 		if fileExt == ".smd" and os.path.isfile(fullPath):
-			__modifySmdFile(allowedBoneNames, fullPath)
+			__modifySmdFile(allowedBoneNames, skeleton, fullPath)
 
-def __modifySmdByPath(allowedBoneNames, path):
+def __modifySmdByPath(allowedBoneNames, skeleton, path):
 	if os.path.isdir(path):
-		__modifySmdDirectory(allowedBoneNames, os.path.abspath(path))
+		__modifySmdDirectory(allowedBoneNames, skeleton, os.path.abspath(path))
 	else:
-		__modifySmdFile(allowedBoneNames, os.path.abspath(path))
+		__modifySmdFile(allowedBoneNames, skeleton, os.path.abspath(path))
 
 def main():
 	args = __parseArgs()
-	boneList = __parseBoneTemplate(args.template)
+	(boneList, skeleton) = __parseReference(args.ref)
 
 	allowedBoneNames = [bone.name() for bone in boneList.list()]
 	print("Allowed bones:", "\n".join(["  " + item for item in allowedBoneNames]))
 
 	for smdPath in args.smd:
-		__modifySmdByPath(allowedBoneNames, smdPath)
+		__modifySmdByPath(allowedBoneNames, skeleton, smdPath)
 
 if __name__ == "__main__":
 	main()
