@@ -24,9 +24,9 @@ nodes
  21 "Bip01 L Finger0"  20
  22 "Bip01 L Finger01"  21
  23 "Bip01 L Finger02"  22
- 24 "Bip01 L Finger2"  20
- 25 "Bip01 L Finger21"  24
- 26 "Bip01 L Finger22"  25
+ 24 "Bip01 L Finger1"  20
+ 25 "Bip01 L Finger11"  24
+ 26 "Bip01 L Finger12"  25
  27 "Bip01 R Arm"  15
  28 "Bip01 R Arm1"  27
  29 "Bip01 R Arm2"  28
@@ -34,9 +34,9 @@ nodes
  31 "Bip01 R Finger0"  30
  32 "Bip01 R Finger01"  31
  33 "Bip01 R Finger02"  32
- 34 "Bip01 R Finger2"  30
- 35 "Bip01 R Finger21"  34
- 36 "Bip01 R Finger22"  35
+ 34 "Bip01 R Finger1"  30
+ 35 "Bip01 R Finger11"  34
+ 36 "Bip01 R Finger12"  35
  37 "Player_Mesh"  2
 end
 skeleton

@@ -69,7 +69,17 @@ BONE_RENAME = \
 	"Bip01 R Calf": "Bip01 R Leg1",
 	"Bip01 R Clavicle": "Bip01 R Arm",
 	"Bip01 R UpperArm": "Bip01 R Arm1",
-	"Bip01 R Forearm": "Bip01 R Arm2"
+	"Bip01 R Forearm": "Bip01 R Arm2",
+}
+
+BONE_FINAL_RENAME = \
+{
+	f"Bip01 L Finger{FINGER_INDEX_FOR_HAND_BONE}": "Bip01 L Finger1",
+	f"Bip01 L Finger{FINGER_INDEX_FOR_HAND_BONE}1": "Bip01 L Finger11",
+	f"Bip01 L Finger{FINGER_INDEX_FOR_HAND_BONE}2": "Bip01 L Finger12",
+	f"Bip01 R Finger{FINGER_INDEX_FOR_HAND_BONE}": "Bip01 R Finger1",
+	f"Bip01 R Finger{FINGER_INDEX_FOR_HAND_BONE}1": "Bip01 R Finger11",
+	f"Bip01 R Finger{FINGER_INDEX_FOR_HAND_BONE}2": "Bip01 R Finger12"
 }
 
 def __parseArgs():
@@ -233,6 +243,13 @@ def __finaliseBoneList(bones, aliases):
 			mappedName = BONE_RENAME[mappedName]
 
 		oldBoneToNewBone[oldIndex] = boneOrderInverseMap[mappedName]
+
+	# Do a final name fixup for fingers, as these always need to be named Finger1.
+	for bone in newBoneList:
+		name = bone.name()
+
+		if name in BONE_FINAL_RENAME:
+			bone.setName(BONE_FINAL_RENAME[name])
 
 	# Sanity:
 	for bone in newBoneList:

@@ -45,22 +45,17 @@ def __removeBones(bones, boneNamesToRemove):
 			del boneList[index]
 
 def __fixThumbBone(entryAsList, isLeft):
-	# Translate the thumb on this frame by a certain amount, so that
+	# Rotate the thumb on this frame by a certain amount, so that
 	# it isn't positioned weirdly. The HLDM animations don't quite work
 	# right with the way the thumbs are positioned on NF models.
-	# Right now these translations are just manually calculated from the
-	# difference in position between the Nightfire reference skeleton
-	# and the HL Gman reference skeleton, because I CBA to do anything
-	# more complicated.
+	# Right now these rotations are just manually calculated from the
+	# position in the Nightfire reference skeleton, because I CBA to
+	# do anything more complicated.
 
 	if isLeft:
-		entryAsList[1] += -0.785953
-		entryAsList[2] += 0.162361
-		entryAsList[3] += 0.968971
+		entryAsList[4] += -1.54727
 	else:
-		entryAsList[1] += -0.672887
-		entryAsList[2] += 0.502195
-		entryAsList[3] += -0.931216
+		entryAsList[4] += 1.626523
 
 def __modifySkeletonFrame(frame, boneRenumberMap, thumbIndices):
 	bones = frame["bones"]
@@ -68,18 +63,17 @@ def __modifySkeletonFrame(frame, boneRenumberMap, thumbIndices):
 	# Reverse iteration to avoid index shifting issues.
 	for index in range(len(bones) - 1, -1, -1):
 		entry = bones[index]
-		boneIndex = entry[0]
+		oldBoneIndex = entry[0]
 
-		if boneIndex in boneRenumberMap:
+		if oldBoneIndex in boneRenumberMap:
 			tempList = list(entry)
 
 			try:
-				__fixThumbBone(tempList, thumbIndices.index(boneIndex) == 0)
+				__fixThumbBone(tempList, thumbIndices.index(oldBoneIndex) == 0)
 			except:
 				pass
 
-			tempList[0] = boneRenumberMap[boneIndex]
-
+			tempList[0] = boneRenumberMap[oldBoneIndex]
 			bones[index] = tuple(tempList)
 		else:
 			del bones[index]
@@ -102,12 +96,12 @@ def __modifySmdFile(allowedBoneNames, refSkeleton, filePath):
 	print("Modifying SMD file:", filePath)
 
 	(bones, skeleton) = __parseSmdBonesAndSkeleton(filePath)
+	thumbIndices = [bones.getByName("Bip01 L Finger0").index(), bones.getByName("Bip01 R Finger0").index()]
 
 	bonesToRemove = __computeBonesToRemove(bones, allowedBoneNames)
 	__removeBones(bones, bonesToRemove)
 	boneRenumberMap = bones.renumber()
 
-	thumbIndices = [bones.getByName("Bip01 L Finger0").index(), bones.getByName("Bip01 R Finger0").index()]
 	__modifySkeleton(skeleton, boneRenumberMap, thumbIndices)
 
 	outputPath = __outputFilePath(filePath)
@@ -133,7 +127,7 @@ def main():
 	(boneList, skeleton) = __parseReference(args.ref)
 
 	allowedBoneNames = [bone.name() for bone in boneList.list()]
-	print("Allowed bones:", "\n".join(["  " + item for item in allowedBoneNames]))
+	print("Allowed bones:\n", "\n".join(["  " + item for item in allowedBoneNames]))
 
 	for smdPath in args.smd:
 		__modifySmdByPath(allowedBoneNames, skeleton, smdPath)
