@@ -93,7 +93,18 @@ def buildEngine(enginePath, outputDirectory, buildConfig, forceRebuild, sdl2Path
 			print("Override SDL2 path:", sdl2Path)
 			callArgs.append(f"--sdl2={sdl2Path}")
 
-	callArgs += ["build", "install"]
+	callArgs.append("build")
+
+	if platform.system() == "Windows":
+		# Currently there's a bug with the Windows build of the Xash3D engine,
+		# where concurrent writes to PDB files will corrupt the paths stored
+		# within them and prevent debugging. Until it's fixed, we have to
+		# compile single-threaded on Windows. Boooooooooooooooooooooooo
+		print("Temporary hack: compiling in single-threaded mode on Windows, to avoid PDB corruption.")
+		print("Check back soon to see whether the Xash3D build scripts have fixed this issue.")
+		callArgs.append("-j 1")
+
+	callArgs.append("install")
 	callProcess(callArgs)
 
 	os.chdir(oldPath)
@@ -116,7 +127,7 @@ def buildGame(gamePath, buildDirectory, config, forceRebuild):
 
 	if config == "debug":
 		cmakeArgs.append("-DCMAKE_BUILD_TYPE=Debug")
-	
+
 	if platform.system() == "Windows":
 		# TODO: Can we auto-detect the version of VS that's installed?
 		cmakeArgs += ["-G", "Visual Studio 16 2019", "-A" "Win32"]
@@ -150,7 +161,7 @@ def copyLibraries(sourcePath, destinationPath, extension):
 			print("Copying library", lib, "to", destinationPath)
 			shutil.copy2(lib, destinationPath)
 
-def copyGameContent(scriptPath, gameBuildPath, gameContentPath, engineGameLaunchPath, config):
+def copyGameContent(scriptPath, gameBuildPath, gameContentPath, engineGameLaunchPath, config, sdl2Path):
 	gameContentPathInEngine = os.path.join(engineGameLaunchPath, "afterburner")
 
 	print("Copying game content from", gameContentPath, "to", gameContentPathInEngine)
@@ -180,6 +191,11 @@ def copyGameContent(scriptPath, gameBuildPath, gameContentPath, engineGameLaunch
 		else:
 			cldllPath = os.path.join(cldllPath, "Release")
 			dllPath = os.path.join(dllPath, "Release")
+
+		if sdl2Path is not None:
+			sdl2DllPath = os.path.join(sdl2Path, "lib", "x86", "SDL2.dll")
+			print("Copying", sdl2DllPath, "to", engineGameLaunchPath)
+			shutil.copy2(sdl2DllPath, engineGameLaunchPath)
 
 	copyLibraries(cldllPath, os.path.join(gameContentPathInEngine, "cl_dlls"), libExtension)
 	copyLibraries(dllPath, os.path.join(gameContentPathInEngine, "dlls"), libExtension)
@@ -213,7 +229,7 @@ def main():
 
 	buildEngine(enginePath, engineOutputPath, args.config, args.rebuild_engine, sdl2Path)
 	buildGame(scriptPath, gameBuildPath, args.config, args.rebuild_engine or args.rebuild_game)
-	copyGameContent(scriptPath, gameBuildPath, gameContentPath, engineOutputPath, args.config)
+	copyGameContent(scriptPath, gameBuildPath, gameContentPath, engineOutputPath, args.config, sdl2Path)
 
 	sys.exit(0)
 
