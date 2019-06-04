@@ -216,6 +216,15 @@ def main():
 		sys.exit(1)
 
 	scriptPath = os.path.dirname(os.path.realpath(sys.argv[0]))
+
+	# More infuriating Windows edge cases:
+	# The drive letter can come back from sys.argv[0] as lowercase.
+	# This causes all case-sensitive path comparisons in Waf to fail,
+	# and causes lock files to be considered invalid.
+	# Make sure the drive letter is uppercase.
+	if len(scriptPath) >= 2 and scriptPath[1] == ":":
+		scriptPath = scriptPath[0].upper() + scriptPath[1:]
+
 	buildBasePath = os.path.realpath(os.path.join(scriptPath, "build"))
 	engineOutputPath = os.path.join(buildBasePath, "engine")
 	gameBuildPath = os.path.join(buildBasePath, "game")
