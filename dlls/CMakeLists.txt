@@ -165,6 +165,12 @@ else()
 	add_definitions(-DNO_VOICEGAMEMGR)
 endif()
 
+if(MSVC)
+	set(SVDLL_SOURCES
+		${SVDLL_SOURCES}
+		hl.def)
+endif()
+
 add_library (${SVDLL_LIBRARY} SHARED ${SVDLL_SOURCES})
 
 set_target_properties (${SVDLL_LIBRARY} PROPERTIES
