@@ -18,6 +18,11 @@
 #pragma once
 #ifndef GAMERULES_H
 #define GAMERULES_H
+
+// Switch for temporary gameplay placeholders that should be replaced at some point by genuine additions.
+// For example, mapping health kits to item_armor_vest entities, etc.
+#define AFTERBURNER_GAMEPLAY_PLACEHOLDERS
+
 //#include "weapons.h"
 //#include "items.h"
 class CBasePlayerItem;

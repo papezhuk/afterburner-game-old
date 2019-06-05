@@ -39,6 +39,10 @@ class CHealthKit : public CItem
 
 LINK_ENTITY_TO_CLASS( item_healthkit, CHealthKit )
 
+#ifdef AFTERBURNER_GAMEPLAY_PLACEHOLDERS
+LINK_ENTITY_TO_CLASS( item_armor_vest, CHealthKit )
+#endif
+
 /*
 TYPEDESCRIPTION	CHealthKit::m_SaveData[] =
 {

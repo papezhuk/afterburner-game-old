@@ -254,6 +254,10 @@ class CItemBattery : public CItem
 
 LINK_ENTITY_TO_CLASS( item_battery, CItemBattery )
 
+#ifdef AFTERBURNER_GAMEPLAY_PLACEHOLDERS
+LINK_ENTITY_TO_CLASS( item_armor_plate, CItemBattery )
+#endif
+
 class CItemAntidote : public CItem
 {
 	void Spawn( void )
