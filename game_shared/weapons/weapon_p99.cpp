@@ -2,6 +2,7 @@
 #include "weaponregistry.h"
 #include "weaponinfo.h"
 #include "skill.h"
+#include "gamerules.h"
 
 namespace
 {
@@ -129,6 +130,12 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 LINK_ENTITY_TO_CLASS(weapon_p99, CWeaponP99)
 LINK_ENTITY_TO_CLASS(weapon_pp9, CWeaponP99)	// NF devs called it "PP9" for some reason.
 
+#ifdef AFTERBURNER_GAMEPLAY_PLACEHOLDERS
+// To make weapons less sparse for testing, map some other known weapons to this one.
+LINK_ENTITY_TO_CLASS(weapon_kowloon, CWeaponP99)
+LINK_ENTITY_TO_CLASS(weapon_mp9, CWeaponP99)
+#endif
+
 CWeaponP99::CWeaponP99()
 	: CGenericHitscanWeapon(),
 	  m_bSilenced(false)
@@ -207,3 +214,9 @@ public:
 };
 
 LINK_ENTITY_TO_CLASS(ammo_p99, CAmmoP99)
+
+#ifdef AFTERBURNER_GAMEPLAY_PLACEHOLDERS
+// To make weapons less sparse for testing, map some other known ammo to this one.
+LINK_ENTITY_TO_CLASS(ammo_kowloon, CAmmoP99)
+LINK_ENTITY_TO_CLASS(ammo_mp9, CAmmoP99)
+#endif
