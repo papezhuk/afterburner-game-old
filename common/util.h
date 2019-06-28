@@ -400,6 +400,7 @@ void DBG_AssertFunction(bool fExpr, const char* szExpr, const char* szFile, int 
 #else	// !DEBUG
 #define ASSERT(f)
 #define ASSERTSZ(f, sz)
+#define ASSERTSZ_Q(f, sz)
 #endif	// !DEBUG
 
 extern DLL_GLOBAL const Vector g_vecZero;

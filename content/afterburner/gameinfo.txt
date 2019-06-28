@@ -6,7 +6,6 @@ title		"Afterburner"
 startmap		"c0a0"
 trainmap		"t0a0"
 version		1
-type		"Single"
 dllpath		"cl_dlls"
 gamedll		"dlls/hl.dll"
 gamedll_linux		"dlls/hl.so"
@@ -25,3 +24,7 @@ max_tempents	500
 max_beams		128
 max_particles	4096
 url_info    "https://github.com/x6herbius/afterburner-game"
+
+// Change this when we add singleplayer stuff
+gamemode "multiplayer_only"
+type "Multiplayer"
