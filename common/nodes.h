@@ -19,17 +19,12 @@
 #ifndef		NODES_H
 #define		NODES_H
 
-// START RHO-BOT
 #include <fstream>
 
-typedef short int NAV_ARRAY_TYPE; // in case a short int isn't big enough
-//30-July-2001: Halved NAV_GRIDBOX_SIZE from 64 to 32
-//const int NAV_GRIDBOX_SIZE	= 64;
-const int NAV_GRIDBOX_SIZE	= 32;
-//30-July-2001: end
-const int NAV_ARRAY_SIZE	= 8192 / NAV_GRIDBOX_SIZE;
-const int NAV_ARRAY_MAX		= NAV_ARRAY_SIZE - 1; //30-July-2001
-// END RHO-BOT
+typedef short int NAV_ARRAY_TYPE;
+constexpr int NAV_GRIDBOX_SIZE	= 32;
+constexpr int NAV_ARRAY_SIZE	= 8192 / NAV_GRIDBOX_SIZE;
+constexpr int NAV_ARRAY_MAX		= NAV_ARRAY_SIZE - 1;
 
 //=========================================================
 // DEFINE
@@ -144,7 +139,6 @@ public:
 	int		m_cLinks;// total number of links
 	int     m_nRouteInfo; // size of m_pRouteInfo in bytes.
 
-	// START RHO-BOT
 	NAV_ARRAY_TYPE	NavigationArray[NAV_ARRAY_SIZE][NAV_ARRAY_SIZE][NAV_ARRAY_SIZE];
 
 	float		FConvertArrayToGlobal( int array );
@@ -161,7 +155,6 @@ public:
 
 	void		slurp_array(NAV_ARRAY_TYPE space_array[NAV_ARRAY_SIZE][NAV_ARRAY_SIZE][NAV_ARRAY_SIZE], const char* filename);
 	void		parse_nav_line(NAV_ARRAY_TYPE space_array[NAV_ARRAY_SIZE][NAV_ARRAY_SIZE][NAV_ARRAY_SIZE], char* line);
-	// END RHO-BOT
 
 	// Tables for making nearest node lookup faster. SortedBy provided nodes in a
 	// order of a particular coordinate. Instead of doing a binary search, RangeStart

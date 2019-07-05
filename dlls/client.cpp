@@ -39,17 +39,7 @@
 #include "usercmd.h"
 #include "netadr.h"
 #include "pm_shared.h"
-
-// START RHO-BOT (Eric)
-#include "bot.h"
-#include "nodes.h"
-
-extern void BotConnect( int NumBots);
-float TimeNextPossibleBotConnect;
-extern respawn_t bot_respawn[32]; //Scott:  Needed to kick bots.
-extern BOOL UseBotCycle(int numBots);
-BOOL bInitBotCycle;
-// END RHO-BOT
+#include "bot_callbacks.h"
 
 extern DLL_GLOBAL ULONG		g_ulModelIndexPlayer;
 extern DLL_GLOBAL BOOL		g_fGameOver;
@@ -116,7 +106,9 @@ GLOBALS ASSUMED SET:  g_fGameOver
 void ClientDisconnect( edict_t *pEntity )
 {
 	if( g_fGameOver )
+	{
 		return;
+	}
 
 	char text[256] = "";
 	if( pEntity->v.netname )
@@ -126,16 +118,7 @@ void ClientDisconnect( edict_t *pEntity )
 		WRITE_STRING( text );
 	MESSAGE_END();
 
-//START RHO-BOT: Scott - for better count
-	CBasePlayer *pPlayer;
-
-	entvars_t *pev = &pEntity->v;
-
-	pPlayer = GetClassPtr((CBasePlayer *)pev);
-	pPlayer->SpawnIndex = -1; // Player will not spawn again
-	pev->effects |= EF_NODRAW; // for observer fix
-
-//END RHO-BOT
+	Bot_Callbacks::ClientDisconnect(pEntity);
 
 	CSound *pSound = CSoundEnt::SoundPointerForIndex( CSoundEnt::ClientSoundIndex( pEntity ) );
 
@@ -212,16 +195,14 @@ called each time a player is spawned
 */
 void ClientPutInServer( edict_t *pEntity )
 {
+	Bot_Callbacks::ClientPutInServer(pEntity);
+
 	CBasePlayer *pPlayer;
 
 	entvars_t *pev = &pEntity->v;
 
 	pPlayer = GetClassPtr( (CBasePlayer *)pev );
 	pPlayer->SetCustomDecalFrames( -1 ); // Assume none;
-
-//START RHO-BOT: Scott - for better count
-	pPlayer->SpawnIndex = 0; // Player will spawn again
-//END RHO-BOT
 
 	// Allocate a CBasePlayer for pev, and call spawn
 	pPlayer->Spawn();
@@ -502,7 +483,9 @@ void ClientCommand( edict_t *pEntity )
 
 	// Is the client spawned yet?
 	if( !pEntity->pvPrivateData )
+	{
 		return;
+	}
 
 	entvars_t *pev = &pEntity->v;
 
@@ -630,96 +613,10 @@ void ClientCommand( edict_t *pEntity )
 		if( pPlayer->IsObserver() )
 			pPlayer->Observer_FindNextPlayer( atoi( CMD_ARGV( 1 ) ) ? true : false );
 	}
-	// RHO-BOT Start: 19-JUL-2001 (Scott)
-	// Prevent clients from adding or removing bots from dedicated server
-	else if (FStrEq(pcmd, "addbot" ))
+	else if ( Bot_Callbacks::ClientCommand(GetClassPtr((CBasePlayer*)pev), pcmd) )
 	{
-		if (!IS_DEDICATED_SERVER())
-		{
-			int NumPlayersInGameNow = 0;
-
-			for ( int i = 1; i <= gpGlobals->maxClients; i++ )
-			{
-				CBasePlayer *player = (CBasePlayer *)UTIL_PlayerByIndex( i );
-
-				if ( player && player->SpawnIndex > -1)
-				{
-					NumPlayersInGameNow++;
-				}
-			}
-
-			if ( NumPlayersInGameNow < MAX_BOTS )
-			{
-				char serverCommand[128] = "bot_number ###";
-				sprintf(serverCommand, "bot_number %d\n", ((int)(bot_number.value)+1) );
-				SERVER_COMMAND(serverCommand);
-				if (IS_DEDICATED_SERVER()) printf( serverCommand );
-			}
-			else
-			{
-				UTIL_ClientPrintAll( HUD_PRINTNOTIFY, "Rho-DMC supports a maximum of 32 players.\n" );
-				return;
-			}
-		}
-		else
-			CLIENT_PRINTF( pEntity, print_console, "addbot not allowed from client!\n" );
+		// Handled - do nothing.
 	}
-	else if (FStrEq(pcmd, "removebots" ))
-	{ // should be used when bots have a nonzero ping
-		if (!IS_DEDICATED_SERVER())
-		{
-			char serverCommand[128] = "bot_number ###";
-			sprintf(serverCommand, "bot_number %d\n", 0 );
-			SERVER_COMMAND(serverCommand);
-			if (IS_DEDICATED_SERVER()) printf( serverCommand );
-		}
-		else
-			CLIENT_PRINTF( pEntity, print_console, "removebots not allowed from client!\n" );
-	}
-	else if (FStrEq(pcmd, "removebot" ))
-	{
-		if (!IS_DEDICATED_SERVER())
-		{
-			CBasePlayer *somePlayer = (CBasePlayer *)UTIL_FindEntityByString( NULL, "netname", (char *)CMD_ARGV(1) );
-
-			if ( somePlayer )
-			{
-				//Scott: Set respawn flag, prevents respawning removed bot
-				bot_respawn[somePlayer->SpawnIndex].is_used = FALSE;
-				somePlayer->SpawnIndex = -1;
-
-				somePlayer->pev->health = 0;
-
-				char serverKickCommand[128] = "kick Some Bot\n";
-
-				sprintf( serverKickCommand, "kick \"%s\"\n", STRING(somePlayer->pev->netname) );
-
-				CLIENT_COMMAND( pEntity, serverKickCommand );
-				char serverCommand[128] = "bot_number ###";
-				sprintf(serverCommand, "bot_number %d\n", ((int)(bot_number.value)-1) );
-				SERVER_COMMAND(serverCommand);
-				if (IS_DEDICATED_SERVER()) printf( serverCommand );
-			}
-			else
-			{
-				char Command[128] = "kick Some Bot\n";
-				sprintf( Command, "could not kick \"%s\"\n", (char *)CMD_ARGV(1) );
-				CLIENT_PRINTF( pEntity, print_console, Command );
-			}
-		}
-		else
-			CLIENT_PRINTF( pEntity, print_console, "removebot not allowed from client!\n" );
-	}
-	//RHO-BOT End: 19-JUL-2001
-/*	else if (FStrEq(pcmd, "loadnav" ))
-	{
-		WorldGraph.FLoadGraph( (char *)STRING( gpGlobals->mapname ) );
-	}
-	else if (FStrEq(pcmd, "savenav" ))
-	{
-		WorldGraph.SaveNavToFile();
-	}*/
-	// END RHO-BOT
 	else if( g_pGameRules->ClientCommand( GetClassPtr( (CBasePlayer *)pev ), pcmd ) )
 	{
 		// MenuSelect returns true only if the command is properly handled,  so don't print a warning
@@ -881,126 +778,11 @@ void PlayerPreThink( edict_t *pEntity )
 	CBasePlayer *pPlayer = (CBasePlayer *)GET_PRIVATE( pEntity );
 
 	if( pPlayer )
+	{
 		pPlayer->PreThink();
-
-	// START RHO-BOT
-	// Rho-Bot messaging
-	// Based on MasterStroke tutorial http://hlpp.valveworld.com/tuts/pointat.htm
-	// and inspired by OZ deathmatch.
-
-	int iDisplayTime = (int) ((gpGlobals->time - pPlayer->m_tRhoBot - 3)*8.);
-	const char cTeamplay[35]   = "Rho-DMC Teamplay\nVersion 2.0\n  ";
-	const char cDeathmatch[35] = "Rho-DMC Deathmatch\nVersion 1.0\n";
-
-	if (iDisplayTime > 0 && iDisplayTime < 34)
-	{
-		char displayText[35];
-		hudtextparms_t     hText;
-
-		if (CVAR_GET_FLOAT( "mp_teamplay"))
-			strcpy(displayText, cTeamplay);
-		else
-			strcpy(displayText, cDeathmatch);
-
-		displayText[iDisplayTime] = '\n';	// string return
-		displayText[iDisplayTime+1] = '\0';	// terminate string
-
-		memset(&hText, 0, sizeof(displayText));
-
-		hText.channel = CHAN_VOICE;
-
-		// Coordinates above the heath meter
-		hText.x = 0.01;
-		hText.y = 0.80;
-
-		hText.effect = 0;    // Fade in/out
-
-		hText.r1 = 255*iDisplayTime/33;
-		hText.g1 = 0;
-		hText.b1 = 0;
-		hText.a1 = 255;
-
-		hText.r2 = 255*iDisplayTime/33;
-		hText.g2 = 0;
-		hText.b2 = 0;
-		hText.a2 = 255;
-
-		hText.fadeinTime  = 0;
-		hText.fadeoutTime = 5;
-		hText.holdTime    = 5;
-
-		UTIL_HudMessage(pPlayer ,hText, displayText);
 	}
 
-	// Rho-Bot messaging end
-
-	// Rho-Bot debug messaging
-
-	if (bot_debug.value != 0)
-	{
-		//Based on MasterStroke tutorial http://hlpp.valveworld.com/tuts/pointat.htm
-
-		TraceResult tr;
-
-		Vector anglesAim = pPlayer->pev->v_angle + pPlayer->pev->punchangle;
-		UTIL_MakeVectors( anglesAim );
-		Vector vecSrc = pPlayer->GetGunPosition( ) - gpGlobals->v_up * 2;
-		Vector vecDir = gpGlobals->v_forward;
-
-		UTIL_TraceLine(vecSrc, vecSrc + vecDir * 8192, dont_ignore_monsters,
-			pPlayer->edict(), &tr);
-
-		CBaseEntity *point = CBaseEntity::Instance(tr.pHit);
-
-		if (FClassnameIs( tr.pHit, "player" ) )
-		{
-			char PrintOutText[201];
-			hudtextparms_t hText;
-
-			entvars_t* pev = &tr.pHit->v;
-			CBasePlayer *pPlayerSighted = GetClassPtr((CBasePlayer *)pev);
-
-			if (pPlayerSighted->IsBot())
-			{
-				CBaseBot *pBot = GetClassPtr((CBaseBot *)pev);
-				char Enemy[201];
-
-				if (pBot->GetEnemy() != NULL)
-				{
-					sprintf (Enemy, STRING(pBot->GetEnemy()->pev->netname) );
-				}
-				else
-					sprintf (Enemy, "NONE");
-
-				sprintf(PrintOutText, "%s\n%s\n",
-					STRING(pPlayerSighted->pev->netname), Enemy);
-			}
-			else
-			{
-				sprintf(PrintOutText, "%s\n", STRING(tr.pHit->v.netname));
-			}
-
-			memset(&hText, 0, sizeof(hText));
-			hText.channel = 1;
-			hText.x = 0.45;
-			hText.y = 0.55;
-
-			hText.effect = 0;
-
-			hText.r1 = hText.g1 = hText.b1 = 255;
-			hText.a1 = 255;
-			hText.r2 = hText.g2 = hText.b2 = 255;
-			hText.a2 = 255;
-			hText.fadeinTime = 0.2;
-			hText.fadeoutTime = 1;
-			hText.holdTime = 1.5;
-			hText.fxTime = 0.5;
-
-			UTIL_HudMessage(pPlayer, hText, PrintOutText);
-		}
-	}
-	// Rho-Bot debug messaging end
-	// END RHO-BOT
+	Bot_Callbacks::PlayerPreThink(pEntity);
 }
 
 /*
@@ -1017,7 +799,9 @@ void PlayerPostThink( edict_t *pEntity )
 	CBasePlayer *pPlayer = (CBasePlayer *)GET_PRIVATE( pEntity );
 
 	if( pPlayer )
+	{
 		pPlayer->PostThink();
+	}
 }
 
 void ParmsNewLevel( void )
@@ -1030,271 +814,27 @@ void ParmsChangeLevel( void )
 	SAVERESTOREDATA *pSaveData = (SAVERESTOREDATA *)gpGlobals->pSaveData;
 
 	if( pSaveData )
-		pSaveData->connectionCount = BuildChangeList( pSaveData->levelList, MAX_LEVEL_CONNECTIONS );
-}
-
-//START RHO-BOT
-CBasePlayer	*CBasePlayerByIndex( int playerIndex )
-{
-	CBasePlayer *pPlayer = NULL;
-	entvars_t *pev;
-
-	if ( playerIndex > 0 && playerIndex <= gpGlobals->maxClients )
 	{
-		edict_t *pPlayerEdict = INDEXENT( playerIndex );
-		if ( pPlayerEdict && !pPlayerEdict->free && (pPlayerEdict->v.flags & FL_FAKECLIENT || pPlayerEdict->v.flags & FL_CLIENT) ) //fake
-		{
-			pev = &pPlayerEdict->v;
-			pPlayer = GetClassPtr((CBasePlayer *)pev);
-		}
+		pSaveData->connectionCount = BuildChangeList( pSaveData->levelList, MAX_LEVEL_CONNECTIONS );
 	}
-
-	return pPlayer;
 }
-//END RHO-BOT
 
 //
 // GLOBALS ASSUMED SET:  g_ulFrameCount
 //
 void StartFrame( void )
 {
-	// START RHO-BOT (Eric)
-
-	static float check_server_cmd = 0;
-	char *cmd, *arg1, *arg2, *arg3;
-	static char cmd_line[80];
-	static char server_cmd[80];
-	static int index;
-	int NumBotsMax = (int) bot_number.value;
-	int NumPlayersInGameNow = 0;
-	int NumBotsInGameNow = 0;
-
-	CBasePlayer *pHumanPlayer = NULL;
-
-	for ( int i = 1; i <= gpGlobals->maxClients; i++ )
-	{
-		CBasePlayer *pPlayer = CBasePlayerByIndex( i );
-
-		if ( pPlayer && pPlayer->SpawnIndex > -1)
-		{
-			NumPlayersInGameNow++;
-
-			if ( pPlayer->IsBot() )
-			{
-				NumBotsInGameNow++;
-
-				pPlayer->BotThink(); // call BotThink for each bot every frame
-			}
-			else
-			{
-				if ( pPlayer->IsNetClient() )
-				{
-					pHumanPlayer = pPlayer;
-
-					if ( pPlayer->IsAlive() )
-					{
-						WorldGraph.MarkLocationFavorable( pPlayer->pev->origin );
-					}
-				}
-			}
-		}
-	}
-
-	if ( NumBotsMax == 0 ||  gpGlobals->time < 10)
-	{
-		bInitBotCycle = FALSE;
-	}
-
-	else if ( NumBotsInGameNow == 0 && !bInitBotCycle)
-	{
-		bInitBotCycle = UseBotCycle(NumBotsInGameNow); //Init Bot Cycle
-		bInitBotCycle = TRUE; // In case of corrupt or missing botcycle.txt
-	}
-
-	else if ( NumBotsInGameNow < NumBotsMax
-		&& NumPlayersInGameNow < (gpGlobals->maxClients-1) // Scott - Always leave a spot open
-		&& NumBotsInGameNow < MAX_BOTS
-		&& ((NumBotsInGameNow == 0 && gpGlobals->time >= 10) ||
-			(NumBotsInGameNow != 0 && gpGlobals->time >= TimeNextPossibleBotConnect))
-		)
-	{
-		//Scott:  Connect the bot directly, do not issue Client Command.
-		//This is needed for dedicated server.
-
-		float BOTCONNECT_DELAY = 1;
-
-		BotConnect(NumBotsInGameNow);
-		TimeNextPossibleBotConnect = gpGlobals->time + BOTCONNECT_DELAY;
-	}
-
-	//Scott:  Remove a bot if game is full or number of bots has been changed
-
-	if ( ( NumBotsInGameNow > 0 && NumPlayersInGameNow == gpGlobals->maxClients)
-		|| NumBotsInGameNow > NumBotsMax
-	    )
-	{
-		for ( int i = gpGlobals->maxClients; i >= 1; i-- )
-		{
-			CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex( i );
-
-			if ( pPlayer && pPlayer->IsBot() &&  pPlayer->SpawnIndex != -1)
-			{
-				bot_respawn[pPlayer->SpawnIndex].is_used = FALSE;
-				pPlayer->SpawnIndex = -1; /* Do not respawn */
-
-				pPlayer->pev->health = 0;
-
-				sprintf(server_cmd, "kick \"%s\"\n",
-					STRING( pPlayer->pev->netname ) );
-
-				SERVER_COMMAND(server_cmd);
-
-				NumBotsInGameNow--;
-				bInitBotCycle = UseBotCycle(NumBotsInGameNow); //Init Bot Cycle
-
-				break;
-			}
-		}
-	}
-
-	BotGlobals.HandleAutoAdjDifficulty();
-
-	// END RHO-BOT
+	Bot_Callbacks::StartFrame();
 
 	//ALERT( at_console, "SV_Physics( %g, frametime %g )\n", gpGlobals->time, gpGlobals->frametime );
 
 	if( g_pGameRules )
 	{
 		g_pGameRules->Think();
-
-		// START RHO-BOT
-		// Scott:  From Botman's bot10.  if time to check for server commands then do so...
-//		if (check_server_cmd <= gpGlobals->time)
-		if (fabs(check_server_cmd - gpGlobals->time) > 1.0) //Scott: fix for map change
-		{
-			check_server_cmd = gpGlobals->time + 1.0;
-
-			char *cvar_bot = (char *)CVAR_GET_STRING( "bot" );
-
-			if ( cvar_bot && cvar_bot[0] )
-			{
-				strcpy(cmd_line, cvar_bot);
-
-				index = 0;
-				cmd = cmd_line;
-				arg1 = arg2 = arg3 = NULL;
-
-				// skip to blank or end of string...
-				while ((cmd_line[index] != ' ') && (cmd_line[index] != 0))
-				index++;
-
-				if (cmd_line[index] == ' ')
-				{
-					cmd_line[index++] = 0;
-					arg1 = &cmd_line[index];
-
-					if (strcmp(cmd, "removebot") != 0)
-					{
-
-					// skip to blank or end of string...
-					while ((cmd_line[index] != ' ') && (cmd_line[index] != 0))
-						index++;
-
-					if (cmd_line[index] == ' ')
-					{
-						cmd_line[index++] = 0;
-						arg2 = &cmd_line[index];
-
-						// skip to blank or end of string...
-						while ((cmd_line[index] != ' ') && (cmd_line[index] != 0))
-							index++;
-
-						if (cmd_line[index] == ' ')
-						{
-							cmd_line[index++] = 0;
-							arg3 = &cmd_line[index];
-						}
-					}
-				}
-				}
-
-				if (strcmp(cmd, "addbot") == 0)
-				{
-					int NumPlayersInGameNow = 0;
-
-					for ( int i = 1; i <= gpGlobals->maxClients; i++ )
-					{
-						CBasePlayer *player = (CBasePlayer *)UTIL_PlayerByIndex( i );
-
-						if (( player ) && (player->SpawnIndex > -1))
-						{
-							NumPlayersInGameNow++;
-						}
-					}
-
-					if ( NumPlayersInGameNow < MAX_BOTS )
-					{
-						char serverCommand[128] = "bot_number ###";
-						sprintf(serverCommand, "bot_number %d\n", ((int)(bot_number.value)+1) );
-						SERVER_COMMAND(serverCommand);
-						if (IS_DEDICATED_SERVER()) printf( serverCommand );
-					}
-					else
-					{
-						UTIL_ClientPrintAll( HUD_PRINTNOTIFY, "Rho-DMC supports a maximum of 32 players.\n" );
-						if (IS_DEDICATED_SERVER())
-							printf("Rho-DMC supports a maximum of 32 players.\n");
-						return;
-					}
-				}
-				else if (strcmp(cmd, "removebot") == 0)
-				{
-					if (arg1 != NULL)
-					{
-						CBasePlayer *somePlayer = (CBasePlayer *)UTIL_FindEntityByString( NULL, "netname", arg1 );
-
-						if ( somePlayer )
-						{
-							bot_respawn[somePlayer->SpawnIndex].is_used = FALSE;
-							somePlayer->SpawnIndex = -1; /* Do not respawn */
-
-							somePlayer->pev->health = 0;
-
-							sprintf(server_cmd,"kick \"%s\"\n", STRING(somePlayer->pev->netname));
-							SERVER_COMMAND(server_cmd);
-							char serverCommand[128] = "bot_number ###";
-							sprintf(serverCommand, "bot_number %d\n", ((int)(bot_number.value)-1) );
-							SERVER_COMMAND(serverCommand);
-							if (IS_DEDICATED_SERVER()) printf( serverCommand );
-						}
-						else
-						{
-							char Command[128] = "kick Some Bot\n";
-							sprintf( Command, "could not kick \"%s\"\n", arg1 );
-							UTIL_ClientPrintAll( HUD_PRINTNOTIFY, Command );
-							if (IS_DEDICATED_SERVER()) printf( Command );
-						}
-					}
-				}
-				else if (strcmp(cmd, "removebots") == 0)
-				{
-					char serverCommand[128] = "bot_number ###";
-					sprintf(serverCommand, "bot_number %d\n", 0 );
-					SERVER_COMMAND(serverCommand);
-					if (IS_DEDICATED_SERVER()) printf( serverCommand );
-				}
-			}
-
-			CVAR_SET_STRING("bot", "");
-		}
-	// END RHO-BOT
 	}
 
 	if( g_fGameOver )
 	{
-		// START RHO-BOT
-		check_server_cmd = 0;
-		// END RHO-BOT
 		return;
 	}
 

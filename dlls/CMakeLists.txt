@@ -130,6 +130,9 @@ set (SVDLL_SOURCES
 	bots/bot_move.cpp
 	bots/bot_nav.cpp
 	bots/bot_stats.cpp
+	bots/bot_cvars.cpp
+	bots/bot_callbacks.cpp
+	bots/bot_commands.cpp
 	../pm_shared/pm_debug.c
 	../pm_shared/pm_math.c
 	../pm_shared/pm_shared.c

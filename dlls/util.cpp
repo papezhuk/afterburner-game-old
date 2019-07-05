@@ -2493,3 +2493,21 @@ int CRestore::BufferCheckZString( const char *string )
 	}
 	return 0;
 }
+
+CBasePlayer* UTIL_CBasePlayerByIndex( int playerIndex )
+{
+	CBasePlayer *pPlayer = NULL;
+	entvars_t *pev;
+
+	if ( playerIndex > 0 && playerIndex <= gpGlobals->maxClients )
+	{
+		edict_t *pPlayerEdict = INDEXENT( playerIndex );
+		if ( pPlayerEdict && !pPlayerEdict->free && (pPlayerEdict->v.flags & FL_FAKECLIENT || pPlayerEdict->v.flags & FL_CLIENT) ) //fake
+		{
+			pev = &pPlayerEdict->v;
+			pPlayer = GetClassPtr((CBasePlayer *)pev);
+		}
+	}
+
+	return pPlayer;
+}

@@ -32,6 +32,7 @@
 
 #include "game.h"
 #include "bot_misc.h"
+#include "bot_cvars.h"
 
 const int DISTANCE_FAR	= 700;
 const int DISTANCE_NEAR	= 200;
@@ -162,10 +163,10 @@ public:
 	void	UseTripMine( void );
 */
 	void	UseWeapon( void );
-	
+
 	AIM		GetAimAt() { return AimAt; }
 	ATTACK_MODE		GetAttackMode() { return AttackMode; }
-	
+
 	BOOL	GetHoldDownAttack() { return bHoldDownAttack; }
 //	BOOL	GetSecondaryFire() { return bSecondaryFire; }
 	//Scott:  Added next shoot time to determine when the bot should shoot
@@ -248,7 +249,7 @@ public:
 	void	EnemyOutOfSight( void );
 	void	EnemySighted( CBaseEntity *pEnemy );
 	void	EndFrameUpdate( CBasePlayer *pOwner );
-	
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////

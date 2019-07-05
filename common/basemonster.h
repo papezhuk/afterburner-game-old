@@ -329,8 +329,6 @@ public:
 
 	CBaseEntity* DropItem( const char *pszItemName, const Vector &vecPos, const Vector &vecAng );// drop an item.
 
-	// START RHO-BOT
 	virtual void BotThink ( void ) {}
-	// END RHO_BOT
 };
 #endif // BASEMONSTER_H

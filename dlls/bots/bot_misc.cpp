@@ -38,8 +38,6 @@
 #include "bot_misc.h"
 #include "nodes.h"
 
-extern CBasePlayer *CBasePlayerByIndex( int playerIndex ); // client.cpp
-
 CBaseBotGlobals BotGlobals;
 
 BOOL skin_used[MAX_BOT_SKINS] = {
@@ -143,7 +141,6 @@ respawn_t bot_respawn[32] = {
 CBaseBotGlobals::CBaseBotGlobals():
 AutoAdjCheckTime( 12 )
 {
-	strcpy( InitialMap, "dmc_dm2" );
 	strcpy( LastUsedBotName, "NoBotLastUsed" );
 }
 
@@ -214,7 +211,7 @@ void CBaseBotGlobals::HandleAutoAdjDifficulty( void )
 
 			for ( int i = 1; i <= gpGlobals->maxClients; i++ )
 			{
-				CBasePlayer *pPlayer = CBasePlayerByIndex( i );
+				CBasePlayer *pPlayer = UTIL_CBasePlayerByIndex( i );
 
 				if ( pPlayer )
 				{

@@ -68,7 +68,6 @@ public:
 //	int	AutoAdjustDifficulty; //Starbreaker - Change from BOOL to int
 //	float	ChatPropensity;
 //	float	DifficultyLevel;
-	char	InitialMap[33];
 //	float	JumpPropensity;
 	char	LastUsedBotName[MAX_LINE_LENGTH];
 //	int		NumBotsDefault;
@@ -93,6 +92,8 @@ extern BOOL name_used[MAX_BOT_NAMES];
 //       changed "char *bot_names[MAX_BOT_NAMES]" to "bot_names[MAX_BOT_NAMES]".
 extern char bot_names[MAX_BOT_NAMES][64];
 extern respawn_t bot_respawn[32];
+
+BOOL UseBotCycle(int NumBots);
 
 #endif	/*RHOBOT_MISC_H*/
 

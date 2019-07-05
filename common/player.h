@@ -133,7 +133,6 @@ public:
 	float				m_fNextSuicideTime; // the time after which the player can next use the suicide command
 
 	//START RHO-BOT
-	float				m_tRhoBot;			// Scott: to display Rho-Bot message at start screen
 	virtual	BOOL	IsBot( void ) { return (pev->flags & FL_FAKECLIENT) != 0; }
 	int				SpawnIndex; //Scott: store spawn index
 	//END RHO-BOT
