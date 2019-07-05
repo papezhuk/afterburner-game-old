@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   This source code contains proprietary and confidential information of
@@ -92,13 +92,13 @@ public:
 
 	int m_failSchedule;				// Schedule type to choose if current schedule fails
 
-	float m_flHungryTime;// set this is a future time to stop the monster from eating for a while. 
+	float m_flHungryTime;// set this is a future time to stop the monster from eating for a while.
 
 	float m_flDistTooFar;	// if enemy farther away than this, bits_COND_ENEMY_TOOFAR set in CheckEnemy
 	float m_flDistLook;	// distance monster sees (Default 2048)
 
 	int m_iTriggerCondition;// for scripted AI, this is the condition that will cause the activation of the monster's TriggerTarget
-	string_t m_iszTriggerTarget;// name of target that should be fired. 
+	string_t m_iszTriggerTarget;// name of target that should be fired.
 
 	Vector m_HackedGunPos;	// HACK until we can query end of gun
 
@@ -106,7 +106,7 @@ public:
 	SCRIPTSTATE m_scriptState;		// internal cinematic state
 	CCineMonster *m_pCine;
 
-	virtual int Save( CSave &save ); 
+	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
 
@@ -121,7 +121,7 @@ public:
 
 	virtual CBaseMonster *MyMonsterPointer( void ) { return this; }
 	virtual void Look( int iDistance );// basic sight function for monsters
-	virtual void RunAI( void );// core ai function!	
+	virtual void RunAI( void );// core ai function!
 	void Listen( void );
 
 	virtual BOOL IsAlive( void ) { return ( pev->deadflag != DEAD_DEAD ); }
@@ -130,7 +130,7 @@ public:
 	// Basic Monster AI functions
 	virtual float ChangeYaw( int speed );
 	float VecToYaw( Vector vecDir );
-	float FlYawDiff( void ); 
+	float FlYawDiff( void );
 
 	float DamageForce( float damage );
 
@@ -205,7 +205,7 @@ public:
 	BOOL PopEnemy( void );
 
 	BOOL FGetNodeRoute( Vector vecDest );
-	
+
 	inline void TaskComplete( void ) { if ( !HasConditions( bits_COND_TASK_FAILED ) ) m_iTaskStatus = TASKSTATUS_COMPLETE; }
 	void MovementComplete( void );
 	inline void TaskFail( void ) { SetConditions( bits_COND_TASK_FAILED ); }
@@ -272,12 +272,12 @@ public:
 	CBaseEntity *CheckTraceHullAttack( float flDist, int iDamage, int iDmgType );
 	BOOL FacingIdeal( void );
 
-	BOOL FCheckAITrigger( void );// checks and, if necessary, fires the monster's trigger target. 
+	BOOL FCheckAITrigger( void );// checks and, if necessary, fires the monster's trigger target.
 	BOOL NoFriendlyFire( void );
 
 	BOOL BBoxFlat( void );
 
-	// PrescheduleThink 
+	// PrescheduleThink
 	virtual void PrescheduleThink( void ) { return; };
 
 	BOOL GetEnemy( void );
@@ -328,5 +328,9 @@ public:
 	BOOL CineCleanup();
 
 	CBaseEntity* DropItem( const char *pszItemName, const Vector &vecPos, const Vector &vecAng );// drop an item.
+
+	// START RHO-BOT
+	virtual void BotThink ( void ) {}
+	// END RHO_BOT
 };
 #endif // BASEMONSTER_H

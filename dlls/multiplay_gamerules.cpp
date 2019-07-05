@@ -32,6 +32,11 @@
 #include	"hltv.h"
 #include "ammodefs.h"
 
+// START RHO-BOT (Eric)
+#include	"bot_misc.h"
+#include	"nodes.h"
+// END RHO-BOT
+
 extern DLL_GLOBAL CGameRules *g_pGameRules;
 extern DLL_GLOBAL BOOL	g_fGameOver;
 extern int gmsgDeathMsg;	// client dll messages
@@ -1521,6 +1526,18 @@ void CHalfLifeMultiplay::ChangeLevel( void )
 {
 	static char szPreviousMapCycleFile[256];
 	static mapcycle_t mapcycle;
+
+	// START RHO-BOT (Eric)
+
+	UTIL_LogPrintf( "Start NavigationArray Save.\n" );
+
+	WorldGraph.SaveNavToFile();
+
+	UTIL_LogPrintf( "NavigationArray Saved.\n" );
+
+	ALERT( at_console, "\nNavigationArray Saved.\n" );
+
+	// END RHO-BOT
 
 	char szNextMap[32];
 	char szFirstMapInList[32];

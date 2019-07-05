@@ -93,18 +93,7 @@ def buildEngine(enginePath, outputDirectory, buildConfig, forceRebuild, sdl2Path
 			print("Override SDL2 path:", sdl2Path)
 			callArgs.append(f"--sdl2={sdl2Path}")
 
-	callArgs.append("build")
-
-	if platform.system() == "Windows":
-		# Currently there's a bug with the Windows build of the Xash3D engine,
-		# where concurrent writes to PDB files will corrupt the paths stored
-		# within them and prevent debugging. Until it's fixed, we have to
-		# compile single-threaded on Windows. Boooooooooooooooooooooooo
-		print("Temporary hack: compiling in single-threaded mode on Windows, to avoid PDB corruption.")
-		print("Check back soon to see whether the Xash3D build scripts have fixed this issue.")
-		callArgs.append("-j 1")
-
-	callArgs.append("install")
+	callArgs += ["build", "install"]
 	callProcess(callArgs)
 
 	os.chdir(oldPath)

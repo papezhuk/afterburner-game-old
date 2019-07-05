@@ -123,6 +123,13 @@ set (SVDLL_SOURCES
 	world.cpp
 	xen.cpp
 	zombie.cpp
+	bots/bot_ai.cpp
+	bots/bot_fightstyle.cpp
+	bots/bot_memory.cpp
+	bots/bot_misc.cpp
+	bots/bot_move.cpp
+	bots/bot_nav.cpp
+	bots/bot_stats.cpp
 	../pm_shared/pm_debug.c
 	../pm_shared/pm_math.c
 	../pm_shared/pm_shared.c
@@ -155,7 +162,7 @@ set (SVDLL_SOURCES
 	../game_shared/weapons/weapon_raptor.cpp
 )
 
-include_directories (. ../common ../engine ../pm_shared ../game_shared ../public ../game_shared/weapons)
+include_directories (. ../common ../engine ../pm_shared ../game_shared ../public ../game_shared/weapons bots)
 
 if(USE_VOICEMGR)
 	set(SVDLL_SOURCES

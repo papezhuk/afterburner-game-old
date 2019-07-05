@@ -2784,6 +2784,9 @@ void CBasePlayer::Spawn( void )
 	m_bitsDamageType = 0;
 	m_afPhysicsFlags = 0;
 	m_fLongJump = FALSE;// no longjump module.
+	// BEGIN RHO-BOT
+	m_tRhoBot			= gpGlobals->time; // time at spawn
+	// END RHO_BOT
 
 	g_engfuncs.pfnSetPhysicsKeyValue( edict(), "slj", "0" );
 	g_engfuncs.pfnSetPhysicsKeyValue( edict(), "hl", "1" );

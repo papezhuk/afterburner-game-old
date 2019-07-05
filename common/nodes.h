@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   This source code contains proprietary and confidential information of
@@ -18,6 +18,19 @@
 #pragma once
 #ifndef		NODES_H
 #define		NODES_H
+
+// START RHO-BOT
+#include <fstream>
+
+typedef short int NAV_ARRAY_TYPE; // in case a short int isn't big enough
+//30-July-2001: Halved NAV_GRIDBOX_SIZE from 64 to 32
+//const int NAV_GRIDBOX_SIZE	= 64;
+const int NAV_GRIDBOX_SIZE	= 32;
+//30-July-2001: end
+const int NAV_ARRAY_SIZE	= 8192 / NAV_GRIDBOX_SIZE;
+const int NAV_ARRAY_MAX		= NAV_ARRAY_SIZE - 1; //30-July-2001
+// END RHO-BOT
+
 //=========================================================
 // DEFINE
 //=========================================================
@@ -40,7 +53,7 @@ public:
 	Vector  m_vecOriginPeek; // location of this node (LAND nodes are NODE_HEIGHT higher).
 	BYTE    m_Region[3]; // Which of 256 regions do each of the coordinate belong?
 	int		m_afNodeInfo;// bits that tell us more about this location
-	
+
 	int		m_cNumLinks; // how many links this node has
 	int		m_iFirstLink;// index of this node's first link in the link pool.
 
@@ -79,8 +92,8 @@ class CLink
 {
 public:
 	int		m_iSrcNode;// the node that 'owns' this link ( keeps us from having to make reverse lookups )
-	int		m_iDestNode;// the node on the other end of the link. 
-	
+	int		m_iDestNode;// the node on the other end of the link.
+
 	entvars_t	*m_pLinkEnt;// the entity that blocks this connection (doors, etc)
 
 	// m_szLinkEntModelname is not necessarily NULL terminated (so we can store it in a more alignment-friendly 4 bytes)
@@ -103,7 +116,7 @@ typedef struct
 } CACHE_ENTRY;
 
 //=========================================================
-// CGraph 
+// CGraph
 //=========================================================
 #define _GRAPH_VERSION_RETAIL 16 // Retail Half-Life graph version. Don't increment this
 #ifdef XASH_64BIT
@@ -130,6 +143,25 @@ public:
 	int		m_cNodes;// total number of nodes
 	int		m_cLinks;// total number of links
 	int     m_nRouteInfo; // size of m_pRouteInfo in bytes.
+
+	// START RHO-BOT
+	NAV_ARRAY_TYPE	NavigationArray[NAV_ARRAY_SIZE][NAV_ARRAY_SIZE][NAV_ARRAY_SIZE];
+
+	float		FConvertArrayToGlobal( int array );
+	int			FConvertGlobalToArray( float location );
+	int			BoundsCheck( int iArray); //30-July-2001
+	NAV_ARRAY_TYPE	FGetNavPropensity( int arrayX, int arrayY, int arrayZ );
+	void		HalfNavArray( void );
+	void		InitNavArray( void );
+	BOOL		IsInWorld( Vector &location );
+	void		MarkLocationFavorable( Vector &location );
+	void		MarkLocationUnfavorable( Vector &location );
+	void		SaveNavToFile( void );
+	int			FLoadBotNav( const char *szMapName );
+
+	void		slurp_array(NAV_ARRAY_TYPE space_array[NAV_ARRAY_SIZE][NAV_ARRAY_SIZE][NAV_ARRAY_SIZE], const char* filename);
+	void		parse_nav_line(NAV_ARRAY_TYPE space_array[NAV_ARRAY_SIZE][NAV_ARRAY_SIZE][NAV_ARRAY_SIZE], char* line);
+	// END RHO-BOT
 
 	// Tables for making nearest node lookup faster. SortedBy provided nodes in a
 	// order of a particular coordinate. Instead of doing a binary search, RangeStart
@@ -159,7 +191,7 @@ public:
 	int m_nHashLinks;
 
 
-	// kinda sleazy. In order to allow variety in active idles for monster groups in a room with more than one node, 
+	// kinda sleazy. In order to allow variety in active idles for monster groups in a room with more than one node,
 	// we keep track of the last node we searched from and store it here. Subsequent searches by other monsters will pick
 	// up where the last search stopped.
 	int		m_iLastActiveIdleSearch;
@@ -185,7 +217,7 @@ public:
 	void	ShowNodeConnections ( int iNode );
 	void	InitGraph( void );
 	int		AllocNodes ( void );
-	
+
 	int		CheckNODFile(const char *szMapName);
 	int		FLoadGraph(const char *szMapName);
 	int		FSaveGraph(const char *szMapName);
@@ -205,11 +237,11 @@ public:
 
 	int			HullIndex( const CBaseEntity *pEntity );	// what hull the monster uses
 	int			NodeType( const CBaseEntity *pEntity );		// what node type the monster uses
-	inline int	CapIndex( int afCapMask ) 
-	{ 
-		if (afCapMask & (bits_CAP_OPEN_DOORS | bits_CAP_AUTO_DOORS | bits_CAP_USE)) 
-			return 1; 
-		return 0; 
+	inline int	CapIndex( int afCapMask )
+	{
+		if (afCapMask & (bits_CAP_OPEN_DOORS | bits_CAP_AUTO_DOORS | bits_CAP_USE))
+			return 1;
+		return 0;
 	}
 
 
@@ -230,7 +262,7 @@ public:
 #endif
 		return m_pLinkPool[i];
 	}
-	
+
 	inline CLink &NodeLink( int iNode, int iLink )
 	{
 		return Link( Node( iNode ).m_iFirstLink + iLink );
@@ -257,7 +289,7 @@ public:
 		return Node( NodeLink( iNode, iLink ).m_iDestNode );
 	}
 
-	inline	CNode *PNodeLink ( int iNode, int iLink ) 
+	inline	CNode *PNodeLink ( int iNode, int iLink )
 	{
 		return &DestNode( iNode, iLink );
 	}
@@ -265,8 +297,8 @@ public:
 };
 
 //=========================================================
-// Nodes start out as ents in the level. The node graph 
-// is built, then these ents are discarded. 
+// Nodes start out as ents in the level. The node graph
+// is built, then these ents are discarded.
 //=========================================================
 class CNodeEnt : public CBaseEntity
 {
@@ -281,7 +313,7 @@ class CNodeEnt : public CBaseEntity
 //=========================================================
 // CStack - last in, first out.
 //=========================================================
-class CStack 
+class CStack
 {
 public:
 			CStack( void );
