@@ -393,9 +393,6 @@ void BotClientPutInServer( edict_t *pEntity, BOOL customBot )
 {
 	char bot_name[64] = "gordon";
 	char bot_skin[64] = "gordon";
-//Scott: Style change.  Did not like pointer reference.
-//	char *color_for_top = "255";
-//	char *color_for_bottom = "255";
 	char color_for_top[4] = "255";
 	char color_for_bottom[4] = "255";
 

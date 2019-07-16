@@ -57,11 +57,7 @@ LINK_ENTITY_TO_CLASS( info_node_air, CNodeEnt )
 //=========================================================
 void CGraph::InitGraph( void )
 {
-	//BEGIN RHO-BOT
-
 	InitNavArray();
-
-	//END RHO-BOT
 
 	// Make the graph unavailable
 	//
@@ -122,11 +118,7 @@ void CGraph::InitGraph( void )
 //=========================================================
 int CGraph::AllocNodes( void )
 {
-	//BEGIN RHO-BOT
-
 	InitNavArray();
-
-	//END RHO-BOT
 
 	//  malloc all of the nodes
 	WorldGraph.m_pNodes = (CNode *)calloc( sizeof(CNode), MAX_NODES );

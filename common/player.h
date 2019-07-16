@@ -16,9 +16,7 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-//START RHO-BOT
 #include "enginecallback.h"
-//END RHO-BOT
 
 #include "pm_materials.h"
 
@@ -132,10 +130,8 @@ public:
 	unsigned int		m_afPhysicsFlags;	// physics flags - set when 'normal' physics should be revisited or overriden
 	float				m_fNextSuicideTime; // the time after which the player can next use the suicide command
 
-	//START RHO-BOT
 	virtual	BOOL	IsBot( void ) { return (pev->flags & FL_FAKECLIENT) != 0; }
 	int				SpawnIndex; //Scott: store spawn index
-	//END RHO-BOT
 
 	// these are time-sensitive things that we keep track of
 	float				m_flTimeStepSound;	// when the last stepping sound was made

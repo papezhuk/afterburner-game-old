@@ -2502,7 +2502,7 @@ CBasePlayer* UTIL_CBasePlayerByIndex( int playerIndex )
 	if ( playerIndex > 0 && playerIndex <= gpGlobals->maxClients )
 	{
 		edict_t *pPlayerEdict = INDEXENT( playerIndex );
-		if ( pPlayerEdict && !pPlayerEdict->free && (pPlayerEdict->v.flags & FL_FAKECLIENT || pPlayerEdict->v.flags & FL_CLIENT) ) //fake
+		if ( pPlayerEdict && !pPlayerEdict->free && (pPlayerEdict->v.flags & FL_FAKECLIENT || pPlayerEdict->v.flags & FL_CLIENT) )
 		{
 			pev = &pPlayerEdict->v;
 			pPlayer = GetClassPtr((CBasePlayer *)pev);

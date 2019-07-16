@@ -2770,7 +2770,17 @@ void CBasePlayer::Spawn( void )
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_WALK;
 	pev->max_health = pev->health;
-	pev->flags &= FL_PROXY;	// keep proxy flag sey by engine
+
+	// Spawn used to clear out all flags inadvertently by using `flags &= FL_PROXY`.
+	// It's unclear whether this was a typo for clearing the proxy flag, because
+	// the Valve comment that went along with it specifically said "keep proxy flag
+	// set by engine". Regardless, this line was zeroing all the flags and causing
+	// the FL_FAKECLIENT flag to disappear from bots, so I had to change it.
+	// My best judgement is that the intent behind the line was to keep the FL_PROXY
+	// flag, so I've just removed the line completely so that the flags remain
+	// unchanged. If this screws anything up, we'll have to re-evaluate.
+	//pev->flags &= FL_PROXY;	// keep proxy flag sey by engine
+
 	pev->flags |= FL_CLIENT;
 	pev->air_finished = gpGlobals->time + 12;
 	pev->dmg = 2;				// initial water damage

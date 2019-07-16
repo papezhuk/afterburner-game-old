@@ -451,7 +451,6 @@ cvar_t	sk_player_leg3	= { "sk_player_leg3","1" };
 // END Cvars for Skill Level settings
 
 // Register your console variables here
-
 // This gets called one time when the game is initialied
 void GameDLLInit( void )
 {
