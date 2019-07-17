@@ -47,8 +47,6 @@ BOOL skin_used[MAX_BOT_SKINS] = {
 	FALSE, FALSE, FALSE, FALSE
 };
 
-//Scott: Style change.  Did not like pointer reference.
-//       changed "char *bot_skins[MAX_BOT_SKINS]" to "bot_skins[MAX_BOT_SKINS][64]".
 char bot_skins[MAX_BOT_SKINS][64] = {
 	"barney",
 	"barney",
@@ -79,10 +77,6 @@ BOOL name_used[MAX_BOT_NAMES] = {
 	FALSE, FALSE, FALSE, FALSE
 };
 
-//Scott: Style change.  Did not like pointer reference.
-//        changed "char *bot_names[MAX_BOT_NAMES]" to "bot_names[MAX_BOT_NAMES]".
-//Scott: List Change.  Removed a few names that I did not like, added some of
-//       players that I have played against
 char bot_names[MAX_BOT_NAMES][64] = {
 	"1000101",			// Lester Lee
 	"Ben",				// Benjamin Matasar
@@ -485,8 +479,7 @@ void BotConnect( int NumBots)
 
 	BOOL bPickedCustomBot = UseBotCycle(NumBots);
 
-//Scott: Style change.  Did not like pointer reference.
-//	char *name = "123456789012345678901234567890123456789012345678901234567890";
+	//Scott: Style change.  Did not like pointer reference.
 	char name[64] = "123456789012345678901234567890123456789012345678901234567890123";
 
 	//Scott: Fixed length copies to prevent overwrite of "\0" in name.
@@ -519,7 +512,7 @@ void BotConnect( int NumBots)
 
 	if ( !pEntity )
 	{
-//Scott:Change print so that dedicated server will work.
+		//Scott:Change print so that dedicated server will work.
 		UTIL_ClientPrintAll(HUD_PRINTNOTIFY,
 			UTIL_VarArgs( "There are no free client slots. Set maxplayers to a higher value.\n"));
 		if (IS_DEDICATED_SERVER())
@@ -529,7 +522,7 @@ void BotConnect( int NumBots)
 
 	BotClientPutInServer( pEntity, bPickedCustomBot );
 
-//Scott: Needed to fix kicking bot.
+	//Scott: Needed to fix kicking bot.
 
 	CBasePlayer *somePlayer = (CBasePlayer *)CBasePlayer::Instance(pEntity);
 
