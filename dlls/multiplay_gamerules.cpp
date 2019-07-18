@@ -413,6 +413,10 @@ BOOL CHalfLifeMultiplay::ClientConnected( edict_t *pEntity, const char *pszName,
 	return TRUE;
 }
 
+void CHalfLifeMultiplay::ClientPutInServer( edict_t* pClient )
+{
+}
+
 extern int gmsgSayText;
 extern int gmsgGameMode;
 

@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -32,7 +32,7 @@ class CBasePlayerAmmo;
 
 // weapon respawning return codes
 enum
-{	
+{
 	GR_NONE = 0,
 
 	GR_WEAPON_RESPAWN_YES,
@@ -82,9 +82,10 @@ public:
 	virtual BOOL IsTeamplay( void ) { return FALSE; };// is this deathmatch game being played with team rules?
 	virtual BOOL IsCoOp( void ) = 0;// is this a coop game?
 	virtual const char *GetGameDescription( void ) { return "Half-Life"; }  // this is the game name that gets seen in the server browser
-	
+
 	// Client connection/disconnection
 	virtual BOOL ClientConnected( edict_t *pEntity, const char *pszName, const char *pszAddress, char szRejectReason[128] ) = 0;// a client just connected to the server (player hasn't spawned yet)
+	virtual void ClientPutInServer( edict_t *pClient ) = 0; // Client connection was accepted, player has not yet spawned. Paired with ClientDisconnected
 	virtual void InitHUD( CBasePlayer *pl ) = 0;		// the client dll is ready for updating
 	virtual void ClientDisconnected( edict_t *pClient ) = 0;// a client just disconnected from the server
 	virtual void UpdateGameMode( CBasePlayer *pPlayer ) {}  // the client needs to be informed of the current game mode
@@ -146,7 +147,7 @@ public:
 	// What happens to a dead player's weapons
 	virtual int DeadPlayerWeapons( CBasePlayer *pPlayer ) = 0;// what do I do with a player's weapons when he's killed?
 
-	// What happens to a dead player's ammo	
+	// What happens to a dead player's ammo
 	virtual int DeadPlayerAmmo( CBasePlayer *pPlayer ) = 0;// Do I drop ammo when the player dies? How much?
 
 	// Teamplay stuff
@@ -173,13 +174,14 @@ extern CGameRules *InstallGameRules( void );
 
 
 //=========================================================
-// CHalfLifeRules - rules for the single player Half-Life 
+// CHalfLifeRules - rules for the single player Half-Life
 // game.
 //=========================================================
 class CHalfLifeRules : public CGameRules
 {
 public:
 	CHalfLifeRules ( void );
+	virtual ~CHalfLifeRules() {}
 
 	// GR_Think
 	virtual void Think( void );
@@ -196,6 +198,7 @@ public:
 
 	// Client connection/disconnection
 	virtual BOOL ClientConnected( edict_t *pEntity, const char *pszName, const char *pszAddress, char szRejectReason[ 128 ] );
+	virtual void ClientPutInServer( edict_t* pClient );
 	virtual void InitHUD( CBasePlayer *pl );		// the client dll is ready for updating
 	virtual void ClientDisconnected( edict_t *pClient );
 
@@ -247,13 +250,13 @@ public:
 	// What happens to a dead player's weapons
 	virtual int DeadPlayerWeapons( CBasePlayer *pPlayer );
 
-	// What happens to a dead player's ammo	
+	// What happens to a dead player's ammo
 	virtual int DeadPlayerAmmo( CBasePlayer *pPlayer );
 
 	// Monsters
 	virtual BOOL FAllowMonsters( void );
 
-	// Teamplay stuff	
+	// Teamplay stuff
 	virtual const char *GetTeamID( CBaseEntity *pEntity ) {return "";};
 	virtual int PlayerRelationship( CBaseEntity *pPlayer, CBaseEntity *pTarget );
 };
@@ -266,6 +269,7 @@ class CHalfLifeMultiplay : public CGameRules
 {
 public:
 	CHalfLifeMultiplay();
+	virtual ~CHalfLifeMultiplay() {}
 
 	// GR_Think
 	virtual void Think( void );
@@ -286,6 +290,7 @@ public:
 	//  svRejectReason
 	// Only the client's name and remote address are provided to the dll for verification.
 	virtual BOOL ClientConnected( edict_t *pEntity, const char *pszName, const char *pszAddress, char szRejectReason[128] );
+	virtual void ClientPutInServer( edict_t* pClient );
 	virtual void InitHUD( CBasePlayer *pl );		// the client dll is ready for updating
 	virtual void ClientDisconnected( edict_t *pClient );
 	virtual void UpdateGameMode( CBasePlayer *pPlayer );  // the client needs to be informed of the current game mode
@@ -343,10 +348,10 @@ public:
 	// What happens to a dead player's weapons
 	virtual int DeadPlayerWeapons( CBasePlayer *pPlayer );
 
-	// What happens to a dead player's ammo	
+	// What happens to a dead player's ammo
 	virtual int DeadPlayerAmmo( CBasePlayer *pPlayer );
 
-	// Teamplay stuff	
+	// Teamplay stuff
 	virtual const char *GetTeamID( CBaseEntity *pEntity ) {return "";}
 	virtual int PlayerRelationship( CBaseEntity *pPlayer, CBaseEntity *pTarget );
 

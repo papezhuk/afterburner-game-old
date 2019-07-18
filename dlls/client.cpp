@@ -196,6 +196,7 @@ called each time a player is spawned
 void ClientPutInServer( edict_t *pEntity )
 {
 	Bot_Callbacks::ClientPutInServer(pEntity);
+	g_pGameRules->ClientPutInServer(pEntity);
 
 	CBasePlayer *pPlayer;
 
