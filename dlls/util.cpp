@@ -2496,18 +2496,17 @@ int CRestore::BufferCheckZString( const char *string )
 
 CBasePlayer* UTIL_CBasePlayerByIndex( int playerIndex )
 {
-	CBasePlayer *pPlayer = NULL;
-	entvars_t *pev;
-
-	if ( playerIndex > 0 && playerIndex <= gpGlobals->maxClients )
+	if ( playerIndex < 1 || playerIndex > gpGlobals->maxClients )
 	{
-		edict_t *pPlayerEdict = INDEXENT( playerIndex );
-		if ( pPlayerEdict && !pPlayerEdict->free && (pPlayerEdict->v.flags & FL_FAKECLIENT || pPlayerEdict->v.flags & FL_CLIENT) )
-		{
-			pev = &pPlayerEdict->v;
-			pPlayer = GetClassPtr((CBasePlayer *)pev);
-		}
+		return NULL;
 	}
 
-	return pPlayer;
+	edict_t* pPlayerEdict = INDEXENT(playerIndex);
+
+	if ( !pPlayerEdict || pPlayerEdict->free || (pPlayerEdict->v.flags & (FL_FAKECLIENT | FL_CLIENT)) == 0 )
+	{
+		return NULL;
+	}
+
+	return GetClassPtr((CBasePlayer*)&pPlayerEdict->v);
 }

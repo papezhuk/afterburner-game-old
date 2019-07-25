@@ -117,17 +117,6 @@ char bot_names[MAX_BOT_NAMES][64] = {
 	"Lazarus Long",		// Sunlit Surf Admin
 };
 
-respawn_t bot_respawn[32] = {
-   {FALSE,""}, {FALSE,""}, {FALSE,""}, {FALSE,""},
-   {FALSE,""}, {FALSE,""}, {FALSE,""}, {FALSE,""},
-   {FALSE,""}, {FALSE,""}, {FALSE,""}, {FALSE,""},
-   {FALSE,""}, {FALSE,""}, {FALSE,""}, {FALSE,""},
-   {FALSE,""}, {FALSE,""}, {FALSE,""}, {FALSE,""},
-   {FALSE,""}, {FALSE,""}, {FALSE,""}, {FALSE,""},
-   {FALSE,""}, {FALSE,""}, {FALSE,""}, {FALSE,""},
-   {FALSE,""}, {FALSE,""}, {FALSE,""}, {FALSE,""}
-};
-
 ///////////////////////////////////////////////////////////////////////////////
 // CBaseBotGlobals Constructor/Destructor
 ///////////////////////////////////////////////////////////////////////////////
@@ -521,22 +510,6 @@ void BotConnect( int NumBots)
 	}
 
 	BotClientPutInServer( pEntity, bPickedCustomBot );
-
-	//Scott: Needed to fix kicking bot.
-
-	CBasePlayer *somePlayer = (CBasePlayer *)CBasePlayer::Instance(pEntity);
-
-	for ( i = 0; i < MAX_BOTS; i++ )
-	{
-		if ( !bot_respawn[i].is_used )
-		{
-			bot_respawn[i].is_used = TRUE;
-			strcpy( bot_respawn[i].name, name );
-			somePlayer->SpawnIndex = i;
-			break;
-		}
-	}
-//Scott: Initialize next bot cvars
 
 	UseBotCycle(NumBots+1);
 }

@@ -542,20 +542,16 @@ void CBaseBot::ActionSpeak( char *pText )
 BOOL CBaseBot::CheckBotKick()
 {
 	// check if someone kicked the bot off of the server (DON'T RESPAWN!)...
-	if ((pev->takedamage == DAMAGE_NO) && (SpawnIndex > -1))
+	if ((pev->takedamage == DAMAGE_NO))
 	{
 		pev->health = 0;
 		pev->deadflag = DEAD_DEAD;  // make the kicked bot be dead
 
-		bot_respawn[SpawnIndex].is_used = FALSE;  // this slot is now free
-		SpawnIndex = -1;
-
 		// fall through to next if statement
-		// SpawnIndex is -1
 	}
 
 	// is the round over (time/frag limit) or has the bot been removed?
-	if ((g_fGameOver) || (SpawnIndex == -1))
+	if ((g_fGameOver) || pev->deadflag == DEAD_DEAD)
 	{
 		ThinkDead();
 

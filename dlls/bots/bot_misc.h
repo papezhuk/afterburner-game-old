@@ -91,7 +91,6 @@ extern BOOL name_used[MAX_BOT_NAMES];
 //Scott: Style change.  Did not like pointer reference.
 //       changed "char *bot_names[MAX_BOT_NAMES]" to "bot_names[MAX_BOT_NAMES]".
 extern char bot_names[MAX_BOT_NAMES][64];
-extern respawn_t bot_respawn[32];
 
 BOOL UseBotCycle(int NumBots);
 

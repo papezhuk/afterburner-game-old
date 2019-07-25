@@ -24,7 +24,6 @@ namespace Bot_Callbacks
 		entvars_t* pev = &pEntity->v;
 		CBasePlayer* pPlayer = GetClassPtr((CBasePlayer*)pev);
 
-		pPlayer->SpawnIndex = -1; // Player will not spawn again
 		pev->effects |= EF_NODRAW; // for observer fix
 	}
 
@@ -32,8 +31,6 @@ namespace Bot_Callbacks
 	{
 		entvars_t* pev = &pEntity->v;
 		CBasePlayer* pPlayer = GetClassPtr( (CBasePlayer *)pev );
-
-		pPlayer->SpawnIndex = 0; // Player will spawn again
 	}
 
 	bool ClientCommand(CBasePlayer* pPlayer, const char* pcmd)
@@ -161,7 +158,7 @@ namespace Bot_Callbacks
 		{
 			CBasePlayer *pPlayer = UTIL_CBasePlayerByIndex( i );
 
-			if ( pPlayer && pPlayer->SpawnIndex > -1)
+			if ( pPlayer )
 			{
 				NumPlayersInGameNow++;
 
@@ -221,11 +218,8 @@ namespace Bot_Callbacks
 			{
 				CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex( i );
 
-				if ( pPlayer && pPlayer->IsBot() &&  pPlayer->SpawnIndex != -1)
+				if ( pPlayer && pPlayer->IsBot() )
 				{
-					bot_respawn[pPlayer->SpawnIndex].is_used = FALSE;
-					pPlayer->SpawnIndex = -1; /* Do not respawn */
-
 					pPlayer->pev->health = 0;
 
 					sprintf(server_cmd, "kick \"%s\"\n", STRING( pPlayer->pev->netname ) );

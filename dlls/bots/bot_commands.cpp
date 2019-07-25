@@ -19,7 +19,7 @@ namespace Bot_Commands
 			{
 				CBasePlayer* player = (CBasePlayer*)UTIL_PlayerByIndex(i);
 
-				if ( player && player->SpawnIndex > -1)
+				if ( player )
 				{
 					NumPlayersInGameNow++;
 				}
@@ -65,10 +65,6 @@ namespace Bot_Commands
 
 			if ( somePlayer )
 			{
-				//Scott: Set respawn flag, prevents respawning removed bot
-				bot_respawn[somePlayer->SpawnIndex].is_used = FALSE;
-				somePlayer->SpawnIndex = -1;
-
 				somePlayer->pev->health = 0;
 
 				char serverKickCommand[128];

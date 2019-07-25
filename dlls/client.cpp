@@ -135,6 +135,9 @@ void ClientDisconnect( edict_t *pEntity )
 	UTIL_SetOrigin( &pEntity->v, pEntity->v.origin );
 
 	g_pGameRules->ClientDisconnected( pEntity );
+
+	// Ensure that the client flags are removed.
+	pEntity->v.flags &= ~(FL_CLIENT|FL_FAKECLIENT);
 }
 
 // called by ClientKill and DeadThink
