@@ -100,7 +100,8 @@ CBaseBot::~CBaseBot()
 
 void CBaseBot::ActionOpenFire( void )
 {
-	if ( !m_pActiveItem->CanDeploy()
+	if ( !m_pActiveItem ||
+		!m_pActiveItem->CanDeploy()
 		|| (FightStyle.GetEndShootTime() <= gpGlobals->time  )
 		)
 	{

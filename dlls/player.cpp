@@ -3242,7 +3242,7 @@ void CBasePlayer::GiveNamedItem( const char *pszName )
 	pent = CREATE_NAMED_ENTITY( istr );
 	if( FNullEnt( pent ) )
 	{
-		ALERT( at_console, "NULL Ent in GiveNamedItem!\n" );
+		ALERT( at_console, "NULL Ent in GiveNamedItem for item %s!\n", pszName );
 		return;
 	}
 	VARS( pent )->origin = pev->origin;
