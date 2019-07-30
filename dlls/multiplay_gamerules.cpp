@@ -34,6 +34,7 @@
 
 #include	"bot_misc.h"
 #include	"nodes.h"
+#include "botgamerulesinterface.h"
 
 extern DLL_GLOBAL CGameRules *g_pGameRules;
 extern DLL_GLOBAL BOOL	g_fGameOver;
@@ -77,6 +78,8 @@ static CMultiplayGameMgrHelper g_GameMgrHelper;
 //*********************************************************
 CHalfLifeMultiplay::CHalfLifeMultiplay()
 {
+	m_pBotGameRulesInterface = new CBotGameRulesInterface(this);
+
 #ifndef NO_VOICEGAMEMGR
 	g_VoiceGameMgr.Init( &g_GameMgrHelper, gpGlobals->maxClients );
 #endif
@@ -125,12 +128,23 @@ CHalfLifeMultiplay::CHalfLifeMultiplay()
 	}
 }
 
+CHalfLifeMultiplay::~CHalfLifeMultiplay()
+{
+	delete m_pBotGameRulesInterface;
+}
+
 BOOL CHalfLifeMultiplay::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 {
 #ifndef NO_VOICEGAMEMGR
 	if( g_VoiceGameMgr.ClientCommand( pPlayer, pcmd ) )
 		return TRUE;
 #endif
+
+	if ( m_pBotGameRulesInterface->ClientCommand(pPlayer, pcmd) )
+	{
+		return TRUE;
+	}
+
 	return CGameRules::ClientCommand( pPlayer, pcmd );
 }
 
@@ -201,6 +215,8 @@ void CHalfLifeMultiplay::Think( void )
 #ifndef NO_VOICEGAMEMGR
 	g_VoiceGameMgr.Update( gpGlobals->frametime );
 #endif
+
+	m_pBotGameRulesInterface->Think();
 
 	///// Check game rules /////
 	static int last_frags;
@@ -415,6 +431,7 @@ BOOL CHalfLifeMultiplay::ClientConnected( edict_t *pEntity, const char *pszName,
 
 void CHalfLifeMultiplay::ClientPutInServer( edict_t* pClient )
 {
+	m_pBotGameRulesInterface->ClientPutInServer(pClient);
 }
 
 extern int gmsgSayText;
@@ -494,6 +511,8 @@ void CHalfLifeMultiplay::InitHUD( CBasePlayer *pl )
 //=========================================================
 void CHalfLifeMultiplay::ClientDisconnected( edict_t *pClient )
 {
+	m_pBotGameRulesInterface->ClientDisconnect(pClient);
+
 	if( pClient )
 	{
 		CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance( pClient );

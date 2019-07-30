@@ -118,8 +118,6 @@ void ClientDisconnect( edict_t *pEntity )
 		WRITE_STRING( text );
 	MESSAGE_END();
 
-	Bot_Callbacks::ClientDisconnect(pEntity);
-
 	CSound *pSound = CSoundEnt::SoundPointerForIndex( CSoundEnt::ClientSoundIndex( pEntity ) );
 
 	// since this client isn't around to think anymore, reset their sound.
@@ -131,7 +129,7 @@ void ClientDisconnect( edict_t *pEntity )
 	// since the edict doesn't get deleted, fix it so it doesn't interfere.
 	pEntity->v.takedamage = DAMAGE_NO;// don't attract autoaim
 	pEntity->v.solid = SOLID_NOT;// nonsolid
-	pEntity->v.effects = 0;// clear any effects
+	pEntity->v.effects = EF_NODRAW;// clear any effects
 	UTIL_SetOrigin( &pEntity->v, pEntity->v.origin );
 
 	g_pGameRules->ClientDisconnected( pEntity );
@@ -198,7 +196,6 @@ called each time a player is spawned
 */
 void ClientPutInServer( edict_t *pEntity )
 {
-	Bot_Callbacks::ClientPutInServer(pEntity);
 	g_pGameRules->ClientPutInServer(pEntity);
 
 	CBasePlayer *pPlayer;
@@ -617,10 +614,6 @@ void ClientCommand( edict_t *pEntity )
 		if( pPlayer->IsObserver() )
 			pPlayer->Observer_FindNextPlayer( atoi( CMD_ARGV( 1 ) ) ? true : false );
 	}
-	else if ( Bot_Callbacks::ClientCommand(GetClassPtr((CBasePlayer*)pev), pcmd) )
-	{
-		// Handled - do nothing.
-	}
 	else if( g_pGameRules->ClientCommand( GetClassPtr( (CBasePlayer *)pev ), pcmd ) )
 	{
 		// MenuSelect returns true only if the command is properly handled,  so don't print a warning
@@ -785,8 +778,6 @@ void PlayerPreThink( edict_t *pEntity )
 	{
 		pPlayer->PreThink();
 	}
-
-	Bot_Callbacks::PlayerPreThink(pEntity);
 }
 
 /*
@@ -828,8 +819,6 @@ void ParmsChangeLevel( void )
 //
 void StartFrame( void )
 {
-	Bot_Callbacks::StartFrame();
-
 	//ALERT( at_console, "SV_Physics( %g, frametime %g )\n", gpGlobals->time, gpGlobals->frametime );
 
 	if( g_pGameRules )

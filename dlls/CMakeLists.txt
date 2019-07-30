@@ -133,6 +133,7 @@ set (SVDLL_SOURCES
 	bots/bot_cvars.cpp
 	bots/bot_callbacks.cpp
 	bots/bot_commands.cpp
+	bots/botgamerulesinterface.cpp
 	../pm_shared/pm_debug.c
 	../pm_shared/pm_math.c
 	../pm_shared/pm_shared.c

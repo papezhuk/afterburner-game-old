@@ -25,7 +25,7 @@ public:
 	operator float *()								{ return &x; } // Vectors will now automatically convert to float * when needed
 	operator const float *() const					{ return &x; } // Vectors will now automatically convert to float * when needed
 
-	inline float Length(void)			const	{ return sqrt(x * x + y * y );		}
+	inline float Length(void)			const	{ return static_cast<float>(sqrt(x * x + y * y ));		}
 
 	inline Vector2D Normalize ( void ) const
 	{
@@ -100,7 +100,7 @@ public:
 
 		return Vec2;
 	}
-	inline float Length2D( void ) const		{ return sqrt( x * x + y * y ); }
+	inline float Length2D( void ) const		{ return static_cast<float>(sqrt( x * x + y * y )); }
 
 	inline float& operator [](int index)
 	{

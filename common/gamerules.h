@@ -30,6 +30,10 @@ class CBasePlayer;
 class CItem;
 class CBasePlayerAmmo;
 
+// This file doesn't currently pull in any headers, so forward-declaring this to avoid
+// adding more dependencies.
+class CBotGameRulesInterface;
+
 // weapon respawning return codes
 enum
 {
@@ -269,7 +273,7 @@ class CHalfLifeMultiplay : public CGameRules
 {
 public:
 	CHalfLifeMultiplay();
-	virtual ~CHalfLifeMultiplay() {}
+	virtual ~CHalfLifeMultiplay();
 
 	// GR_Think
 	virtual void Think( void );
@@ -370,6 +374,9 @@ protected:
 	float m_flIntermissionEndTime;
 	BOOL m_iEndIntermissionButtonHit;
 	void SendMOTDToClient( edict_t *client );
+
+private:
+	CBotGameRulesInterface* m_pBotGameRulesInterface;
 };
 
 extern DLL_GLOBAL CGameRules *g_pGameRules;
