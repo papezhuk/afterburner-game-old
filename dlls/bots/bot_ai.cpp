@@ -542,17 +542,7 @@ void CBaseBot::ActionSpeak( char *pText )
 
 BOOL CBaseBot::CheckBotKick()
 {
-	// check if someone kicked the bot off of the server (DON'T RESPAWN!)...
-	if ((pev->takedamage == DAMAGE_NO))
-	{
-		pev->health = 0;
-		pev->deadflag = DEAD_DEAD;  // make the kicked bot be dead
-
-		// fall through to next if statement
-	}
-
-	// is the round over (time/frag limit) or has the bot been removed?
-	if ((g_fGameOver) || pev->deadflag == DEAD_DEAD)
+	if ( g_fGameOver )
 	{
 		ThinkDead();
 
@@ -568,7 +558,9 @@ BOOL CBaseBot::CheckBotKick()
 		pev->button = 0;  // make sure no buttons are pressed
 
 		if (RANDOM_LONG(1, 100) > 50)
-		pev->button = IN_ATTACK;
+		{
+			pev->button = IN_ATTACK;
+		}
 
 		g_engfuncs.pfnRunPlayerMove( edict(), pev->v_angle, GetMoveForward(), GetMoveStrafe(), GetMoveVertical(), pev->button, 0, GetMSec() );
 		return TRUE;
