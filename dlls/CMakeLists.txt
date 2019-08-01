@@ -134,6 +134,8 @@ set (SVDLL_SOURCES
 	bots/bot_callbacks.cpp
 	bots/bot_commands.cpp
 	bots/botgamerulesinterface.cpp
+	bots/profiles/botprofiletable.cpp
+	bots/profiles/botprofileparser.cpp
 	../pm_shared/pm_debug.c
 	../pm_shared/pm_math.c
 	../pm_shared/pm_shared.c
@@ -164,9 +166,10 @@ set (SVDLL_SOURCES
 	../game_shared/weapons/weapon_frinesi.cpp
 	../game_shared/weapons/weapon_grenadelauncher.cpp
 	../game_shared/weapons/weapon_raptor.cpp
+	../game_shared/rapidjson_helpers/rapidjson_helpers.cpp
 )
 
-include_directories (. ../common ../engine ../pm_shared ../game_shared ../public ../game_shared/weapons bots)
+include_directories (. ../common ../engine ../pm_shared ../game_shared ../public ../game_shared/weapons bots bots/profiles)
 
 if(USE_VOICEMGR)
 	set(SVDLL_SOURCES

@@ -572,4 +572,5 @@ float UTIL_SharedRandomFloat( unsigned int seed, float low, float high );
 float UTIL_WeaponTimeBase( void );
 
 CBasePlayer* UTIL_CBasePlayerByIndex( int playerIndex );
+const char* UTIL_GetPlayerNetName(CBasePlayer* player);
 #endif // UTIL_H

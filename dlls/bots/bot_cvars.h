@@ -27,6 +27,8 @@ extern cvar_t bot_trait_chat;
 extern cvar_t bot_trait_perception;
 extern cvar_t bot_trait_reflexes;
 
+extern cvar_t bot_profile_file;
+
 void Bot_RegisterCVars(void);
 
 #endif // BOT_CVARS_H

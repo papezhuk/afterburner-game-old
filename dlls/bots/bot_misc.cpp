@@ -198,12 +198,12 @@ void CBaseBotGlobals::HandleAutoAdjDifficulty( void )
 
 				if ( pPlayer )
 				{
-					if ( pPlayer->IsBot() )
+					if ( pPlayer->IsFakeClient() )
 					{
 						BotFragTotal	+= pPlayer->pev->frags;
 						BotDeathTotal	+= pPlayer->m_iDeaths;
 					}
-					else if ( !pPlayer->IsBot() && pPlayer->IsNetClient() )
+					else if ( !pPlayer->IsFakeClient() && pPlayer->IsNetClient() )
 					{
 						HumanFragTotal	+= pPlayer->pev->frags;
 						HumanDeathTotal	+= pPlayer->m_iDeaths;

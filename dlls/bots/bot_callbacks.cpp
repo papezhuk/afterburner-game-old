@@ -101,7 +101,7 @@ namespace Bot_Callbacks
 				entvars_t* pev = &tr.pHit->v;
 				CBasePlayer *pPlayerSighted = GetClassPtr((CBasePlayer *)pev);
 
-				if (pPlayerSighted->IsBot())
+				if (pPlayerSighted->IsFakeClient())
 				{
 					CBaseBot *pBot = GetClassPtr((CBaseBot *)pev);
 					char Enemy[201];
@@ -162,7 +162,7 @@ namespace Bot_Callbacks
 			{
 				NumPlayersInGameNow++;
 
-				if ( pPlayer->IsBot() )
+				if ( pPlayer->IsFakeClient() )
 				{
 					NumBotsInGameNow++;
 
@@ -218,7 +218,7 @@ namespace Bot_Callbacks
 			{
 				CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex( i );
 
-				if ( pPlayer && pPlayer->IsBot() )
+				if ( pPlayer && pPlayer->IsFakeClient() )
 				{
 					pPlayer->pev->health = 0;
 

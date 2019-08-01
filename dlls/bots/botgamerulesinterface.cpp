@@ -10,13 +10,19 @@
 #include "client.h"
 #include "nodes.h"
 #include "bot.h"
+#include "botprofileparser.h"
+#include "botprofiletable.h"
 
 CBotGameRulesInterface::CBotGameRulesInterface(CGameRules* parent) :
 	m_pParent(parent),
-	m_nNextBotNumber(0),
-	m_nBotCount(0)
+	m_nBotCount(0),
+	m_ProfileTable()
 {
 	ASSERT(m_pParent);
+
+	// This class will be instantiated on world precache, when the game rules are created.
+	// Reload the bot profiles at this point.
+	LoadBotProfiles();
 }
 
 void CBotGameRulesInterface::ClientDisconnect(edict_t* entity)
@@ -85,7 +91,7 @@ void CBotGameRulesInterface::Think()
 			continue;
 		}
 
-		if ( player->IsBot() )
+		if ( player->IsFakeClient() )
 		{
 			player->BotThink();
 		}
@@ -126,18 +132,26 @@ void CBotGameRulesInterface::HandleBotAddCommand(CBasePlayer* player)
 
 	if ( numArgs == 2 )
 	{
-		const char* botCountStr = CMD_ARGV(1);
-		int botCount = atoi(botCountStr);
+		const char* arg = CMD_ARGV(1);
 
-		if ( botCount > 0 )
+		if ( arg && (*arg < '0' || *arg > '9') )
 		{
-			// Add a specified number of bots.
-			CreateBots(botCount);
+			// The first character was not a digit, so treat as a profile name.
+			TryCreateBot(arg);
 		}
-		else if ( botCount == 0 )
+		else
 		{
-			// See whether the argument matches a bot profile.
-			// TODO
+			// Try to parse as a number and add some random bots.
+			int botCount = atoi(arg);
+
+			if ( botCount > 0 )
+			{
+				CreateBots(botCount);
+			}
+			else
+			{
+				ALERT(at_console, "Amount of bots to add must be a positive number.\n", arg);
+			}
 		}
 
 		return;
@@ -146,9 +160,7 @@ void CBotGameRulesInterface::HandleBotAddCommand(CBasePlayer* player)
 	for ( int argNum = 1; argNum < numArgs; ++argNum )
 	{
 		// Treat each argument as a bot profile.
-		const char* arg = CMD_ARGV(argNum);
-
-		// TODO
+		TryCreateBot(CMD_ARGV(argNum));
 	}
 }
 
@@ -165,7 +177,7 @@ void CBotGameRulesInterface::HandleBotRemoveAllCommand(CBasePlayer* player)
 	{
 		CBasePlayer* player = UTIL_CBasePlayerByIndex(clientIndex);
 
-		if ( !player || !player->IsBot() )
+		if ( !player || !player->IsFakeClient() )
 		{
 			continue;
 		}
@@ -184,25 +196,111 @@ void CBotGameRulesInterface::CreateBots(uint32_t num)
 {
 	for ( uint32_t iteration = 0; iteration < num; ++iteration )
 	{
-		std::string name = std::string("Bot") + std::to_string(m_nNextBotNumber++);
-		edict_t* bot = g_engfuncs.pfnCreateFakeClient(name.c_str());
+		// TODO: Choose a random profile
+		CreateBot();
+	}
+}
 
-		if ( !bot )
+void CBotGameRulesInterface::TryCreateBot(const std::string& profileName)
+{
+	if ( !m_ProfileTable.ProfileExists(profileName) )
+	{
+		ALERT(at_console, "Bot profile '%s' does not exist.\n", profileName.c_str());
+		return;
+	}
+
+	CreateBot(m_ProfileTable.GetProfile(profileName));
+}
+
+void CBotGameRulesInterface::CreateBot(const CBotProfileTable::ProfileData* profile)
+{
+	std::string name("Bot");
+
+	if ( profile )
+	{
+		name = profile->playerName;
+	}
+
+	// TODO: Validate name!
+
+	edict_t* bot = g_engfuncs.pfnCreateFakeClient(name.c_str());
+
+	if ( !bot )
+	{
+		static const char* errorMsg = "No free player slots to create new bot.\n";
+
+		UTIL_ClientPrintAll(HUD_PRINTNOTIFY, UTIL_VarArgs(errorMsg));
+
+		if ( IS_DEDICATED_SERVER() )
 		{
-			static const char* errorMsg = "No free player slots to create new bot.\n";
-
-			UTIL_ClientPrintAll(HUD_PRINTNOTIFY, UTIL_VarArgs(errorMsg));
-
-			if ( IS_DEDICATED_SERVER() )
-			{
-				printf(errorMsg);
-			}
-
-			return;
+			printf(errorMsg);
 		}
 
-		// Run the bot through the standard connection functions.
-		// It'll eventually get passed back through this class.
-		::ClientPutInServer(bot);
+		return;
 	}
+
+	// Run the bot through the standard connection functions.
+	// It'll eventually get passed back through this class.
+	::ClientPutInServer(bot);
+
+	// Now that the bot is registered with us, set up profile-specific things.
+	SetBotAttributesViaProfile(dynamic_cast<CBaseBot*>(CBaseEntity::Instance(&bot->v)), profile);
+	ALERT(at_console, "Added bot '%s'\n", STRING(bot->v.netname));
+}
+
+void CBotGameRulesInterface::LoadBotProfiles()
+{
+	const char* fileName = CVAR_GET_STRING("bot_profile_file");
+
+	if ( !fileName || !(*fileName) )
+	{
+		// No bot profiles.
+		return;
+	}
+
+	std::string filePath = std::string("scripts/") + std::string(fileName);
+
+	CBotProfileParser parser(m_ProfileTable);
+
+	if ( !parser.Parse(filePath) )
+	{
+		ALERT(at_error, "Could not load bot profiles from '%s'\n", filePath.c_str());
+	}
+}
+
+void CBotGameRulesInterface::SetBotAttributesViaProfile(CBaseBot* bot, const CBotProfileTable::ProfileData* profile)
+{
+	if ( !bot || !profile )
+	{
+		return;
+	}
+
+	SetBotSkin(bot, profile->skin);
+}
+
+void CBotGameRulesInterface::SetBotSkin(CBaseBot* bot, const std::string& skin)
+{
+	if ( !bot )
+	{
+		return;
+	}
+
+	// The call takes a non-const char*, so we do this just in case it mucks about with it.
+	char buffer[64];
+	buffer[0] = '\0';
+
+	if ( skin.size() < 64 )
+	{
+		strncpy(buffer, skin.c_str(), sizeof(buffer));
+		buffer[sizeof(buffer) - 1] = '\0';
+	}
+	else
+	{
+		ALERT(at_console, "Skin name '%s' for bot '%s' was too long!\n", skin.c_str(), STRING(bot->pev->netname));
+	}
+
+	g_engfuncs.pfnSetClientKeyValue(bot->entindex(),
+									g_engfuncs.pfnGetInfoKeyBuffer(bot->edict()),
+									"model",
+									buffer);
 }

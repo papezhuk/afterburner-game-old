@@ -2510,3 +2510,8 @@ CBasePlayer* UTIL_CBasePlayerByIndex( int playerIndex )
 
 	return GetClassPtr((CBasePlayer*)&pPlayerEdict->v);
 }
+
+const char* UTIL_GetPlayerNetName(CBasePlayer* player)
+{
+	return player ? STRING(player->pev->netname) : NULL;
+}

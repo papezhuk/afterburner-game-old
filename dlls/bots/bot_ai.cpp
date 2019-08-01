@@ -367,7 +367,7 @@ void CBaseBot::ActionLook( int SearchDistance )
 						SetEnemy( pPlayer );
 					}
 				}
-				else if ( !pPlayer->IsBot()
+				else if ( !pPlayer->IsFakeClient()
 						&& g_pGameRules->PlayerRelationship( this, pPlayer ) != GR_NOTTEAMMATE
 						)
 				{
@@ -382,7 +382,7 @@ void CBaseBot::ActionLook( int SearchDistance )
 						SteerSafePursue( pPlayer, STEER_GROUP_ASSEMBLE );
 					}
 				}
-				else if ( pPlayer->IsBot()
+				else if ( pPlayer->IsFakeClient()
 						&& g_pGameRules->PlayerRelationship( this, pPlayer ) != GR_NOTTEAMMATE
 						)
 				{
