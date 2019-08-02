@@ -9,6 +9,7 @@
 #include "weaponids.h"
 #include "ammodefs.h"
 #include "skill.h"
+#include "utlstring.h"
 
 class CGenericWeapon;
 
@@ -169,8 +170,8 @@ public:
 
 private:
 	SkillDataEntryPtr m_Entry;
-	std::string m_BaseName;
-	std::string m_NameBuffers[TOTAL_SKILL_LEVELS];
+	CUtlString m_BaseName;
+	CUtlString m_NameBuffers[TOTAL_SKILL_LEVELS];
 	mutable cvar_t m_Cvars[TOTAL_SKILL_LEVELS];
 };
 

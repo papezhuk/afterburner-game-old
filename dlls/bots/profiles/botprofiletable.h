@@ -2,16 +2,16 @@
 #define BOTPROFILETABLE_H
 
 #include <unordered_map>
-#include <string>
 #include <vector>
+#include "utlstring.h"
 
 class CBotProfileTable
 {
 public:
 	struct ProfileData
 	{
-		std::string skin;
-		std::string playerName;
+		CUtlString skin;
+		CUtlString playerName;
 	};
 
 	CBotProfileTable();
@@ -19,17 +19,17 @@ public:
 	void Clear();
 	size_t Count() const;
 
-	bool ProfileExists(const std::string& name) const;
-	ProfileData* GetProfile(const std::string& name);
-	const ProfileData* GetProfile(const std::string& name) const;
+	bool ProfileExists(const CUtlString& name) const;
+	ProfileData* GetProfile(const CUtlString& name);
+	const ProfileData* GetProfile(const CUtlString& name) const;
 
-	ProfileData& CreateProfile(const std::string& name);
-	void RemoveProfile(const std::string& name);
+	ProfileData& CreateProfile(const CUtlString& name);
+	void RemoveProfile(const CUtlString& name);
 
-	void RandomProfileNameList(std::vector<std::string>& list, size_t count) const;
+	void RandomProfileNameList(std::vector<CUtlString>& list, size_t count) const;
 
 private:
-	std::unordered_map<std::string, ProfileData> m_Table;
+	std::unordered_map<CUtlString, ProfileData> m_Table;
 };
 
 #endif // BOTPROFILETABLE_H

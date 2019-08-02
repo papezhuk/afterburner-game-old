@@ -1,7 +1,7 @@
 #ifndef BOTPROFILEPARSER_H
 #define BOTPROFILEPARSER_H
 
-#include <string>
+#include "utlstring.h"
 #include "rapidjson/document.h"
 #include "rapidjson/rapidjson.h"
 #include "botprofiletable.h"
@@ -11,7 +11,7 @@ class CBotProfileParser
 public:
 	CBotProfileParser(CBotProfileTable& table);
 
-	bool Parse(const std::string& filePath);
+	bool Parse(const CUtlString& filePath);
 
 private:
 	bool ReadParsedDocument(const rapidjson::Document& document);

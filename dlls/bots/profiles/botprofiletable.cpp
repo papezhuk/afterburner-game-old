@@ -13,12 +13,12 @@ CBotProfileTable::CBotProfileTable()
 {
 }
 
-bool CBotProfileTable::ProfileExists(const std::string& name) const
+bool CBotProfileTable::ProfileExists(const CUtlString& name) const
 {
 	return m_Table.find(name) != m_Table.cend();
 }
 
-CBotProfileTable::ProfileData& CBotProfileTable::CreateProfile(const std::string& name)
+CBotProfileTable::ProfileData& CBotProfileTable::CreateProfile(const CUtlString& name)
 {
 	auto it = m_Table.find(name);
 
@@ -30,7 +30,7 @@ CBotProfileTable::ProfileData& CBotProfileTable::CreateProfile(const std::string
 	return m_Table[name];
 }
 
-CBotProfileTable::ProfileData* CBotProfileTable::GetProfile(const std::string& name)
+CBotProfileTable::ProfileData* CBotProfileTable::GetProfile(const CUtlString& name)
 {
 	auto it = m_Table.find(name);
 
@@ -42,7 +42,7 @@ CBotProfileTable::ProfileData* CBotProfileTable::GetProfile(const std::string& n
 	return &it->second;
 }
 
-const CBotProfileTable::ProfileData* CBotProfileTable::GetProfile(const std::string& name) const
+const CBotProfileTable::ProfileData* CBotProfileTable::GetProfile(const CUtlString& name) const
 {
 	auto it = m_Table.find(name);
 
@@ -54,7 +54,7 @@ const CBotProfileTable::ProfileData* CBotProfileTable::GetProfile(const std::str
 	return &it->second;
 }
 
-void CBotProfileTable::RemoveProfile(const std::string& name)
+void CBotProfileTable::RemoveProfile(const CUtlString& name)
 {
 	m_Table.erase(name);
 }
@@ -69,7 +69,7 @@ size_t CBotProfileTable::Count() const
 	return m_Table.size();
 }
 
-void CBotProfileTable::RandomProfileNameList(std::vector<std::string>& list, size_t count) const
+void CBotProfileTable::RandomProfileNameList(std::vector<CUtlString>& list, size_t count) const
 {
 	list.clear();
 
@@ -83,19 +83,19 @@ void CBotProfileTable::RandomProfileNameList(std::vector<std::string>& list, siz
 
 	while ( list.size() < count )
 	{
-		std::vector<std::string> intermediateList;
+		std::vector<const char*> intermediateList;
 		intermediateList.reserve(m_Table.size());
 
 		for ( auto it = m_Table.cbegin(); it != m_Table.cend(); ++it )
 		{
-			intermediateList.push_back(it->first);
+			intermediateList.push_back(it->first.String());
 		}
 
 		std::shuffle(std::begin(intermediateList), std::end(intermediateList), rng);
 
-		for ( const std::string& name : intermediateList )
+		for ( const char* name : intermediateList )
 		{
-			list.push_back(name);
+			list.push_back(CUtlString(name));
 
 			if ( list.size() >= count )
 			{

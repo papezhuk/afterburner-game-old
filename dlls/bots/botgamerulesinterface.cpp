@@ -173,7 +173,7 @@ void CBotGameRulesInterface::HandleBotRemoveAllCommand(CBasePlayer* player)
 		return;
 	}
 
-	std::string kickCommands;
+	CUtlString kickCommands;
 
 	for ( int clientIndex = 1; clientIndex <= gpGlobals->maxClients; ++clientIndex )
 	{
@@ -185,23 +185,23 @@ void CBotGameRulesInterface::HandleBotRemoveAllCommand(CBasePlayer* player)
 		}
 
 		const char* name = STRING(player->pev->netname);
-		kickCommands += std::string("kick \"") + std::string(name) + std::string("\"\n");
+		kickCommands.AppendFormat("kick \"%s\"\n", name);
 	}
 
-	if ( kickCommands.size() > 0 )
+	if ( !kickCommands.IsEmpty() )
 	{
-		SERVER_COMMAND(kickCommands.c_str());
+		SERVER_COMMAND(kickCommands.String());
 	}
 }
 
 void CBotGameRulesInterface::CreateBots(uint32_t num)
 {
-	std::vector<std::string> randomProfileNameList;
+	std::vector<CUtlString> randomProfileNameList;
 	m_ProfileTable.RandomProfileNameList(randomProfileNameList, num);
 
 	if ( randomProfileNameList.size() > 0 )
 	{
-		for ( const std::string& name : randomProfileNameList )
+		for ( const CUtlString& name : randomProfileNameList )
 		{
 			CreateBot(m_ProfileTable.GetProfile(name));
 		}
@@ -216,11 +216,11 @@ void CBotGameRulesInterface::CreateBots(uint32_t num)
 	}
 }
 
-void CBotGameRulesInterface::TryCreateBot(const std::string& profileName)
+void CBotGameRulesInterface::TryCreateBot(const CUtlString& profileName)
 {
 	if ( !m_ProfileTable.ProfileExists(profileName) )
 	{
-		ALERT(at_console, "Bot profile '%s' does not exist.\n", profileName.c_str());
+		ALERT(at_console, "Bot profile '%s' does not exist.\n", profileName.String());
 		return;
 	}
 
@@ -229,7 +229,7 @@ void CBotGameRulesInterface::TryCreateBot(const std::string& profileName)
 
 void CBotGameRulesInterface::CreateBot(const CBotProfileTable::ProfileData* profile)
 {
-	std::string name("Bot");
+	CUtlString name("Bot");
 
 	if ( profile )
 	{
@@ -238,7 +238,7 @@ void CBotGameRulesInterface::CreateBot(const CBotProfileTable::ProfileData* prof
 
 	// TODO: Validate name!
 
-	edict_t* bot = g_engfuncs.pfnCreateFakeClient(name.c_str());
+	edict_t* bot = g_engfuncs.pfnCreateFakeClient(name.String());
 
 	if ( !bot )
 	{
@@ -273,13 +273,14 @@ void CBotGameRulesInterface::LoadBotProfiles()
 		return;
 	}
 
-	std::string filePath = std::string("scripts/") + std::string(fileName);
+	CUtlString filePath;
+	filePath.Format("scripts/%s", fileName);
 
 	CBotProfileParser parser(m_ProfileTable);
 
 	if ( !parser.Parse(filePath) )
 	{
-		ALERT(at_error, "Could not load bot profiles from '%s'\n", filePath.c_str());
+		ALERT(at_error, "Could not load bot profiles from '%s'\n", filePath.String());
 	}
 }
 
@@ -293,29 +294,17 @@ void CBotGameRulesInterface::SetBotAttributesViaProfile(CBaseBot* bot, const CBo
 	SetBotSkin(bot, profile->skin);
 }
 
-void CBotGameRulesInterface::SetBotSkin(CBaseBot* bot, const std::string& skin)
+void CBotGameRulesInterface::SetBotSkin(CBaseBot* bot, const CUtlString& skin)
 {
 	if ( !bot )
 	{
 		return;
 	}
 
-	// The call takes a non-const char*, so we do this just in case it mucks about with it.
-	char buffer[64];
-	buffer[0] = '\0';
-
-	if ( skin.size() < 64 )
-	{
-		strncpy(buffer, skin.c_str(), sizeof(buffer));
-		buffer[sizeof(buffer) - 1] = '\0';
-	}
-	else
-	{
-		ALERT(at_console, "Skin name '%s' for bot '%s' was too long!\n", skin.c_str(), STRING(bot->pev->netname));
-	}
-
+	// Annoyingly this takes a non-const char* (can we change this one day?),
+	// but the function just uses it as const internally so it's OK to cast.
 	g_engfuncs.pfnSetClientKeyValue(bot->entindex(),
 									g_engfuncs.pfnGetInfoKeyBuffer(bot->edict()),
 									"model",
-									buffer);
+									(char*)CUtlString(skin).String());
 }

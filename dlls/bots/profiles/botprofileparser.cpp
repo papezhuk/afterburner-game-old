@@ -9,6 +9,7 @@
 #include "rapidjson/document.h"
 #include "rapidjson_helpers/rapidjson_helpers.h"
 #include "rapidjson/error/en.h"
+#include "utlstring.h"
 
 #define LOG(level, ...) ALERT(level, "BotProfileParser: " __VA_ARGS__);
 
@@ -49,12 +50,12 @@ CBotProfileParser::CBotProfileParser(CBotProfileTable& table) :
 {
 }
 
-bool CBotProfileParser::Parse(const std::string& filePath)
+bool CBotProfileParser::Parse(const CUtlString& filePath)
 {
 	m_Table.Clear();
 
 	int length = 0;
-	byte* fileData = LOAD_FILE_FOR_ME(filePath.c_str(), &length);
+	byte* fileData = LOAD_FILE_FOR_ME(filePath.String(), &length);
 
 	if ( !fileData )
 	{
@@ -109,11 +110,10 @@ void CBotProfileParser::ReadProfileEntry(rapidjson::SizeType index, const rapidj
 		return;
 	}
 
-	std::string name(object["name"].GetString());
+	CUtlString name(object["name"].GetString());
+	name.TrimWhitespace();
 
-	// TODO: Trim the string! We really need to move to CUtlString first.
-
-	if ( name.size() < 1 )
+	if ( name.Length() < 1 )
 	{
 		LOG(at_warning, "Bot profile %u name was empty.\n", index);
 		return;
@@ -121,7 +121,7 @@ void CBotProfileParser::ReadProfileEntry(rapidjson::SizeType index, const rapidj
 
 	// Reject if profile name begins with a digit, because we want to be able to distinguish
 	// profile names from bot counts when using bot_add.
-	if ( name[0] >= '0' && name[0] <= '9' )
+	if ( name.String()[0] >= '0' && name.String()[0] <= '9' )
 	{
 		LOG(at_warning, "Bot profile %u name '%s' began with a digit, which is not allowed.\n", index, name.c_str());
 		return;
@@ -132,15 +132,15 @@ void CBotProfileParser::ReadProfileEntry(rapidjson::SizeType index, const rapidj
 		return;
 	}
 
-	std::string skin(object["skin"].GetString());
+	CUtlString skin(object["skin"].GetString());
 
 	// Optional:
 
-	std::string playerName("Bot");
+	CUtlString playerName("Bot");
 
 	if ( PropertyExistsOnObject(index, object, "playerName", rapidjson::kStringType) )
 	{
-		playerName = std::string(object["playerName"].GetString());
+		playerName.Set(object["playerName"].GetString());
 	}
 
 	if ( m_Table.ProfileExists(name) )

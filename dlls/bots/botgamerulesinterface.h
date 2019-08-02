@@ -5,6 +5,7 @@
 #include "mathlib.h"
 #include "const.h"
 #include "botprofiletable.h"
+#include "utlstring.h"
 
 class CBasePlayer;
 class CBaseBot;
@@ -24,10 +25,10 @@ private:
 	void LoadBotProfiles();
 	void CreateBots(uint32_t num);
 	void CreateBot(const CBotProfileTable::ProfileData* profile = NULL);
-	void TryCreateBot(const std::string& profileName);
+	void TryCreateBot(const CUtlString& profileName);
 
 	void SetBotAttributesViaProfile(CBaseBot* bot, const CBotProfileTable::ProfileData* profile);
-	void SetBotSkin(CBaseBot* bot, const std::string& skin);
+	void SetBotSkin(CBaseBot* bot, const CUtlString& skin);
 
 	bool CanExecuteCommand(CBasePlayer* player);
 	void HandleBotAddCommand(CBasePlayer* player);
