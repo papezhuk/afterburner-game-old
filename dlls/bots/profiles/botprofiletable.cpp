@@ -8,6 +8,7 @@
 #include "cbase.h"
 #include "player.h"
 #include "enginecallback.h"
+#include "utlvector.h"
 
 CBotProfileTable::CBotProfileTable()
 {
@@ -52,20 +53,21 @@ size_t CBotProfileTable::Count() const
 	return m_Table.Count();
 }
 
-void CBotProfileTable::RandomProfileNameList(std::vector<CUtlString>& list, size_t count) const
+void CBotProfileTable::RandomProfileNameList(CUtlVector<CUtlString>& list, size_t count) const
 {
-	list.clear();
+	list.Purge();
 
 	if ( m_Table.Count() < 1 )
 	{
 		return;
 	}
 
-	list.reserve(count);
+	list.EnsureCapacity(count);
 	auto rng = std::default_random_engine {(unsigned int)RANDOM_LONG(0, 1000)};
 
-	while ( list.size() < count )
+	while ( list.Count() < count )
 	{
+		// This has to be a std::vector in order to randomise it.
 		std::vector<const char*> intermediateList;
 		intermediateList.reserve(m_Table.Count());
 
@@ -78,9 +80,9 @@ void CBotProfileTable::RandomProfileNameList(std::vector<CUtlString>& list, size
 
 		for ( const char* name : intermediateList )
 		{
-			list.push_back(CUtlString(name));
+			list.AddToTail(CUtlString(name));
 
-			if ( list.size() >= count )
+			if ( list.Count() >= count )
 			{
 				break;
 			}

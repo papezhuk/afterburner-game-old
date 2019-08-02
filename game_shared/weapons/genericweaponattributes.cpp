@@ -72,19 +72,19 @@ CGenericWeaponAttributes_Skill::CGenericWeaponAttributes_Skill()
 
 CGenericWeaponAttributes_Skill::CGenericWeaponAttributes_Skill(const CGenericWeaponAttributes_Skill& other)
 {
-	for ( const CGenericWeaponAttributes_SkillRecord& record : other.m_Records )
+	FOR_EACH_VEC(other.m_Records, index)
 	{
-		m_Records.push_back(record);
+		m_Records.AddToTail(other.m_Records[index]);
 	}
 }
 
 CGenericWeaponAttributes_Skill& CGenericWeaponAttributes_Skill::operator =(const CGenericWeaponAttributes_Skill& other)
 {
-	m_Records.clear();
+	m_Records.Purge();
 
-	for ( const CGenericWeaponAttributes_SkillRecord& record : other.m_Records )
+	FOR_EACH_VEC(other.m_Records, index)
 	{
-		m_Records.push_back(record);
+		m_Records.AddToTail(other.m_Records[index]);
 	}
 
 	return *this;

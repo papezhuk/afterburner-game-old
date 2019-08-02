@@ -1,8 +1,6 @@
 #include "botgamerulesinterface.h"
 
-#include <string>
-#include <vector>
-
+#include "utlvector.h"
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
@@ -196,14 +194,14 @@ void CBotGameRulesInterface::HandleBotRemoveAllCommand(CBasePlayer* player)
 
 void CBotGameRulesInterface::CreateBots(uint32_t num)
 {
-	std::vector<CUtlString> randomProfileNameList;
+	CUtlVector<CUtlString> randomProfileNameList;
 	m_ProfileTable.RandomProfileNameList(randomProfileNameList, num);
 
-	if ( randomProfileNameList.size() > 0 )
+	if ( randomProfileNameList.Count() > 0 )
 	{
-		for ( const CUtlString& name : randomProfileNameList )
+		FOR_EACH_VEC(randomProfileNameList, index)
 		{
-			CreateBot(m_ProfileTable.GetProfile(name));
+			CreateBot(m_ProfileTable.GetProfile(randomProfileNameList[index]));
 		}
 	}
 	else

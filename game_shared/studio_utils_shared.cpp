@@ -10,9 +10,9 @@ float StudioGetAnimationDuration(int modelIndex, int anim)
 	return MODEL_SEQ_DURATION(modelIndex, anim);
 }
 
-void StudioGetAnimationDurations(int modelIndex, std::vector<float>& outDurations)
+void StudioGetAnimationDurations(int modelIndex, CUtlVector<float>& outDurations)
 {
-	outDurations.clear();
+	outDurations.Purge();
 
 	if ( modelIndex < 1 )
 	{
@@ -29,6 +29,6 @@ void StudioGetAnimationDurations(int modelIndex, std::vector<float>& outDuration
 			break;
 		}
 
-		outDurations.push_back(duration);
+		outDurations.AddToTail(duration);
 	}
 }

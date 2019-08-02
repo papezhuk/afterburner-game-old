@@ -26,7 +26,7 @@ public:
 	ProfileData& CreateProfile(const CUtlString& name);
 	void RemoveProfile(const CUtlString& name);
 
-	void RandomProfileNameList(std::vector<CUtlString>& list, size_t count) const;
+	void RandomProfileNameList(CUtlVector<CUtlString>& list, size_t count) const;
 
 private:
 	typedef CUtlHashMap<CUtlString, ProfileData> HashTable;
