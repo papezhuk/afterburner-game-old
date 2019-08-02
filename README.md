@@ -45,5 +45,6 @@ Many thanks to:
 * The FWGS team for the [Xash3D engine](https://github.com/FWGS/xash3d-fwgs) and [Xash3D version of Half Life SDK](https://github.com/FWGS/hlsdk-xash3d)
 * j-yaniv and others for [Rho-Bot Half Life bots](https://sourceforge.net/projects/rhobot/)
 * Developers of [STB libraries](https://github.com/nothings/stb)
+* Developers of [rapidjson library](http://rapidjson.org/)
 * Contributors to [XeNTaX game reverse-engineering forums](https://forum.xentax.com/)
 * Various Nightfire modders over the years whose tools and reverse-engineering have proven invaluable when developing this mod (specifically Tres, 009, Ford, UltimateSniper).

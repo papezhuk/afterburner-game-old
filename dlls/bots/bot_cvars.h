@@ -11,7 +11,6 @@ extern cvar_t bot_jump;
 extern cvar_t bot_chat;
 
 //cvars for debugging
-extern cvar_t bot_debug; // activate debug options
 extern cvar_t bot_dontshoot; // does not shoot at humans or bots
 extern cvar_t bot_observer; // does not shoot at humans
 

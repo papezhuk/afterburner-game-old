@@ -12,6 +12,7 @@
 #include "bot.h"
 #include "botprofileparser.h"
 #include "botprofiletable.h"
+#include "bot_misc.h"
 
 CBotGameRulesInterface::CBotGameRulesInterface(CGameRules* parent) :
 	m_pParent(parent),
@@ -100,6 +101,8 @@ void CBotGameRulesInterface::Think()
 			WorldGraph.MarkLocationFavorable(player->pev->origin);
 		}
 	}
+
+	BotGlobals.HandleAutoAdjDifficulty();
 }
 
 bool CBotGameRulesInterface::CanExecuteCommand(CBasePlayer* player)

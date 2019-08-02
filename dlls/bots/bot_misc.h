@@ -32,12 +32,6 @@
 
 //#include "nodes.h"
 
-typedef struct
-{
-   BOOL is_used;
-   char name[32];
-} respawn_t;
-
 ///////////////////////////////////////////////////////////////////////////////
 // Global Vars
 ///////////////////////////////////////////////////////////////////////////////
@@ -52,9 +46,6 @@ const int MAX_LINE_LENGTH	= 100;
 ///////////////////////////////////////////////////////////////////////////////
 
 void nextItem(char *dest, char **line, char delimiter, char comment = '\0');
-//void BotConnect( edict_t *aEntity);
-void BotConnect( int NumBots);
-void BotClientPutInServer( edict_t *pEntity, char *pickedBot );
 
 ///////////////////////////////////////////////////////////////////////////////
 // CBaseBotGlobals Class
@@ -65,12 +56,6 @@ class CBaseBotGlobals
 public:
 
 	float	AutoAdjCheckTime;
-//	int	AutoAdjustDifficulty; //Starbreaker - Change from BOOL to int
-//	float	ChatPropensity;
-//	float	DifficultyLevel;
-//	float	JumpPropensity;
-	char	LastUsedBotName[MAX_LINE_LENGTH];
-//	int		NumBotsDefault;
 
 	CBaseBotGlobals();
 	~CBaseBotGlobals();
@@ -78,21 +63,10 @@ public:
 	void	IncreaseDifficulty( void );
 	void	DecreaseDifficulty( void );
 	void	HandleAutoAdjDifficulty( void );
-//	BOOL	ReadRhobotCfg( void );
 
 };
 
 extern CBaseBotGlobals BotGlobals;
-extern BOOL skin_used[MAX_BOT_SKINS];
-//Scott: Style change.  Did not like pointer reference.
-//       changed "char *bot_skins[MAX_BOT_SKINS]" to "bot_skins[MAX_BOT_SKINS][64]".
-extern char bot_skins[MAX_BOT_SKINS][64];
-extern BOOL name_used[MAX_BOT_NAMES];
-//Scott: Style change.  Did not like pointer reference.
-//       changed "char *bot_names[MAX_BOT_NAMES]" to "bot_names[MAX_BOT_NAMES]".
-extern char bot_names[MAX_BOT_NAMES][64];
-
-BOOL UseBotCycle(int NumBots);
 
 #endif	/*RHOBOT_MISC_H*/
 

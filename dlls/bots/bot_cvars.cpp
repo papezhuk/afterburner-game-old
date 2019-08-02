@@ -8,7 +8,6 @@ cvar_t bot_skill = { "bot_skill" , "50" };
 cvar_t bot_skill_aa = { "bot_skill_aa" , "1" };
 cvar_t bot_jump = { "bot_jump" , "50" };
 cvar_t bot_chat = { "bot_chat" , "30" };
-cvar_t bot_debug = { "bot_debug" , "0" };
 cvar_t bot_dontshoot = { "bot_dontshoot" , "0" };
 cvar_t bot_observer = { "bot_observer" , "0" };
 cvar_t bot_name = { "bot_name" , "Rho-Bot" };
@@ -35,7 +34,6 @@ void Bot_RegisterCVars(void)
 	CVAR_REGISTER ( &bot_skill_aa );
 	CVAR_REGISTER ( &bot_jump );
 	CVAR_REGISTER ( &bot_chat );
-	CVAR_REGISTER ( &bot_debug );
 	CVAR_REGISTER ( &bot_dontshoot );
 	CVAR_REGISTER ( &bot_observer );
 	CVAR_REGISTER ( &bot_name );

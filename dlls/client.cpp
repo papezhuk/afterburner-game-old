@@ -39,7 +39,6 @@
 #include "usercmd.h"
 #include "netadr.h"
 #include "pm_shared.h"
-#include "bot_callbacks.h"
 
 extern DLL_GLOBAL ULONG		g_ulModelIndexPlayer;
 extern DLL_GLOBAL BOOL		g_fGameOver;
