@@ -167,9 +167,26 @@ set (SVDLL_SOURCES
 	../game_shared/weapons/weapon_grenadelauncher.cpp
 	../game_shared/weapons/weapon_raptor.cpp
 	../game_shared/rapidjson_helpers/rapidjson_helpers.cpp
+	../miniutl/bitstring.cpp
+	../miniutl/generichash.cpp
+	../miniutl/ipv6text.c
+	../miniutl/strtools.cpp
+	../miniutl/utlbuffer.cpp
+	../miniutl/utlmemory.cpp
+	../miniutl/utlstring.cpp
 )
 
-include_directories (. ../common ../engine ../pm_shared ../game_shared ../public ../game_shared/weapons bots bots/profiles)
+include_directories (
+	.
+	../common
+	../engine
+	../pm_shared
+	../game_shared
+	../public
+	../game_shared/weapons
+	../miniutl
+	bots
+	bots/profiles)
 
 if(USE_VOICEMGR)
 	set(SVDLL_SOURCES

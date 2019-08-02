@@ -74,6 +74,13 @@ set (CLDLL_SOURCES
 	../game_shared/weapons/weapon_frinesi.cpp
 	../game_shared/weapons/weapon_grenadelauncher.cpp
 	../game_shared/weapons/weapon_raptor.cpp
+	../miniutl/bitstring.cpp
+	../miniutl/generichash.cpp
+	../miniutl/ipv6text.c
+	../miniutl/strtools.cpp
+	../miniutl/utlbuffer.cpp
+	../miniutl/utlmemory.cpp
+	../miniutl/utlstring.cpp
 	ev_hldm.cpp
 	hl/hl_baseentity.cpp
 	hl/hl_events.cpp
@@ -124,7 +131,17 @@ set (CLDLL_SOURCES
 	scoreboard.cpp
 	MOTD.cpp)
 
-include_directories (. hl/ ../common ../engine ../pm_shared ../game_shared ../public ../utils/false_vgui/include ../game_shared/weapons)
+include_directories (
+	.
+	hl/
+	../common
+	../engine
+	../pm_shared
+	../game_shared
+	../miniutl
+	../public
+	../utils/false_vgui/include
+	../game_shared/weapons)
 
 if(USE_VOICEMGR)
 	#set(CLDLL_SOURCES
