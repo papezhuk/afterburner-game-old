@@ -1,6 +1,8 @@
 #include "botgamerulesinterface.h"
 
 #include <string>
+#include <vector>
+
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
@@ -194,10 +196,23 @@ void CBotGameRulesInterface::HandleBotRemoveAllCommand(CBasePlayer* player)
 
 void CBotGameRulesInterface::CreateBots(uint32_t num)
 {
-	for ( uint32_t iteration = 0; iteration < num; ++iteration )
+	std::vector<std::string> randomProfileNameList;
+	m_ProfileTable.RandomProfileNameList(randomProfileNameList, num);
+
+	if ( randomProfileNameList.size() > 0 )
 	{
-		// TODO: Choose a random profile
-		CreateBot();
+		for ( const std::string& name : randomProfileNameList )
+		{
+			CreateBot(m_ProfileTable.GetProfile(name));
+		}
+	}
+	else
+	{
+		// No profiles loaded - use default bots.
+		for ( uint32_t index = 0; index < num; ++index )
+		{
+			CreateBot();
+		}
 	}
 }
 

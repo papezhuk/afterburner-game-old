@@ -3,6 +3,7 @@
 
 #include <unordered_map>
 #include <string>
+#include <vector>
 
 class CBotProfileTable
 {
@@ -24,6 +25,8 @@ public:
 
 	ProfileData& CreateProfile(const std::string& name);
 	void RemoveProfile(const std::string& name);
+
+	void RandomProfileNameList(std::vector<std::string>& list, size_t count) const;
 
 private:
 	std::unordered_map<std::string, ProfileData> m_Table;
