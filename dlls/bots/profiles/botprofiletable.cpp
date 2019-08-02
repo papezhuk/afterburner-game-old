@@ -15,65 +15,48 @@ CBotProfileTable::CBotProfileTable()
 
 bool CBotProfileTable::ProfileExists(const CUtlString& name) const
 {
-	return m_Table.find(name) != m_Table.cend();
+	return m_Table.HasElement(name);
 }
 
 CBotProfileTable::ProfileData& CBotProfileTable::CreateProfile(const CUtlString& name)
 {
-	auto it = m_Table.find(name);
-
-	if ( it != m_Table.end() )
-	{
-		m_Table.erase(it);
-	}
-
-	return m_Table[name];
+	m_Table.Remove(name);
+	HashTable::IndexType_t index = m_Table.Insert(name);
+	return m_Table.Element(index);
 }
 
 CBotProfileTable::ProfileData* CBotProfileTable::GetProfile(const CUtlString& name)
 {
-	auto it = m_Table.find(name);
-
-	if ( it == m_Table.end() )
-	{
-		return NULL;
-	}
-
-	return &it->second;
+	HashTable::IndexType_t index = m_Table.Find(name);
+	return index != m_Table.InvalidIndex() ? &m_Table.Element(index) : NULL;
 }
 
 const CBotProfileTable::ProfileData* CBotProfileTable::GetProfile(const CUtlString& name) const
 {
-	auto it = m_Table.find(name);
-
-	if ( it == m_Table.cend() )
-	{
-		return NULL;
-	}
-
-	return &it->second;
+	HashTable::IndexType_t index = m_Table.Find(name);
+	return index != m_Table.InvalidIndex() ? &m_Table.Element(index) : NULL;
 }
 
 void CBotProfileTable::RemoveProfile(const CUtlString& name)
 {
-	m_Table.erase(name);
+	m_Table.Remove(name);
 }
 
 void CBotProfileTable::Clear()
 {
-	m_Table.clear();
+	m_Table.Purge();
 }
 
 size_t CBotProfileTable::Count() const
 {
-	return m_Table.size();
+	return m_Table.Count();
 }
 
 void CBotProfileTable::RandomProfileNameList(std::vector<CUtlString>& list, size_t count) const
 {
 	list.clear();
 
-	if ( m_Table.size() < 1 )
+	if ( m_Table.Count() < 1 )
 	{
 		return;
 	}
@@ -84,11 +67,11 @@ void CBotProfileTable::RandomProfileNameList(std::vector<CUtlString>& list, size
 	while ( list.size() < count )
 	{
 		std::vector<const char*> intermediateList;
-		intermediateList.reserve(m_Table.size());
+		intermediateList.reserve(m_Table.Count());
 
-		for ( auto it = m_Table.cbegin(); it != m_Table.cend(); ++it )
+		FOR_EACH_HASHMAP(m_Table, iterator)
 		{
-			intermediateList.push_back(it->first.String());
+			intermediateList.push_back(m_Table.Key(iterator).String());
 		}
 
 		std::shuffle(std::begin(intermediateList), std::end(intermediateList), rng);

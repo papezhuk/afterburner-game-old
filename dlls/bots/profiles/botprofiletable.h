@@ -1,9 +1,9 @@
 #ifndef BOTPROFILETABLE_H
 #define BOTPROFILETABLE_H
 
-#include <unordered_map>
 #include <vector>
 #include "utlstring.h"
+#include "utlhashmap.h"
 
 class CBotProfileTable
 {
@@ -29,7 +29,8 @@ public:
 	void RandomProfileNameList(std::vector<CUtlString>& list, size_t count) const;
 
 private:
-	std::unordered_map<CUtlString, ProfileData> m_Table;
+	typedef CUtlHashMap<CUtlString, ProfileData> HashTable;
+	HashTable m_Table;
 };
 
 #endif // BOTPROFILETABLE_H

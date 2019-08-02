@@ -123,7 +123,7 @@ void CBotProfileParser::ReadProfileEntry(rapidjson::SizeType index, const rapidj
 	// profile names from bot counts when using bot_add.
 	if ( name.String()[0] >= '0' && name.String()[0] <= '9' )
 	{
-		LOG(at_warning, "Bot profile %u name '%s' began with a digit, which is not allowed.\n", index, name.c_str());
+		LOG(at_warning, "Bot profile %u name '%s' began with a digit, which is not allowed.\n", index, name.String());
 		return;
 	}
 
@@ -145,7 +145,7 @@ void CBotProfileParser::ReadProfileEntry(rapidjson::SizeType index, const rapidj
 
 	if ( m_Table.ProfileExists(name) )
 	{
-		LOG(at_warning, "Bot profile %u: another profile with the name '%s' already existed.\n", index, name.c_str());
+		LOG(at_warning, "Bot profile %u: another profile with the name '%s' already existed.\n", index, name.String());
 		return;
 	}
 
@@ -153,5 +153,5 @@ void CBotProfileParser::ReadProfileEntry(rapidjson::SizeType index, const rapidj
 	profile.skin = skin;
 	profile.playerName = playerName;
 
-	LOG(at_aiconsole, "Successfully created bot profile '%s'.\n", name.c_str());
+	LOG(at_aiconsole, "Successfully created bot profile '%s'.\n", name.String());
 }

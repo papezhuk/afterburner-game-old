@@ -35,6 +35,7 @@
 inline void MESSAGE_BEGIN( int msg_dest, int msg_type, const float *pOrigin, entvars_t *ent );  // implementation later in this file
 
 #include "hulldefs.h"
+#include "utlstring.h"
 
 extern globalvars_t				*gpGlobals;
 
@@ -573,4 +574,5 @@ float UTIL_WeaponTimeBase( void );
 
 CBasePlayer* UTIL_CBasePlayerByIndex( int playerIndex );
 const char* UTIL_GetPlayerNetName(CBasePlayer* player);
+CUtlString UTIL_SanitisePlayerNetName(const CUtlString& name);
 #endif // UTIL_H

@@ -236,8 +236,7 @@ void CBotGameRulesInterface::CreateBot(const CBotProfileTable::ProfileData* prof
 		name = profile->playerName;
 	}
 
-	// TODO: Validate name!
-
+	name = UTIL_SanitisePlayerNetName(name);
 	edict_t* bot = g_engfuncs.pfnCreateFakeClient(name.String());
 
 	if ( !bot )

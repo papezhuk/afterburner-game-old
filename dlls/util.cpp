@@ -2515,3 +2515,38 @@ const char* UTIL_GetPlayerNetName(CBasePlayer* player)
 {
 	return player ? STRING(player->pev->netname) : NULL;
 }
+
+CUtlString UTIL_SanitisePlayerNetName(const CUtlString& name)
+{
+	if ( name.IsEmpty() )
+	{
+		return CUtlString("Player");
+	}
+
+	CUtlString out;
+	out.AppendRepeat('\0', name.Length() + 1);
+
+	const char* in = name.String();
+	char* buffer = out.Access();
+	bool lastCharacterWasInvalid = false;
+
+	for ( uint32_t index = 0; index < name.Length(); ++index )
+	{
+		const char ch = name[index];
+		const bool characterValid = ch >= ' ' && ch <= '~' && ch != '"';
+
+		if ( characterValid )
+		{
+			*(buffer++) = ch;
+			lastCharacterWasInvalid = false;
+		}
+		else if ( !lastCharacterWasInvalid )
+		{
+			*(buffer++) = ' ';
+			lastCharacterWasInvalid = true;
+		}
+	}
+
+	out.TrimTrailingWhitespace();
+	return out;
+}
