@@ -2,6 +2,7 @@
 #include "weaponinfo.h"
 #include "skill.h"
 #include "gamerules.h"
+#include "weapon_pref_weights.h"
 
 namespace
 {
@@ -65,7 +66,7 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 	.Id(WeaponId_e::WeaponFrinesi)
 	.Classname("weapon_frinesi")
 	.Flags(0)
-	.SwitchWeight(0)
+	.SwitchWeight(WeaponPref_Frinesi)
 	.PrimaryAmmoDef(&AmmoDef_Frinesi)
 	.PrimaryAmmoClassname("ammo_frinesi")
 	.MaxClip(8)

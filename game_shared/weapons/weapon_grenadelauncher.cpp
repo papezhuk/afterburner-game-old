@@ -2,6 +2,7 @@
 #include "ammodefs.h"
 #include "skill.h"
 #include "gamerules.h"
+#include "weapon_pref_weights.h"
 
 namespace
 {
@@ -37,7 +38,7 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 	.Id(WeaponId_e::WeaponGrenadeLauncher)
 	.Classname("weapon_grenadelauncher")
 	.Flags(0)
-	.SwitchWeight(0)
+	.SwitchWeight(WeaponPref_GrenadeLauncher)
 	.PrimaryAmmoDef(&AmmoDef_GrenadeLauncher)
 	.PrimaryAmmoClassname("ammo_grenadelauncher")
 	.MaxClip(6)
