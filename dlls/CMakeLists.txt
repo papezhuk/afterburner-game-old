@@ -159,7 +159,6 @@ set (SVDLL_SOURCES
 	../game_shared/weapons/ammodefs.cpp
 	../game_shared/weapons/weaponslots.cpp
 	../game_shared/studio_utils_shared.cpp
-	../game_shared/weapons/weapon_generictest.cpp
 	../game_shared/weapons/weapon_p99.cpp
 	../game_shared/weapons/weapon_frinesi.cpp
 	../game_shared/weapons/weapon_grenadelauncher.cpp
