@@ -34,6 +34,8 @@
 #include "bot_misc.h"
 #include "bot_cvars.h"
 
+class CBaseBot;
+
 const int DISTANCE_FAR	= 700;
 const int DISTANCE_NEAR	= 200;
 const int DISTANCE_MAX = 8192; // this is actually incorrect because this is the length of the sides of the worldbox,
@@ -122,9 +124,9 @@ class CBaseBotFightStyle
 private:
 	AIM			AimAt;
 	ATTACK_MODE	AttackMode;
-	BOOL		bHoldDownAttack;
-//	BOOL		bSecondaryFire;
-	CBasePlayer	*pOwner;
+	bool		bHoldDownAttack;
+	bool		bSecondaryFire;
+	CBaseBot*	pOwner;
 
 	//Scott:  Added next shoot time to determine when the bot should shoot
 	float	fNextShootTime; // time to shoot
@@ -136,46 +138,52 @@ public:
 	CBaseBotFightStyle();
 	~CBaseBotFightStyle();
 
-	void	SetOwner( class CBasePlayer *newOwner ) { pOwner = newOwner; }
+	inline void SetOwner(CBaseBot* newOwner)
+	{
+		pOwner = newOwner;
+	}
 
-	void	SetAimAt( const AIM newAim ) { AimAt = newAim; }
-	void	SetAttackMode( const ATTACK_MODE newAttackMode ) { AttackMode = newAttackMode; }
-	void	SetHoldDownAttack( const BOOL newValue ) { bHoldDownAttack = newValue; }
-//	void	SetSecondaryFire( const BOOL newValue ) { bSecondaryFire = newValue; }
+	inline void SetAimAt(const AIM newAim)
+	{
+		AimAt = newAim;
+	}
 
-	void	RandomizeAimAtHead( const int AimAtHeadPropensity );
-//	void	RandomizeSecondaryFire( const int SecondaryFirePropensity );
+	inline void SetAttackMode(const ATTACK_MODE newAttackMode)
+	{
+		AttackMode = newAttackMode;
+	}
 
-/*
-	void	UseCrossbow( void );
-	void	UseCrowbar( void );
-	void	UseEgon( void );
-	void	UseGauss( void );
-	void	UseGlock( void );
-	void	UseHandGrenade( void );
-	void	UseHornetGun( void );
-	void	UseMP5( void );
-	void	UsePython( void );
-	void	UseRPG( void );
-	void	UseSatchel( void );
-	void	UseShotgun( void );
-	void	UseSnark( void );
-	void	UseTripMine( void );
-*/
-	void	UseWeapon( void );
+	inline void SetHoldDownAttack(const bool newValue)
+	{
+		bHoldDownAttack = newValue;
+	}
 
-	AIM		GetAimAt() { return AimAt; }
-	ATTACK_MODE		GetAttackMode() { return AttackMode; }
+	inline void SetSecondaryFire(const bool newValue)
+	{
+		bSecondaryFire = newValue;
+	}
 
-	BOOL	GetHoldDownAttack() { return bHoldDownAttack; }
-//	BOOL	GetSecondaryFire() { return bSecondaryFire; }
-	//Scott:  Added next shoot time to determine when the bot should shoot
-	void	SetNextShootTime (const float tOff, const  float tMin, const  float tMax);
-	float	GetNextShootTime () { return fNextShootTime; }
-	float	GetEndShootTime () { return fEndShootTime; }
+	// Pass in an int between 0 and 100 to detemine the chance that the next shot will:
+	// - Be aimed as a headshot
+	void RandomizeAimAtHead(const int AimAtHeadPropensity);
 
-	void	DispatchWeaponUse( CBasePlayerItem *ActiveItem );
-//	void	OptimizeAttackMode();
+	// - Use secondary fire
+	void RandomizeSecondaryFire(const int SecondaryFirePropensity);
+
+	// Default weapon use method, if for some reason the weapon doesn't implement IBotCollectableWeapon.
+	void UseWeaponDefault();
+
+	inline AIM GetAimAt() const { return AimAt; }
+	inline ATTACK_MODE GetAttackMode() const { return AttackMode; }
+
+	inline bool GetHoldDownAttack() const { return bHoldDownAttack; }
+	inline bool GetSecondaryFire() { return bSecondaryFire; }
+	inline void SetNextShootTime(const float tOff, const  float tMin, const  float tMax);
+	inline float GetNextShootTime() const { return fNextShootTime; }
+	inline float GetEndShootTime() const { return fEndShootTime; }
+	CBaseBot* GetOwner() const { return pOwner; }
+
+	void DispatchWeaponUse(CBasePlayerItem* activeItem);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -496,7 +504,7 @@ public:
 	void		BotThink( void );
 	float		GetBotThinkDelay();
 
-	BOOL		CheckHasDecentWeapon( void );
+	BOOL		CheckHasPowerfulWeapon( void );
 	BOOL		CheckNotice( CBaseEntity *pEntity );
 	BOOL		CheckPathObstructedFront( Vector &IdealVelocity, TraceResult &tr );
 	BOOL		CheckPathObstructedSides( Vector &IdealVelocity, TraceResult &tr, TraceResult &tr2 );

@@ -33,6 +33,7 @@
 #include "player.h"
 #include "weapons.h"
 #include "bot.h"
+#include "bot_collectable_weapon.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // Constructors/Destructors
@@ -56,83 +57,18 @@ CBaseBotFightStyle::~CBaseBotFightStyle()
 
 void CBaseBotFightStyle::DispatchWeaponUse( CBasePlayerItem *ActiveItem )
 {
-	SetHoldDownAttack( FALSE ); // unless the particular weapon sets this TRUE we want it false
+	SetHoldDownAttack(FALSE); // unless the particular weapon sets this TRUE we want it false
 
-	/*
-	if ( FClassnameIs( ActiveItem->pev, "weapon_9mmhandgun" ) )
+	IBotCollectableWeapon* collectableWeapon = dynamic_cast<IBotCollectableWeapon*>(ActiveItem);
+	if ( !collectableWeapon )
 	{
-		UseGlock();
+		// Use the dumb, default code.
+		UseWeaponDefault();
+		return;
 	}
-	else if ( FClassnameIs( ActiveItem->pev, "weapon_shotgun" ) )
-	{
-		UseShotgun();
-	}
-	else if ( FClassnameIs( ActiveItem->pev, "weapon_9mmAR" ) )
-	{
-		UseMP5();
-	}
-	else if ( FClassnameIs( ActiveItem->pev, "weapon_rpg" ) )
-	{
-		UseRPG();
-	}
-	else if ( FClassnameIs( ActiveItem->pev, "weapon_crossbow" ) )
-	{
-		UseCrossbow();
-	}
-	else if ( FClassnameIs( ActiveItem->pev, "weapon_egon" ) )
-	{
-		UseEgon();
-	}
-	else if ( FClassnameIs( ActiveItem->pev, "weapon_gauss" ) )
-	{
-		UseGauss();
-	}
-	else if ( FClassnameIs( ActiveItem->pev, "weapon_hornetgun" ) )
-	{
-		UseHornetGun();
-	}
-	else if ( FClassnameIs( ActiveItem->pev, "weapon_crowbar" ) )
-	{
-		UseCrowbar();
-	}
-	else if ( FClassnameIs( ActiveItem->pev, "weapon_snark" ) )
-	{
-		UseSnark();
-	}
-	else if ( FClassnameIs( ActiveItem->pev, "weapon_357" ) )
-	{
-		UsePython();
-	}
-	else if ( FClassnameIs( ActiveItem->pev, "weapon_handgrenade" ) )
-	{
-		UseHandGrenade();
-	}
-	else if ( FClassnameIs( ActiveItem->pev, "weapon_satchel" ) )
-	{
-		UseSatchel();
-	}
-	else if ( FClassnameIs( ActiveItem->pev, "weapon_tripmine" ) )
-	{
-		UseTripMine();
-	}
-	else
-	*/
-	{
-		UseWeapon();
-//		ALERT( at_aiconsole, "Unidentified Weapon!\n" );
-	}
+
+	collectableWeapon->UseWeapon(*this);
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// OptimizeAttackMode
-///////////////////////////////////////////////////////////////////////////////
-
-/*
-void CBaseBotFightStyle::OptimizeAttackMode()
-{
-	SetAttackMode( NOT_FIGHTING );
-}
-*/
 
 ///////////////////////////////////////////////////////////////////////////////
 // RandomizeAimAtHead
@@ -142,56 +78,50 @@ void CBaseBotFightStyle::OptimizeAttackMode()
 
 void CBaseBotFightStyle::RandomizeAimAtHead( const int AimAtHeadPropensity )
 {
-	CBaseBot *pBotOwner = (CBaseBot *)pOwner;
-
-	int BotAccuracy = pBotOwner->Stats.GetTraitAccuracy();
+	int BotAccuracy = pOwner->Stats.GetTraitAccuracy();
 	int ModifiedAim = (AimAtHeadPropensity*BotAccuracy)/100;
 
 	if ( ( RANDOM_LONG(0,100) < ModifiedAim ) || ( BotAccuracy >= 99 ) )
+	{
 		SetAimAt( AIM_HEAD );
+	}
 	else
+	{
 		SetAimAt( AIM_BODY );
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // RandomizeSecondaryFire
 ///////////////////////////////////////////////////////////////////////////////
 
-/*
 void CBaseBotFightStyle::RandomizeSecondaryFire( const int SecondaryFirePropensity )
 {
-	if ( RANDOM_LONG(0,100) < SecondaryFirePropensity )
-	{
-		SetSecondaryFire( TRUE );
-	}
-	else
-	{
-		SetSecondaryFire( FALSE );
-	}
+	SetSecondaryFire(RANDOM_LONG(0,100) < SecondaryFirePropensity);
 }
-*/
 
 ///////////////////////////////////////////////////////////////////////////////
 // SetNextShootTime - Scott: set the time for the next bot shot
 //    The delay parameters are based on Botman's HPB bot
 ///////////////////////////////////////////////////////////////////////////////
 
-void CBaseBotFightStyle::SetNextShootTime (const float tOff,
-		const float tMin, const float tMax)
+void CBaseBotFightStyle::SetNextShootTime(const float tOff, const float tMin, const float tMax)
 {
-	CBaseBot *pBotOwner = (CBaseBot *)pOwner;
-
-	float delayFactor = 1. - pBotOwner->Stats.GetTraitReflexes()/100.;
-
+	float delayFactor = 1.0f - pOwner->Stats.GetTraitReflexes()/100.0f;
 	float tstart = fNextShootTime > gpGlobals->time ? fNextShootTime : gpGlobals->time;
-
 	fNextShootTime = tstart + tOff + RANDOM_LONG(tMin, tMax)*delayFactor;
 
 	if (GetHoldDownAttack()) // for continuous firing, stop every two seconds
+	{
 		fEndShootTime = fNextShootTime + 2.0;
+	}
 	else // Stop shooting 0.1+GetBotThinkDelay seconds after the first shot
-		fEndShootTime = fNextShootTime + 0.1 + pBotOwner->GetBotThinkDelay(); 
+	{
+		fEndShootTime = fNextShootTime + 0.1 + pOwner->GetBotThinkDelay();
+	}
 }
+
+// Old Half-Life weapon use functions are below, for posterity.
 
 ///////////////////////////////////////////////////////////////////////////////
 // UseCrossbow
@@ -436,10 +366,9 @@ void CBaseBotFightStyle::UseTripMine( void )
 // UseWeapon
 ///////////////////////////////////////////////////////////////////////////////
 
-void CBaseBotFightStyle::UseWeapon( void )
+void CBaseBotFightStyle::UseWeaponDefault( void )
 {
-//	SetSecondaryFire( FALSE );
-
-	RandomizeAimAtHead( 50 );
-	SetNextShootTime ( 0.75, 1.5, 2.2 );
+	SetSecondaryFire(FALSE);
+	RandomizeAimAtHead(50);
+	SetNextShootTime(0.75, 1.5, 2.2);
 }

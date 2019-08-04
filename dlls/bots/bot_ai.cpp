@@ -39,6 +39,7 @@
 #include "weapons.h"
 #include "nodes.h"
 #include "bot.h"
+#include "bot_collectable_weapon.h"
 
 extern DLL_GLOBAL BOOL g_fGameOver;
 
@@ -170,7 +171,7 @@ void CBaseBot::ActionChooseGoal( void )
 	{
 		PickupDesire = 0.0;
 
-		if ( !CheckHasDecentWeapon() )
+		if ( !CheckHasPowerfulWeapon() )
 		{
 			if ( !(pNextEnt->pev->effects & EF_NODRAW) && CheckVisible( pNextEnt ) )
 			{
@@ -259,69 +260,51 @@ void CBaseBot::ActionChooseGoal( void )
 
 void CBaseBot::ActionChooseWeapon( void )
 {
-#ifdef RHOBOT_REMOVEME
-	if (pev->waterlevel <= 1 && m_iAmmoCells >= 1 && (m_iQuakeItems & IT_LIGHTNING) )
-		m_iQuakeWeapon = IT_LIGHTNING;
-	else if(m_iAmmoRockets >= 1 && (m_iQuakeItems & IT_ROCKET_LAUNCHER) )
-		m_iQuakeWeapon = IT_ROCKET_LAUNCHER;
-	else if(m_iAmmoRockets >= 1 && (m_iQuakeItems & IT_GRENADE_LAUNCHER) )
-		m_iQuakeWeapon = IT_GRENADE_LAUNCHER;
-	else if(m_iAmmoNails >= 2 && (m_iQuakeItems & IT_SUPER_NAILGUN) )
-		m_iQuakeWeapon = IT_SUPER_NAILGUN;
-	else if(m_iAmmoShells >= 2 && (m_iQuakeItems & IT_SUPER_SHOTGUN) )
-		m_iQuakeWeapon = IT_SUPER_SHOTGUN;
-	else if(m_iAmmoNails >= 1 && (m_iQuakeItems & IT_NAILGUN) )
-		m_iQuakeWeapon = IT_NAILGUN;
-	else if(m_iAmmoShells >= 1 && (m_iQuakeItems & IT_SHOTGUN)  )
-		m_iQuakeWeapon = IT_SHOTGUN;
-	else
-		m_iQuakeWeapon = IT_AXE;
-
-	W_SetCurrentAmmo();
-#endif
-/*	CBasePlayerItem *pCheckWeapon;
 	CBasePlayerItem *pBestWeapon = NULL;
 	int BestWeaponDesire = 0; // no weapon lower than -1 can be autoswitched to
 
 	if ( m_pActiveItem == NULL || !m_pActiveItem->CanHolster() )
 	{
-//		ActionSpeak( "I can't put away my current weapon." );
 		return;
+	}
+
+	CBaseEntity* currentEnemy = GetEnemy();
+	float DistanceToEnemy = DISTANCE_MAX;
+
+	if ( currentEnemy )
+	{
+		DistanceToEnemy = (currentEnemy->pev->origin - pev->origin).Length();
 	}
 
 	for ( int i = 0 ; i < MAX_ITEM_TYPES ; i++ )
 	{
-		pCheckWeapon = m_rgpPlayerItems[ i ];
-
-		while ( pCheckWeapon )
+		for ( CBasePlayerItem* weapon = m_rgpPlayerItems[i]; weapon; weapon = weapon->m_pNext )
 		{
+			IBotCollectableWeapon* collectableWeapon = dynamic_cast<IBotCollectableWeapon*>(weapon);
+			if ( !collectableWeapon || !collectableWeapon->CanBeUsed() || !weapon->CanDeploy() )
+			{
+				continue;
+			}
+
 			// this randomizes what weapon a given bot will choose at any particular moment
 			// and yet maintains preferencial weapon bias
+			float CheckWeaponDesire = collectableWeapon->DesireToUse(DistanceToEnemy) * RANDOM_FLOAT(0,1);
 
-			float DistanceToEnemy = DISTANCE_MAX;
-			if ( GetEnemy() != NULL )
-			{
-				DistanceToEnemy = ( GetEnemy()->pev->origin - pev->origin ).Length();
-			}
-
-			float CheckWeaponDesire = Stats.FindWeaponDesire( pCheckWeapon, DistanceToEnemy ) * RANDOM_FLOAT(0,1);
-
-			if ( ( CheckWeaponDesire > BestWeaponDesire ) && pCheckWeapon->CanDeploy() )
+			if ( CheckWeaponDesire > BestWeaponDesire )
 			{
 				BestWeaponDesire = CheckWeaponDesire;
-				pBestWeapon = pCheckWeapon;
+				pBestWeapon = weapon;
 			}
-
-			pCheckWeapon = pCheckWeapon->m_pNext;
 		}
 	}
 
+	// this->pev check is protecting against us trying to call SwitchWeapon on a dead man's weapon
 	if ( pBestWeapon && this->pev )
-	{ // this->pev check is protecting against us trying to call SwitchWeapon on a dead man's weapon
-		SwitchWeapon( pBestWeapon );
-	} */
+	{
+		SwitchWeapon(pBestWeapon);
+	}
 
-	FightStyle.DispatchWeaponUse( m_pActiveItem );
+	FightStyle.DispatchWeaponUse(m_pActiveItem);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -633,27 +616,20 @@ void CBaseBot::BotThink( void )
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// CheckHasDecentWeapon
+// CheckHasPowerfulWeapon
 ///////////////////////////////////////////////////////////////////////////////
 
-BOOL CBaseBot::CheckHasDecentWeapon( void )
+BOOL CBaseBot::CheckHasPowerfulWeapon( void )
 {
-/*	for ( int i = 2; i < 4; i++ ) // have weapon from groups 3 or 4?
+	for ( int i = 2; i < 4; i++ ) // have weapon from groups 3 or 4?
 	{
 		if ( m_rgpPlayerItems[ i ] )
 		{
 			return TRUE;
 		}
-	} */
-
-#ifdef RHOBOT_REMOVEME
-	if (W_BestWeapon() != IT_AXE)
-		return TRUE;
+	}
 
 	return FALSE;
-#else
-	return TRUE;
-#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -800,15 +776,15 @@ void CBaseBot::ThinkDead( void )
 
 void CBaseBot::ThinkMood( void )
 {
+	CBasePlayerWeapon *pActiveWeapon = dynamic_cast<CBasePlayerWeapon*>(m_pActiveItem);
 
-	CBasePlayerWeapon *pActiveWeapon = (CBasePlayerWeapon *)m_pActiveItem;
-
-/*	if ( pActiveWeapon->m_fInReload )
+	if ( !pActiveWeapon || pActiveWeapon->m_fInReload )
 	{
 		SetWantToBeInCombat( FALSE );
+		return;
 	}
-	else if ( FClassnameIs( pActiveWeapon->pev, "weapon_crowbar" ) ) */
-	if (CheckHasDecentWeapon())
+
+	if (CheckHasPowerfulWeapon())
 	{
 		SetWantToBeInCombat( TRUE );
 	}
@@ -818,15 +794,6 @@ void CBaseBot::ThinkMood( void )
 		CBaseEntity *pEnemy = GetEnemy();
 		CBasePlayer *pEnemyPlayer = (CBasePlayer *)pEnemy;
 
-#ifdef RHOBOT_REMOVEME
-		if ( pEnemyPlayer->m_pActiveItem != NULL && //Scott: Make sure the pointer is non-zero!
-//			FClassnameIs( pEnemyPlayer->m_pActiveItem->pev, "weapon_crowbar" ) )
-			pEnemyPlayer->W_BestWeapon() == IT_AXE )
-		{
-			SetWantToBeInCombat( FALSE );
-		}
-		else
-#endif
 		if ( (pev->health + pev->armorvalue) + (Stats.GetTraitAggression() - 50) > (pEnemyPlayer->pev->health + pEnemyPlayer->pev->armorvalue) )
 		{
 			SetWantToBeInCombat( TRUE );
@@ -838,7 +805,7 @@ void CBaseBot::ThinkMood( void )
 	}
 	else
 	{
-		if ( ((pev->health + pev->armorvalue) > (140 - Stats.GetTraitAggression())) && CheckHasDecentWeapon() )
+		if ( ((pev->health + pev->armorvalue) > (140 - Stats.GetTraitAggression())) && CheckHasPowerfulWeapon() )
 		{
 			SetWantToBeInCombat( TRUE );
 		}
@@ -919,7 +886,7 @@ void CBaseBot::ThinkSteering( void )
 			Memory.EnemyOutOfSight();
 		}
 
-		if ( CheckHasDecentWeapon() )
+		if ( CheckHasPowerfulWeapon() )
 		{
 			if ( GetWantToBeInCombat() )
 			{
@@ -957,7 +924,7 @@ void CBaseBot::ThinkSteering( void )
 		else
 		{
 			if ( RANDOM_FLOAT(1,1000) < Stats.GetTraitJumpPropensity() )
-			{ // jump alot if you don't have a decent weapon
+			{ // jump a lot if you don't have a decent weapon
 				pev->button |= IN_JUMP;
 			}
 

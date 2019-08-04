@@ -183,7 +183,8 @@ include_directories (
 	../game_shared/weapons
 	../miniutl
 	bots
-	bots/profiles)
+	bots/profiles
+	bots/collectables)
 
 if(USE_VOICEMGR)
 	set(SVDLL_SOURCES
