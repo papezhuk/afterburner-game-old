@@ -1,5 +1,4 @@
-#ifndef BOTPROFILEPARSER_H
-#define BOTPROFILEPARSER_H
+#pragma once
 
 #include "utlstring.h"
 #include "rapidjson/document.h"
@@ -19,5 +18,3 @@ private:
 
 	CBotProfileTable& m_Table;
 };
-
-#endif // BOTPROFILEPARSER_H

@@ -1,5 +1,4 @@
-#ifndef BOTGAMERULESINTERFACE_H
-#define BOTGAMERULESINTERFACE_H
+#pragma once
 
 #include <cstdint>
 #include "mathlib.h"
@@ -38,5 +37,3 @@ private:
 	uint32_t m_nBotCount;
 	CBotProfileTable m_ProfileTable;
 };
-
-#endif // BOTGAMERULESINTERFACE_H

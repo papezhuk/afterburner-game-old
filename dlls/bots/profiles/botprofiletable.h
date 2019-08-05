@@ -1,5 +1,4 @@
-#ifndef BOTPROFILETABLE_H
-#define BOTPROFILETABLE_H
+#pragma once
 
 #include <vector>
 #include "utlstring.h"
@@ -32,5 +31,3 @@ private:
 	typedef CUtlHashMap<CUtlString, ProfileData> HashTable;
 	HashTable m_Table;
 };
-
-#endif // BOTPROFILETABLE_H

@@ -30,7 +30,7 @@ public:
 
 	const T& Value(uint32_t index) const
 	{
-		ASSERTSZ_Q((int)index > 0 && (int)index < m_Items.Count(), "Index must be in range.");
+		ASSERTSZ_Q((int)index >= 0 && (int)index < m_Items.Count(), "Index must be in range.");
 		return m_Items[index].m_Value;
 	}
 
