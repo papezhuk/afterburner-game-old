@@ -39,21 +39,10 @@
 #include "weapons.h"
 #include "nodes.h"
 #include "bot.h"
-#include "bot_collectable_weapon.h"
+#include "botweaponattributes.h"
+#include "genericweapon.h"
 
 extern DLL_GLOBAL BOOL g_fGameOver;
-
-/* AmmoCheck ammo_check[] = {
-	{"ammo_9mmclip", "9mm", _9MM_MAX_CARRY},
-	{"ammo_9mmAR", "9mm", _9MM_MAX_CARRY},
-	{"ammo_ARgrenades", "ARgrenades", M203_GRENADE_MAX_CARRY},
-	{"ammo_buckshot", "buckshot", BUCKSHOT_MAX_CARRY},
-	{"ammo_crossbow", "bolts", BOLT_MAX_CARRY},
-	{"ammo_357", "357", _357_MAX_CARRY},
-	{"ammo_rpgclip", "rockets", ROCKET_MAX_CARRY},
-	{"ammo_egonclip", "uranium", URANIUM_MAX_CARRY},
-	{"ammo_gaussclip", "uranium", URANIUM_MAX_CARRY},
-	{"", 0, 0}}; */
 
 ///////////////////////////////////////////////////////////////////////////////
 // Constructor/Destructor
@@ -260,7 +249,7 @@ void CBaseBot::ActionChooseGoal( void )
 
 void CBaseBot::ActionChooseWeapon( void )
 {
-	CBasePlayerItem *pBestWeapon = NULL;
+	CGenericWeapon* pBestWeapon = NULL;
 	int BestWeaponDesire = 0; // no weapon lower than -1 can be autoswitched to
 
 	if ( m_pActiveItem == NULL || !m_pActiveItem->CanHolster() )
@@ -280,20 +269,34 @@ void CBaseBot::ActionChooseWeapon( void )
 	{
 		for ( CBasePlayerItem* weapon = m_rgpPlayerItems[i]; weapon; weapon = weapon->m_pNext )
 		{
-			IBotCollectableWeapon* collectableWeapon = dynamic_cast<IBotCollectableWeapon*>(weapon);
-			if ( !collectableWeapon || !collectableWeapon->CanBeUsed() || !weapon->CanDeploy() )
+			if ( !weapon->CanDeploy() )
+			{
+				// No point checking.
+				continue;
+			}
+
+			CGenericWeapon* genericWeapon = dynamic_cast<CGenericWeapon*>(weapon);
+
+			// Should never happen anyway:
+			if ( !genericWeapon )
 			{
 				continue;
 			}
 
-			// this randomizes what weapon a given bot will choose at any particular moment
-			// and yet maintains preferencial weapon bias
-			float CheckWeaponDesire = collectableWeapon->DesireToUse(DistanceToEnemy) * RANDOM_FLOAT(0,1);
+			const CBotWeaponAttributes& attributes = genericWeapon->WeaponAttributes().BotWeaponAttributes();
+			if ( !attributes.CanBeUsed() )
+			{
+				continue;
+			}
+
+			// This randomizes what weapon a given bot will choose at any particular moment
+			// and yet maintains preferencial weapon bias.
+			float CheckWeaponDesire = attributes.ExecDesireToUse(*genericWeapon, DistanceToEnemy) * RANDOM_FLOAT(0,1);
 
 			if ( CheckWeaponDesire > BestWeaponDesire )
 			{
 				BestWeaponDesire = CheckWeaponDesire;
-				pBestWeapon = weapon;
+				pBestWeapon = genericWeapon;
 			}
 		}
 	}
@@ -304,7 +307,17 @@ void CBaseBot::ActionChooseWeapon( void )
 		SwitchWeapon(pBestWeapon);
 	}
 
-	FightStyle.DispatchWeaponUse(m_pActiveItem);
+	// Use the active item instead of the cached best weapon, just in case the
+	// call to SwitchWeapon failed for some reason and the best weapon is not active.
+	CGenericWeapon* activeWeapon = dynamic_cast<CGenericWeapon*>(m_pActiveItem);
+	if ( activeWeapon )
+	{
+		FightStyle.DispatchWeaponUse(*activeWeapon);
+	}
+	else
+	{
+		FightStyle.UseWeaponDefault();
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -512,7 +525,7 @@ void CBaseBot::ActionLook( int SearchDistance )
 // ActionSpeak
 ///////////////////////////////////////////////////////////////////////////////
 
-void CBaseBot::ActionSpeak( char *pText )
+void CBaseBot::ActionSpeak( const char *pText )
 {
 	char buffer[256];
 	sprintf( buffer, "%s: %s\n", STRING(pev->netname), pText );

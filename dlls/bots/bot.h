@@ -35,6 +35,7 @@
 #include "bot_cvars.h"
 
 class CBaseBot;
+class CGenericWeapon;
 
 const int DISTANCE_FAR	= 700;
 const int DISTANCE_NEAR	= 200;
@@ -170,7 +171,7 @@ public:
 	// - Use secondary fire
 	void RandomizeSecondaryFire(const int SecondaryFirePropensity);
 
-	// Default weapon use method, if for some reason the weapon doesn't implement IBotCollectableWeapon.
+	// Default weapon use method, if for some reason the weapon doesn't implement CBotCollectableWeapon.
 	void UseWeaponDefault();
 
 	inline AIM GetAimAt() const { return AimAt; }
@@ -178,12 +179,12 @@ public:
 
 	inline bool GetHoldDownAttack() const { return bHoldDownAttack; }
 	inline bool GetSecondaryFire() { return bSecondaryFire; }
-	inline void SetNextShootTime(const float tOff, const  float tMin, const  float tMax);
+	void SetNextShootTime(const float tOff, const  float tMin, const  float tMax);
 	inline float GetNextShootTime() const { return fNextShootTime; }
 	inline float GetEndShootTime() const { return fEndShootTime; }
 	CBaseBot* GetOwner() const { return pOwner; }
 
-	void DispatchWeaponUse(CBasePlayerItem* activeItem);
+	void DispatchWeaponUse(CGenericWeapon& activeWeapon);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -494,7 +495,7 @@ public:
 	void		ActionLook( int SearchDistance = SEARCH_DISTANCE );
 	void		ActionOpenFire( void );
 //	BOOL		ActionReload( void );
-	void		ActionSpeak( char *pText );
+	void		ActionSpeak( const char *pText );
 
 	void		AimAtBias( void );
 	void		AimAtEnemy( void );
