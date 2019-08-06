@@ -96,7 +96,7 @@ void CBaseBotFightStyle::RandomizeAimAtHead( const int AimAtHeadPropensity )
 
 void CBaseBotFightStyle::RandomizeSecondaryFire( const int SecondaryFirePropensity )
 {
-	SetSecondaryFire(RANDOM_LONG(0,100) < SecondaryFirePropensity);
+	SetSecondaryFire(SecondaryFirePropensity > 99 || RANDOM_LONG(0,100) < SecondaryFirePropensity);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
