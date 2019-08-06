@@ -63,7 +63,7 @@ namespace
 #ifdef CLIENT_DLL
 	static CWeaponFrinesi PredictionWeapon;
 #else
-	float FrinesiDesireToUse(CGenericWeapon& weapon, float distanceToEnemy)
+	float FrinesiDesireToUse(CGenericWeapon& weapon, CBaseBot&, CBaseEntity&, float distanceToEnemy)
 	{
 		return static_cast<float>(WeaponPref_Frinesi) / static_cast<float>(WeaponPref_Max);
 	}
@@ -87,7 +87,7 @@ namespace
 		}
 
 		fightStyle.RandomizeSecondaryFire(chanceOfSecondaryFire);
-		fightStyle.SetNextShootTime(1.0f / (fightStyle.GetSecondaryFire() ? FRINESI_FIRE_RATE_PUMP : FRINESI_FIRE_RATE_AUTO), 0.8, 2.0);
+		fightStyle.SetNextShootTime(1.0f / (fightStyle.GetSecondaryFire() ? FRINESI_FIRE_RATE_PUMP : FRINESI_FIRE_RATE_AUTO), 0.8f, 2.0f);
 	}
 #endif
 }

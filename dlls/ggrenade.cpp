@@ -97,7 +97,14 @@ void CGrenade::Explode( TraceResult *pTrace, int bitsDamageType )
 
 	pev->owner = NULL; // can't traceline attack owner if this is set
 
-	RadiusDamage( pev, pevOwner, pev->dmg, CLASS_NONE, bitsDamageType );
+	if ( ExplosionRadius() > 0.0f )
+	{
+		::RadiusDamage(pev->origin, pev, pevOwner, pev->dmg, ExplosionRadius(), CLASS_NONE, bitsDamageType);
+	}
+	else
+	{
+		RadiusDamage( pev, pevOwner, pev->dmg, CLASS_NONE, bitsDamageType );
+	}
 
 	if( RANDOM_FLOAT( 0, 1 ) < 0.5 )
 	{

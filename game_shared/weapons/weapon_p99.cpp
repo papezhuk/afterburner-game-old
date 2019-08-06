@@ -43,7 +43,7 @@ namespace
 #ifdef CLIENT_DLL
 	static CWeaponP99 PredictionWeapon;
 #else
-	float P99DesireToUse(CGenericWeapon& weapon, float distanceToEnemy)
+	float P99DesireToUse(CGenericWeapon& weapon, CBaseBot&, CBaseEntity&, float distanceToEnemy)
 	{
 		return static_cast<float>(WeaponPref_P99) / static_cast<float>(WeaponPref_Max);
 	}
@@ -52,7 +52,7 @@ namespace
 	{
 		fightStyle.SetSecondaryFire(false);
 		fightStyle.RandomizeAimAtHead(80);
-		fightStyle.SetNextShootTime(1.0f / P99_FIRE_RATE, 0.2, 0.4);
+		fightStyle.SetNextShootTime(1.0f / P99_FIRE_RATE, 0.2f, 0.4f);
 	}
 #endif
 }

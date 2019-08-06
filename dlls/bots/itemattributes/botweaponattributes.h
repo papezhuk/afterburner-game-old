@@ -4,6 +4,8 @@
 
 class CGenericWeapon;
 class CBaseBotFightStyle;
+class CBaseBot;
+class CBaseEntity;
 
 // A collection of functions used to provide useful information about a weapon to the bot AI.
 // This is a plug-in item rather than an interface on the weapon class, because the bot code
@@ -13,7 +15,7 @@ class CBotWeaponAttributes
 {
 public:
 	// Given distance to enemy, returns desire to use this weapon between 0 and 1 inclusive.
-	typedef float(*Func_DesireToUse)(CGenericWeapon&,float);
+	typedef float(*Func_DesireToUse)(CGenericWeapon&,CBaseBot&,CBaseEntity&,float);
 
 	// Set attributes on fightStyle in order to tell the bot how to use this weapon.
 	typedef void(*Func_UseWeapon)(CGenericWeapon&,CBaseBotFightStyle&);
@@ -44,9 +46,9 @@ public:
 		return *this;
 	}
 
-	inline float ExecDesireToUse(CGenericWeapon& weapon, float distanceToEnemy) const
+	inline float ExecDesireToUse(CGenericWeapon& weapon, CBaseBot& owner, CBaseEntity& enemy, float distanceToEnemy) const
 	{
-		return m_DesireToUse ? m_DesireToUse(weapon, distanceToEnemy) : 0.0f;
+		return m_DesireToUse ? m_DesireToUse(weapon, owner, enemy, distanceToEnemy) : 0.0f;
 	}
 
 	inline bool ExecUseWeapon(CGenericWeapon& weapon, CBaseBotFightStyle& fightStyle) const
