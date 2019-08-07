@@ -169,48 +169,32 @@ void CBaseBot::ActionChooseGoal( void )
 		}
 		else if ( !(pNextEnt->pev->effects & EF_NODRAW) && CheckVisible( pNextEnt ) )
 		{
-#ifdef RHOBOT_REMOVEME
-			if ( strncmp( "item_shells", STRING(pNextEnt->pev->classname), 11 ) == 0 )
+			// TODO: This is a bit horrible. We really need something to be set on CBaseEntity that can
+			// help us identify the type of the item, eg. an interface we can query.
+
+			CGenericWeapon* genericWeapon = NULL;
+			CGenericAmmo* genericAmmo = NULL;
+
+			if ( (genericAmmo = dynamic_cast<CGenericAmmo*>(pNextEnt)) != NULL )
 			{
-				if (m_iAmmoShells < 100)
-					PickupDesire = 100 - m_iAmmoShells;
+				const int ammoIndex = GetAmmoIndex(genericAmmo->AmmoName());
+				if ( ammoIndex >= 0 && ammoIndex < MAX_AMMO_SLOTS && m_rgAmmo[ammoIndex] < 100 )
+				{
+					PickupDesire = 100 - m_rgAmmo[ammoIndex];
+				}
 				else
+				{
 					PickupDesire = 0;
+				}
 			}
-			else if ( strncmp( "item_spikes", STRING(pNextEnt->pev->classname), 11 ) == 0 )
+			else if ( (genericWeapon = dynamic_cast<CGenericWeapon*>(pNextEnt)) != NULL )
 			{
-				if (m_iAmmoNails < 200)
-					PickupDesire = (200 - m_iAmmoNails)/2;
-				else
-					PickupDesire = 0;
-			}
-			else if ( strncmp( "item_cells", STRING(pNextEnt->pev->classname), 10 ) == 0 )
-			{
-				if (m_iAmmoCells < 100)
-					PickupDesire = 100 - m_iAmmoCells;
-				else
-					PickupDesire = 0;
-			}
-			else if ( strncmp( "item_rocket", STRING(pNextEnt->pev->classname), 11 ) == 0 )
-			{
-				if (m_iAmmoRockets < 100)
-					PickupDesire = 100 - m_iAmmoRockets;
-				else
-					PickupDesire = 0;
-			}
-			else
-#endif // RHOBOT_REMOVEME
-			if ( strncmp( "weapon_", STRING(pNextEnt->pev->classname), 7 ) == 0 )
-			{
+				// TODO: This is very basic. Could we make it better?
 				PickupDesire = 80;
 			}
 			else if ( FClassnameIs( pNextEnt->pev, "item_health" ) )
 			{
 				PickupDesire = 100.0 - pev->health; // we want health proportional to how much we need
-			}
-			else if ( FClassnameIs( pNextEnt->pev, "item_backpack" ) ) // backpack
-			{
-				PickupDesire = 80;
 			}
 			else if ( FClassnameIs( pNextEnt->pev, "item_battery" ) )
 			{

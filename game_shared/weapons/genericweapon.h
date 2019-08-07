@@ -149,6 +149,11 @@ public:
 		return FALSE;
 	}
 
+	inline const char* AmmoName() const
+	{
+		return m_AmmoDef.Name;
+	}
+
 private:
 	static constexpr const char* DEFAULT_PICKUP_SOUND = "items/ammopickup1.wav";
 
