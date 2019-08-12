@@ -33,7 +33,8 @@
 #include "player.h"
 #include "weapons.h"
 #include "bot.h"
-#include "bot_collectable_weapon.h"
+#include "botweaponattributes.h"
+#include "genericweapon.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // Constructors/Destructors
@@ -55,19 +56,17 @@ CBaseBotFightStyle::~CBaseBotFightStyle()
 // DispatchWeaponUse
 ///////////////////////////////////////////////////////////////////////////////
 
-void CBaseBotFightStyle::DispatchWeaponUse( CBasePlayerItem *ActiveItem )
+void CBaseBotFightStyle::DispatchWeaponUse(CGenericWeapon& weapon)
 {
 	SetHoldDownAttack(FALSE); // unless the particular weapon sets this TRUE we want it false
 
-	IBotCollectableWeapon* collectableWeapon = dynamic_cast<IBotCollectableWeapon*>(ActiveItem);
-	if ( !collectableWeapon )
-	{
-		// Use the dumb, default code.
-		UseWeaponDefault();
-		return;
-	}
+	const CBotWeaponAttributes& attributes = weapon.WeaponAttributes().BotWeaponAttributes();
 
-	collectableWeapon->UseWeapon(*this);
+	if ( !attributes.ExecUseWeapon(weapon, *this) )
+	{
+		// No use function, so use default, dumb code.
+		UseWeaponDefault();
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -97,7 +96,7 @@ void CBaseBotFightStyle::RandomizeAimAtHead( const int AimAtHeadPropensity )
 
 void CBaseBotFightStyle::RandomizeSecondaryFire( const int SecondaryFirePropensity )
 {
-	SetSecondaryFire(RANDOM_LONG(0,100) < SecondaryFirePropensity);
+	SetSecondaryFire(SecondaryFirePropensity > 99 || RANDOM_LONG(0,100) < SecondaryFirePropensity);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

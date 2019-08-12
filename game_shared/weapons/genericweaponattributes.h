@@ -10,6 +10,10 @@
 #include "utlstring.h"
 #include "utlvector.h"
 
+#ifndef CLIENT_DLL
+#include "botweaponattributes.h"
+#endif
+
 class CGenericWeapon;
 
 template<typename T>
@@ -607,6 +611,19 @@ public:
 		return *this;
 	}
 
+#ifndef CLIENT_DLL
+	inline const CBotWeaponAttributes& BotWeaponAttributes() const
+	{
+		return m_BotWeaponAttributes;
+	}
+
+	inline CGenericWeaponAttributes& BotWeaponAttributes(const CBotWeaponAttributes& val)
+	{
+		m_BotWeaponAttributes = val;
+		return *this;
+	}
+#endif
+
 private:
 	inline void SetFireModeSignatures()
 	{
@@ -621,4 +638,8 @@ private:
 	CGenericWeaponAtts_Animations m_Animations;
 	CGenericWeaponAtts_IdleAnimations m_IdleAnimations;
 	CGenericWeaponAtts_FireMode m_NewFireModes[2];
+
+#ifndef CLIENT_DLL
+	CBotWeaponAttributes m_BotWeaponAttributes;
+#endif
 };

@@ -5,6 +5,10 @@
 #include "gamerules.h"
 #include "weapon_pref_weights.h"
 
+#ifndef CLIENT_DLL
+#include "bot.h"
+#endif
+
 namespace
 {
 	enum P99Animations_e
@@ -38,6 +42,18 @@ namespace
 
 #ifdef CLIENT_DLL
 	static CWeaponP99 PredictionWeapon;
+#else
+	float P99DesireToUse(CGenericWeapon& weapon, CBaseBot&, CBaseEntity&, float distanceToEnemy)
+	{
+		return static_cast<float>(WeaponPref_P99) / static_cast<float>(WeaponPref_Max);
+	}
+
+	void P99UseWeapon(CGenericWeapon& weapon, CBaseBotFightStyle& fightStyle)
+	{
+		fightStyle.SetSecondaryFire(false);
+		fightStyle.RandomizeAimAtHead(80);
+		fightStyle.SetNextShootTime(1.0f / P99_FIRE_RATE, 0.2f, 0.4f);
+	}
 #endif
 }
 
@@ -126,7 +142,15 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 .Skill(
 	CGenericWeaponAttributes_Skill()
 	.Record("sk_plr_dmg_p99", &skilldata_t::plrDmgP99)
-);
+)
+#ifndef CLIENT_DLL
+.BotWeaponAttributes(
+	CBotWeaponAttributes()
+	.DesireToUse(&P99DesireToUse)
+	.UseWeapon(&P99UseWeapon)
+)
+#endif
+;
 
 LINK_ENTITY_TO_CLASS(weapon_p99, CWeaponP99)
 LINK_ENTITY_TO_CLASS(weapon_pp9, CWeaponP99)	// NF devs called it "PP9" for some reason.

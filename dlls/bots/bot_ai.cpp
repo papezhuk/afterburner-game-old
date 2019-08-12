@@ -39,21 +39,10 @@
 #include "weapons.h"
 #include "nodes.h"
 #include "bot.h"
-#include "bot_collectable_weapon.h"
+#include "botweaponattributes.h"
+#include "genericweapon.h"
 
 extern DLL_GLOBAL BOOL g_fGameOver;
-
-/* AmmoCheck ammo_check[] = {
-	{"ammo_9mmclip", "9mm", _9MM_MAX_CARRY},
-	{"ammo_9mmAR", "9mm", _9MM_MAX_CARRY},
-	{"ammo_ARgrenades", "ARgrenades", M203_GRENADE_MAX_CARRY},
-	{"ammo_buckshot", "buckshot", BUCKSHOT_MAX_CARRY},
-	{"ammo_crossbow", "bolts", BOLT_MAX_CARRY},
-	{"ammo_357", "357", _357_MAX_CARRY},
-	{"ammo_rpgclip", "rockets", ROCKET_MAX_CARRY},
-	{"ammo_egonclip", "uranium", URANIUM_MAX_CARRY},
-	{"ammo_gaussclip", "uranium", URANIUM_MAX_CARRY},
-	{"", 0, 0}}; */
 
 ///////////////////////////////////////////////////////////////////////////////
 // Constructor/Destructor
@@ -180,48 +169,32 @@ void CBaseBot::ActionChooseGoal( void )
 		}
 		else if ( !(pNextEnt->pev->effects & EF_NODRAW) && CheckVisible( pNextEnt ) )
 		{
-#ifdef RHOBOT_REMOVEME
-			if ( strncmp( "item_shells", STRING(pNextEnt->pev->classname), 11 ) == 0 )
+			// TODO: This is a bit horrible. We really need something to be set on CBaseEntity that can
+			// help us identify the type of the item, eg. an interface we can query.
+
+			CGenericWeapon* genericWeapon = NULL;
+			CGenericAmmo* genericAmmo = NULL;
+
+			if ( (genericAmmo = dynamic_cast<CGenericAmmo*>(pNextEnt)) != NULL )
 			{
-				if (m_iAmmoShells < 100)
-					PickupDesire = 100 - m_iAmmoShells;
+				const int ammoIndex = GetAmmoIndex(genericAmmo->AmmoName());
+				if ( ammoIndex >= 0 && ammoIndex < MAX_AMMO_SLOTS && m_rgAmmo[ammoIndex] < 100 )
+				{
+					PickupDesire = 100 - m_rgAmmo[ammoIndex];
+				}
 				else
+				{
 					PickupDesire = 0;
+				}
 			}
-			else if ( strncmp( "item_spikes", STRING(pNextEnt->pev->classname), 11 ) == 0 )
+			else if ( (genericWeapon = dynamic_cast<CGenericWeapon*>(pNextEnt)) != NULL )
 			{
-				if (m_iAmmoNails < 200)
-					PickupDesire = (200 - m_iAmmoNails)/2;
-				else
-					PickupDesire = 0;
-			}
-			else if ( strncmp( "item_cells", STRING(pNextEnt->pev->classname), 10 ) == 0 )
-			{
-				if (m_iAmmoCells < 100)
-					PickupDesire = 100 - m_iAmmoCells;
-				else
-					PickupDesire = 0;
-			}
-			else if ( strncmp( "item_rocket", STRING(pNextEnt->pev->classname), 11 ) == 0 )
-			{
-				if (m_iAmmoRockets < 100)
-					PickupDesire = 100 - m_iAmmoRockets;
-				else
-					PickupDesire = 0;
-			}
-			else
-#endif // RHOBOT_REMOVEME
-			if ( strncmp( "weapon_", STRING(pNextEnt->pev->classname), 7 ) == 0 )
-			{
+				// TODO: This is very basic. Could we make it better?
 				PickupDesire = 80;
 			}
 			else if ( FClassnameIs( pNextEnt->pev, "item_health" ) )
 			{
 				PickupDesire = 100.0 - pev->health; // we want health proportional to how much we need
-			}
-			else if ( FClassnameIs( pNextEnt->pev, "item_backpack" ) ) // backpack
-			{
-				PickupDesire = 80;
 			}
 			else if ( FClassnameIs( pNextEnt->pev, "item_battery" ) )
 			{
@@ -260,7 +233,7 @@ void CBaseBot::ActionChooseGoal( void )
 
 void CBaseBot::ActionChooseWeapon( void )
 {
-	CBasePlayerItem *pBestWeapon = NULL;
+	CGenericWeapon* pBestWeapon = NULL;
 	int BestWeaponDesire = 0; // no weapon lower than -1 can be autoswitched to
 
 	if ( m_pActiveItem == NULL || !m_pActiveItem->CanHolster() )
@@ -280,20 +253,34 @@ void CBaseBot::ActionChooseWeapon( void )
 	{
 		for ( CBasePlayerItem* weapon = m_rgpPlayerItems[i]; weapon; weapon = weapon->m_pNext )
 		{
-			IBotCollectableWeapon* collectableWeapon = dynamic_cast<IBotCollectableWeapon*>(weapon);
-			if ( !collectableWeapon || !collectableWeapon->CanBeUsed() || !weapon->CanDeploy() )
+			if ( !weapon->CanDeploy() )
+			{
+				// No point checking.
+				continue;
+			}
+
+			CGenericWeapon* genericWeapon = dynamic_cast<CGenericWeapon*>(weapon);
+
+			// Should never happen anyway:
+			if ( !genericWeapon )
 			{
 				continue;
 			}
 
-			// this randomizes what weapon a given bot will choose at any particular moment
-			// and yet maintains preferencial weapon bias
-			float CheckWeaponDesire = collectableWeapon->DesireToUse(DistanceToEnemy) * RANDOM_FLOAT(0,1);
+			const CBotWeaponAttributes& attributes = genericWeapon->WeaponAttributes().BotWeaponAttributes();
+			if ( !attributes.CanBeUsed() )
+			{
+				continue;
+			}
+
+			// This randomizes what weapon a given bot will choose at any particular moment
+			// and yet maintains preferencial weapon bias.
+			float CheckWeaponDesire = attributes.ExecDesireToUse(*genericWeapon, *this, *currentEnemy, DistanceToEnemy) * RANDOM_FLOAT(0,1);
 
 			if ( CheckWeaponDesire > BestWeaponDesire )
 			{
 				BestWeaponDesire = CheckWeaponDesire;
-				pBestWeapon = weapon;
+				pBestWeapon = genericWeapon;
 			}
 		}
 	}
@@ -304,7 +291,17 @@ void CBaseBot::ActionChooseWeapon( void )
 		SwitchWeapon(pBestWeapon);
 	}
 
-	FightStyle.DispatchWeaponUse(m_pActiveItem);
+	// Use the active item instead of the cached best weapon, just in case the
+	// call to SwitchWeapon failed for some reason and the best weapon is not active.
+	CGenericWeapon* activeWeapon = dynamic_cast<CGenericWeapon*>(m_pActiveItem);
+	if ( activeWeapon )
+	{
+		FightStyle.DispatchWeaponUse(*activeWeapon);
+	}
+	else
+	{
+		FightStyle.UseWeaponDefault();
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -512,7 +509,7 @@ void CBaseBot::ActionLook( int SearchDistance )
 // ActionSpeak
 ///////////////////////////////////////////////////////////////////////////////
 
-void CBaseBot::ActionSpeak( char *pText )
+void CBaseBot::ActionSpeak( const char *pText )
 {
 	char buffer[256];
 	sprintf( buffer, "%s: %s\n", STRING(pev->netname), pText );

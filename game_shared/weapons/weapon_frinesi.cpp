@@ -4,6 +4,10 @@
 #include "gamerules.h"
 #include "weapon_pref_weights.h"
 
+#ifndef CLIENT_DLL
+#include "bot.h"
+#endif
+
 namespace
 {
 	enum FrinesiAnimations_e
@@ -58,6 +62,33 @@ namespace
 
 #ifdef CLIENT_DLL
 	static CWeaponFrinesi PredictionWeapon;
+#else
+	float FrinesiDesireToUse(CGenericWeapon& weapon, CBaseBot&, CBaseEntity&, float distanceToEnemy)
+	{
+		return static_cast<float>(WeaponPref_Frinesi) / static_cast<float>(WeaponPref_Max);
+	}
+
+	void FrinesiUseWeapon(CGenericWeapon& weapon, CBaseBotFightStyle& fightStyle)
+	{
+		static constexpr float SECONDARY_FIRE_PROXIMITY = 700.0f;
+
+		fightStyle.RandomizeAimAtHead(60);
+		int chanceOfSecondaryFire = 20;
+
+		// If we're able to determine that the enemy is near enough,
+		// increase the chance of using secondary fire.
+
+		CBaseBot* bot = fightStyle.GetOwner();
+		CBaseEntity* enemy = bot->GetEnemy();
+
+		if ( enemy && (enemy->pev->origin - bot->pev->origin).Length() <= SECONDARY_FIRE_PROXIMITY )
+		{
+			chanceOfSecondaryFire = 90;
+		}
+
+		fightStyle.RandomizeSecondaryFire(chanceOfSecondaryFire);
+		fightStyle.SetNextShootTime(1.0f / (fightStyle.GetSecondaryFire() ? FRINESI_FIRE_RATE_PUMP : FRINESI_FIRE_RATE_AUTO), 0.8f, 2.0f);
+	}
 #endif
 }
 
@@ -147,7 +178,15 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 	CGenericWeaponAttributes_Skill()
 	.Record("sk_plr_dmg_frinesi_auto", &skilldata_t::plrDmgFrinesiAuto)
 	.Record("sk_plr_dmg_frinesi_pump", &skilldata_t::plrDmgFrinesiPump)
-);
+)
+#ifndef CLIENT_DLL
+.BotWeaponAttributes(
+	CBotWeaponAttributes()
+	.DesireToUse(&FrinesiDesireToUse)
+	.UseWeapon(&FrinesiUseWeapon)
+)
+#endif
+;
 
 LINK_ENTITY_TO_CLASS(weapon_frinesi, CWeaponFrinesi)
 

@@ -184,7 +184,7 @@ include_directories (
 	../miniutl
 	bots
 	bots/profiles
-	bots/collectables)
+	bots/itemattributes)
 
 if(USE_VOICEMGR)
 	set(SVDLL_SOURCES
