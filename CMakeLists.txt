@@ -94,6 +94,10 @@ else()
 	add_definitions(-DNDEBUG)
 endif()
 
+if(MSVC)
+	add_definitions(-DNOMINMAX)
+endif()
+
 if(BUILD_CLIENT)
 	add_subdirectory(cl_dll)
 endif()

@@ -6,6 +6,7 @@
 
 #ifndef CLIENT_DLL
 #include <limits>
+#include <algorithm>
 #include "bot.h"
 #endif
 
