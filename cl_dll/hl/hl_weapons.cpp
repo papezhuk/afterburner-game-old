@@ -32,8 +32,9 @@
 #include "../com_weapons.h"
 #include "../demo.h"
 
-#include "weapon_generictest.h"
 #include "weaponregistry.h"
+#include "genericweaponattributes.h"
+#include "genericweapon.h"
 
 extern globalvars_t *gpGlobals;
 extern int g_iUser1;

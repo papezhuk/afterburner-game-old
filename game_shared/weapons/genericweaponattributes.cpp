@@ -15,11 +15,12 @@ CGenericWeaponAttributes_SkillRecord::CGenericWeaponAttributes_SkillRecord(const
 	for ( uint32_t index = 0; index < TOTAL_SKILL_LEVELS; ++index )
 	{
 		// These must not change after this point, or the cvar name string pointers will be wrong!
-		m_NameBuffers[index] = m_BaseName + std::to_string(index + 1);
+		m_NameBuffers[index] = m_BaseName;
+		m_NameBuffers[index].AppendFormat("%u", index + 1);
 
 		cvar_t* cvar = &m_Cvars[index];
 		memset(cvar, 0, sizeof(cvar_t));
-		cvar->name = m_NameBuffers[index].c_str();
+		cvar->name = m_NameBuffers[index].String();
 		cvar->string = "0";
 	}
 }
@@ -32,7 +33,7 @@ CGenericWeaponAttributes_SkillRecord::CGenericWeaponAttributes_SkillRecord(const
 	{
 		m_NameBuffers[index] = other.m_NameBuffers[index];
 		m_Cvars[index] = other.m_Cvars[index];
-		m_Cvars[index].name = m_NameBuffers[index].c_str();
+		m_Cvars[index].name = m_NameBuffers[index].String();
 	}
 }
 
@@ -58,7 +59,7 @@ void CGenericWeaponAttributes_SkillRecord::UpdateSkillValue(skilldata_t* instanc
 
 	if ( value <= 0.0f )
 	{
-		ALERT(at_warning, "UpdateSkillValue: Got invalid value of %f for %s at skill level %d.\n", value, m_BaseName.c_str(), instance->iSkillLevel);
+		ALERT(at_warning, "UpdateSkillValue: Got invalid value of %f for %s at skill level %d.\n", value, m_BaseName.String(), instance->iSkillLevel);
 		value = 0.0f;
 	}
 
@@ -71,19 +72,19 @@ CGenericWeaponAttributes_Skill::CGenericWeaponAttributes_Skill()
 
 CGenericWeaponAttributes_Skill::CGenericWeaponAttributes_Skill(const CGenericWeaponAttributes_Skill& other)
 {
-	for ( const CGenericWeaponAttributes_SkillRecord& record : other.m_Records )
+	FOR_EACH_VEC(other.m_Records, index)
 	{
-		m_Records.push_back(record);
+		m_Records.AddToTail(other.m_Records[index]);
 	}
 }
 
 CGenericWeaponAttributes_Skill& CGenericWeaponAttributes_Skill::operator =(const CGenericWeaponAttributes_Skill& other)
 {
-	m_Records.clear();
+	m_Records.Purge();
 
-	for ( const CGenericWeaponAttributes_SkillRecord& record : other.m_Records )
+	FOR_EACH_VEC(other.m_Records, index)
 	{
-		m_Records.push_back(record);
+		m_Records.AddToTail(other.m_Records[index]);
 	}
 
 	return *this;

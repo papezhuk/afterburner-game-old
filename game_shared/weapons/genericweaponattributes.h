@@ -1,14 +1,18 @@
 #pragma once
 
 #include <memory>
-#include <vector>
-#include <string>
 
 #include "standard_includes.h"
 #include "weapons.h"
 #include "weaponids.h"
 #include "ammodefs.h"
 #include "skill.h"
+#include "utlstring.h"
+#include "utlvector.h"
+
+#ifndef CLIENT_DLL
+#include "botweaponattributes.h"
+#endif
 
 class CGenericWeapon;
 
@@ -18,19 +22,19 @@ class WeightedValueList
 public:
 	uint32_t Add(const T& value, float weight, bool normalise = true)
 	{
-		m_Items.push_back({value, weight, 0.0f});
+		m_Items.AddToTail({value, weight, 0.0f});
 
 		if ( normalise )
 		{
 			NormaliseWeights();
 		}
 
-		return m_Items.size();
+		return m_Items.Count();
 	}
 
 	const T& Value(uint32_t index) const
 	{
-		ASSERTSZ_Q(index < m_Items.size(), "Index must be in range.");
+		ASSERTSZ_Q((int)index >= 0 && (int)index < m_Items.Count(), "Index must be in range.");
 		return m_Items[index].m_Value;
 	}
 
@@ -41,7 +45,7 @@ public:
 	{
 		float accumulatedWeight = 0;
 
-		for ( uint32_t index = 0; index < m_Items.size(); ++index )
+		for ( int index = 0; index < m_Items.Count(); ++index )
 		{
 			// accumulatedWeight is the lower bound in the [0 1] range,
 			// and this + the item's normalised weight is the upper bound.
@@ -55,31 +59,31 @@ public:
 		}
 
 		// Unlikely to happen - probably the result of rounding errors.
-		return m_Items.size() - 1;
+		return m_Items.Count() - 1;
 	}
 
 	// As above, but returns the item pointed to by the index.
 	const T& ItemByProbabilisticValue(float input) const
 	{
-		ASSERTSZ(m_Items.size() > 0, "Container must not be empty.");
+		ASSERTSZ(m_Items.Count() > 0, "Container must not be empty.");
 		return m_Items[IndexByProbabilisticValue(input)].m_Value;
 	}
 
 	float OriginalWeight(uint32_t index) const
 	{
-		ASSERTSZ(index < m_Items.size(), "Index must be in range.");
+		ASSERTSZ(index < m_Items.Count(), "Index must be in range.");
 		return m_Items[index].m_Weight;
 	}
 
 	float NormalisedWeight(uint32_t index) const
 	{
-		ASSERTSZ(index < m_Items.size(), "Index must be in range.");
+		ASSERTSZ(index < m_Items.Count(), "Index must be in range.");
 		return m_Items[index].m_NormalisedWeight;
 	}
 
 	size_t Count() const
 	{
-		return m_Items.size();
+		return m_Items.Count();
 	}
 
 	void NormaliseWeights()
@@ -88,12 +92,12 @@ public:
 		// on addition/deletion floating point errors could accumulate.
 		float totalWeight = 0.0f;
 
-		for ( uint32_t index = 0; index < m_Items.size(); ++index )
+		for ( int index = 0; index < m_Items.Count(); ++index )
 		{
 			totalWeight += m_Items[index].m_Weight;
 		}
 
-		for ( uint32_t index = 0; index < m_Items.size(); ++index )
+		for ( int index = 0; index < m_Items.Count(); ++index )
 		{
 			m_Items[index].m_NormalisedWeight = m_Items[index].m_Weight / totalWeight;
 		}
@@ -107,7 +111,7 @@ private:
 		float m_NormalisedWeight;
 	};
 
-	std::vector<WeightedValue> m_Items;
+	CUtlVector<WeightedValue> m_Items;
 };
 
 #define BASE_ATTR(outerClass, type, name, defaultVal) \
@@ -169,8 +173,8 @@ public:
 
 private:
 	SkillDataEntryPtr m_Entry;
-	std::string m_BaseName;
-	std::string m_NameBuffers[TOTAL_SKILL_LEVELS];
+	CUtlString m_BaseName;
+	CUtlString m_NameBuffers[TOTAL_SKILL_LEVELS];
 	mutable cvar_t m_Cvars[TOTAL_SKILL_LEVELS];
 };
 
@@ -183,34 +187,34 @@ public:
 
 	inline CGenericWeaponAttributes_Skill& Record(const CGenericWeaponAttributes_SkillRecord& record)
 	{
-		m_Records.push_back(record);
+		m_Records.AddToTail(record);
 		return *this;
 	}
 
 	inline CGenericWeaponAttributes_Skill& Record(const char* cvarBaseName, CGenericWeaponAttributes_SkillRecord::SkillDataEntryPtr entry)
 	{
-		m_Records.push_back(CGenericWeaponAttributes_SkillRecord(cvarBaseName, entry));
+		m_Records.AddToTail(CGenericWeaponAttributes_SkillRecord(cvarBaseName, entry));
 		return *this;
 	}
 
 	inline void RegisterCvars() const
 	{
-		for ( const CGenericWeaponAttributes_SkillRecord& record: m_Records )
+		FOR_EACH_VEC(m_Records, index)
 		{
-			record.RegisterCvars();
+			m_Records[index].RegisterCvars();
 		}
 	}
 
 	inline void UpdateSkillValues(skilldata_t* instance) const
 	{
-		for ( const CGenericWeaponAttributes_SkillRecord& record : m_Records )
+		FOR_EACH_VEC(m_Records, index)
 		{
-			record.UpdateSkillValue(instance);
+			m_Records[index].UpdateSkillValue(instance);
 		}
 	}
 
 private:
-	std::vector<CGenericWeaponAttributes_SkillRecord> m_Records;
+	CUtlVector<CGenericWeaponAttributes_SkillRecord> m_Records;
 };
 
 class CGenericWeaponAttributes_Sound
@@ -512,9 +516,12 @@ public:
 		: m_Core(other.m_Core),
 		  m_Skill(other.m_Skill),
 		  m_NewFireModes{},
-		  m_Animations(other.m_Animations),
-		  m_IdleAnimations(other.m_IdleAnimations)
+		  m_Animations(),
+		  m_IdleAnimations()
 	{
+		m_Animations = other.m_Animations;
+		m_IdleAnimations = other.m_IdleAnimations;
+
 		for ( int mode = 0; mode < 2; ++mode )
 		{
 			m_NewFireModes[mode] = other.m_NewFireModes[mode];
@@ -604,6 +611,19 @@ public:
 		return *this;
 	}
 
+#ifndef CLIENT_DLL
+	inline const CBotWeaponAttributes& BotWeaponAttributes() const
+	{
+		return m_BotWeaponAttributes;
+	}
+
+	inline CGenericWeaponAttributes& BotWeaponAttributes(const CBotWeaponAttributes& val)
+	{
+		m_BotWeaponAttributes = val;
+		return *this;
+	}
+#endif
+
 private:
 	inline void SetFireModeSignatures()
 	{
@@ -618,4 +638,8 @@ private:
 	CGenericWeaponAtts_Animations m_Animations;
 	CGenericWeaponAtts_IdleAnimations m_IdleAnimations;
 	CGenericWeaponAtts_FireMode m_NewFireModes[2];
+
+#ifndef CLIENT_DLL
+	CBotWeaponAttributes m_BotWeaponAttributes;
+#endif
 };

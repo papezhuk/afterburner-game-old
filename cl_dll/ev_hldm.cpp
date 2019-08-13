@@ -40,7 +40,7 @@
 
 #include "genericweaponattributes.h"
 #include "weaponregistry.h"
-#include "weapon_generictest.h"
+#include "genericweapon.h"
 
 extern engine_studio_api_t IEngineStudio;
 

@@ -105,7 +105,9 @@ GLOBALS ASSUMED SET:  g_fGameOver
 void ClientDisconnect( edict_t *pEntity )
 {
 	if( g_fGameOver )
+	{
 		return;
+	}
 
 	char text[256] = "";
 	if( pEntity->v.netname )
@@ -126,10 +128,13 @@ void ClientDisconnect( edict_t *pEntity )
 	// since the edict doesn't get deleted, fix it so it doesn't interfere.
 	pEntity->v.takedamage = DAMAGE_NO;// don't attract autoaim
 	pEntity->v.solid = SOLID_NOT;// nonsolid
-	pEntity->v.effects = 0;// clear any effects
+	pEntity->v.effects = EF_NODRAW;// clear any effects
 	UTIL_SetOrigin( &pEntity->v, pEntity->v.origin );
 
 	g_pGameRules->ClientDisconnected( pEntity );
+
+	// Ensure that the client flags are removed.
+	pEntity->v.flags &= ~(FL_CLIENT|FL_FAKECLIENT);
 }
 
 // called by ClientKill and DeadThink
@@ -190,6 +195,8 @@ called each time a player is spawned
 */
 void ClientPutInServer( edict_t *pEntity )
 {
+	g_pGameRules->ClientPutInServer(pEntity);
+
 	CBasePlayer *pPlayer;
 
 	entvars_t *pev = &pEntity->v;
@@ -476,7 +483,9 @@ void ClientCommand( edict_t *pEntity )
 
 	// Is the client spawned yet?
 	if( !pEntity->pvPrivateData )
+	{
 		return;
+	}
 
 	entvars_t *pev = &pEntity->v;
 
@@ -765,7 +774,9 @@ void PlayerPreThink( edict_t *pEntity )
 	CBasePlayer *pPlayer = (CBasePlayer *)GET_PRIVATE( pEntity );
 
 	if( pPlayer )
+	{
 		pPlayer->PreThink();
+	}
 }
 
 /*
@@ -782,7 +793,9 @@ void PlayerPostThink( edict_t *pEntity )
 	CBasePlayer *pPlayer = (CBasePlayer *)GET_PRIVATE( pEntity );
 
 	if( pPlayer )
+	{
 		pPlayer->PostThink();
+	}
 }
 
 void ParmsNewLevel( void )
@@ -795,7 +808,9 @@ void ParmsChangeLevel( void )
 	SAVERESTOREDATA *pSaveData = (SAVERESTOREDATA *)gpGlobals->pSaveData;
 
 	if( pSaveData )
+	{
 		pSaveData->connectionCount = BuildChangeList( pSaveData->levelList, MAX_LEVEL_CONNECTIONS );
+	}
 }
 
 //
@@ -806,10 +821,14 @@ void StartFrame( void )
 	//ALERT( at_console, "SV_Physics( %g, frametime %g )\n", gpGlobals->time, gpGlobals->frametime );
 
 	if( g_pGameRules )
+	{
 		g_pGameRules->Think();
+	}
 
 	if( g_fGameOver )
+	{
 		return;
+	}
 
 	gpGlobals->teamplay = teamplay.value;
 	g_ulFrameCount++;

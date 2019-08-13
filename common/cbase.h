@@ -694,6 +694,12 @@ template <class T> T * GetClassPtr( T *a )
 	return a;
 }
 
+template<typename T>
+inline T* GetClassPtrFromEdict(edict_t* edict)
+{
+	return edict ? GetClassPtr<T>(reinterpret_cast<T*>(&edict->v)) : NULL;
+}
+
 /*
 bit_PUSHBRUSH_DATA | bit_TOGGLE_DATA
 bit_MONSTER_DATA

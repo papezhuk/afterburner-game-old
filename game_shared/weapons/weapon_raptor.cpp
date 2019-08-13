@@ -1,6 +1,11 @@
 #include "weapon_raptor.h"
 #include "skill.h"
 #include "gamerules.h"
+#include "weapon_pref_weights.h"
+
+#ifndef CLIENT_DLL
+#include "bot.h"
+#endif
 
 namespace
 {
@@ -30,6 +35,18 @@ namespace
 
 #ifdef CLIENT_DLL
 	static CWeaponRaptor PredictionWeapon;
+#else
+	float RaptorDesireToUse(CGenericWeapon& weapon, CBaseBot&, CBaseEntity&, float distanceToEnemy)
+	{
+		return static_cast<float>(WeaponPref_P99) / static_cast<float>(WeaponPref_Max);
+	}
+
+	void RaptorUseWeapon(CGenericWeapon& weapon, CBaseBotFightStyle& fightStyle)
+	{
+		fightStyle.SetSecondaryFire(false);
+		fightStyle.RandomizeAimAtHead(80);
+		fightStyle.SetNextShootTime(1.0f / RAPTOR_FIRE_RATE, 0.2f, 0.6f);
+	}
 #endif
 }
 
@@ -38,7 +55,7 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 	.Id(WeaponId_e::WeaponRaptor)
 	.Classname("weapon_raptor")
 	.Flags(0)
-	.SwitchWeight(0)
+	.SwitchWeight(WeaponPref_Raptor)
 	.PrimaryAmmoDef(&AmmoDef_Raptor)
 	.PrimaryAmmoClassname("ammo_raptor")
 	.MaxClip(9)
@@ -92,7 +109,15 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 .Skill(
 	CGenericWeaponAttributes_Skill()
 	.Record("sk_plr_dmg_raptor", &skilldata_t::plrDmgRaptor)
-);
+)
+#ifndef CLIENT_DLL
+.BotWeaponAttributes(
+	CBotWeaponAttributes()
+	.DesireToUse(&RaptorDesireToUse)
+	.UseWeapon(&RaptorUseWeapon)
+)
+#endif
+;
 
 LINK_ENTITY_TO_CLASS(weapon_raptor, CWeaponRaptor)
 

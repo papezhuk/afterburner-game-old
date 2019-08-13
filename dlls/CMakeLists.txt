@@ -123,6 +123,17 @@ set (SVDLL_SOURCES
 	world.cpp
 	xen.cpp
 	zombie.cpp
+	bots/bot_ai.cpp
+	bots/bot_fightstyle.cpp
+	bots/bot_memory.cpp
+	bots/bot_misc.cpp
+	bots/bot_move.cpp
+	bots/bot_nav.cpp
+	bots/bot_stats.cpp
+	bots/bot_cvars.cpp
+	bots/botgamerulesinterface.cpp
+	bots/profiles/botprofiletable.cpp
+	bots/profiles/botprofileparser.cpp
 	../pm_shared/pm_debug.c
 	../pm_shared/pm_math.c
 	../pm_shared/pm_shared.c
@@ -148,14 +159,32 @@ set (SVDLL_SOURCES
 	../game_shared/weapons/ammodefs.cpp
 	../game_shared/weapons/weaponslots.cpp
 	../game_shared/studio_utils_shared.cpp
-	../game_shared/weapons/weapon_generictest.cpp
 	../game_shared/weapons/weapon_p99.cpp
 	../game_shared/weapons/weapon_frinesi.cpp
 	../game_shared/weapons/weapon_grenadelauncher.cpp
 	../game_shared/weapons/weapon_raptor.cpp
+	../game_shared/rapidjson_helpers/rapidjson_helpers.cpp
+	../miniutl/bitstring.cpp
+	../miniutl/generichash.cpp
+	../miniutl/ipv6text.c
+	../miniutl/strtools.cpp
+	../miniutl/utlbuffer.cpp
+	../miniutl/utlmemory.cpp
+	../miniutl/utlstring.cpp
 )
 
-include_directories (. ../common ../engine ../pm_shared ../game_shared ../public ../game_shared/weapons)
+include_directories (
+	.
+	../common
+	../engine
+	../pm_shared
+	../game_shared
+	../public
+	../game_shared/weapons
+	../miniutl
+	bots
+	bots/profiles
+	bots/itemattributes)
 
 if(USE_VOICEMGR)
 	set(SVDLL_SOURCES

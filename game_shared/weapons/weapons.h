@@ -58,6 +58,8 @@ public:
 
 	inline unsigned char ExplodeSpriteScale() const { return m_iExplodeSpriteScale; }
 	inline void SetExplodeSpriteScale(unsigned char val) { m_iExplodeSpriteScale = val; }
+	inline float ExplosionRadius() const { return pev->fuser1; }
+	inline void SetExplosionRadius(float radius) { pev->fuser1 = radius; }
 
 	BOOL m_fRegisteredSound;// whether or not this grenade has issued its DANGER sound to the world sound list yet.
 

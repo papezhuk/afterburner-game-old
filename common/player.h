@@ -16,6 +16,8 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include "enginecallback.h"
+
 #include "pm_materials.h"
 
 #define PLAYER_FATAL_FALL_SPEED		1024// approx 60 feet
@@ -127,6 +129,10 @@ public:
 
 	unsigned int		m_afPhysicsFlags;	// physics flags - set when 'normal' physics should be revisited or overriden
 	float				m_fNextSuicideTime; // the time after which the player can next use the suicide command
+
+	// Generic - only goes off the flags.
+	// It's recommended to do a dynamic_cast if you want to get a CBaseBot.
+	inline bool IsFakeClient( void ) { return (pev->flags & FL_FAKECLIENT) != 0; }
 
 	// these are time-sensitive things that we keep track of
 	float				m_flTimeStepSound;	// when the last stepping sound was made

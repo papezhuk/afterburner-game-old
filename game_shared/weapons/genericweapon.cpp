@@ -149,7 +149,7 @@ int CGenericWeapon::AddToPlayer(CBasePlayer *pPlayer)
 BOOL CGenericWeapon::Deploy()
 {
 	const CGenericWeaponAtts_Core& core = WeaponAttributes().Core();
-	const CGenericWeaponAtts_Animations anims = WeaponAttributes().Animations();
+	const CGenericWeaponAtts_Animations& anims = WeaponAttributes().Animations();
 
 	return DefaultDeploy(core.ViewModelName(), core.PlayerModelName(), anims.Index_Draw(), anims.Extension(), m_iViewModelBody);
 }
@@ -443,7 +443,7 @@ void CGenericWeapon::SetViewModelBody(int body, bool immediate)
 
 float CGenericWeapon::ViewModelAnimationDuration(int anim) const
 {
-	if ( anim < 0 || anim >= m_ViewAnimDurations.size() )
+	if ( anim < 0 || anim >= m_ViewAnimDurations.Count() )
 	{
 		return 0.0f;
 	}

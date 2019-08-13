@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -95,6 +95,10 @@ BOOL CHalfLifeRules::GetNextBestWeapon( CBasePlayer *pPlayer, CBasePlayerItem *p
 BOOL CHalfLifeRules::ClientConnected( edict_t *pEntity, const char *pszName, const char *pszAddress, char szRejectReason[128] )
 {
 	return TRUE;
+}
+
+void CHalfLifeRules::ClientPutInServer( edict_t* pClient )
+{
 }
 
 void CHalfLifeRules::InitHUD( CBasePlayer *pl )
@@ -191,7 +195,7 @@ float CHalfLifeRules::FlWeaponRespawnTime( CBasePlayerItem *pWeapon )
 }
 
 //=========================================================
-// FlWeaponRespawnTime - Returns 0 if the weapon can respawn 
+// FlWeaponRespawnTime - Returns 0 if the weapon can respawn
 // now,  otherwise it returns the time at which it can try
 // to spawn again.
 //=========================================================
@@ -314,7 +318,7 @@ int CHalfLifeRules::DeadPlayerAmmo( CBasePlayer *pPlayer )
 //=========================================================
 int CHalfLifeRules::PlayerRelationship( CBaseEntity *pPlayer, CBaseEntity *pTarget )
 {
-	// why would a single player in half life need this? 
+	// why would a single player in half life need this?
 	return GR_NOTTEAMMATE;
 }
 

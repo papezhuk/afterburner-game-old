@@ -3,7 +3,7 @@
 #include "standard_includes.h"
 #include "weapons.h"
 #include "genericweaponattributes.h"
-#include <vector>
+#include "utlvector.h"
 
 // Build on top of CBasePlayerWeapon, because this is so tied into the engine
 // already it'd be a pain to replace it (at least at this stage).
@@ -106,7 +106,7 @@ private:
 
 	int m_iViewModelIndex;
 	int m_iViewModelBody;
-	std::vector<float> m_ViewAnimDurations;
+	CUtlVector<float> m_ViewAnimDurations;
 	int m_iWeaponSlot;
 	int m_iWeaponSlotPosition;
 };
@@ -147,6 +147,11 @@ public:
 		}
 
 		return FALSE;
+	}
+
+	inline const char* AmmoName() const
+	{
+		return m_AmmoDef.Name;
 	}
 
 private:

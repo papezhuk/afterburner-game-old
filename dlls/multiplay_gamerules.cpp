@@ -32,6 +32,10 @@
 #include	"hltv.h"
 #include "ammodefs.h"
 
+#include	"bot_misc.h"
+#include	"nodes.h"
+#include "botgamerulesinterface.h"
+
 extern DLL_GLOBAL CGameRules *g_pGameRules;
 extern DLL_GLOBAL BOOL	g_fGameOver;
 extern int gmsgDeathMsg;	// client dll messages
@@ -74,6 +78,8 @@ static CMultiplayGameMgrHelper g_GameMgrHelper;
 //*********************************************************
 CHalfLifeMultiplay::CHalfLifeMultiplay()
 {
+	m_pBotGameRulesInterface = new CBotGameRulesInterface(this);
+
 #ifndef NO_VOICEGAMEMGR
 	g_VoiceGameMgr.Init( &g_GameMgrHelper, gpGlobals->maxClients );
 #endif
@@ -122,12 +128,23 @@ CHalfLifeMultiplay::CHalfLifeMultiplay()
 	}
 }
 
+CHalfLifeMultiplay::~CHalfLifeMultiplay()
+{
+	delete m_pBotGameRulesInterface;
+}
+
 BOOL CHalfLifeMultiplay::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 {
 #ifndef NO_VOICEGAMEMGR
 	if( g_VoiceGameMgr.ClientCommand( pPlayer, pcmd ) )
 		return TRUE;
 #endif
+
+	if ( m_pBotGameRulesInterface->ClientCommand(pPlayer, pcmd) )
+	{
+		return TRUE;
+	}
+
 	return CGameRules::ClientCommand( pPlayer, pcmd );
 }
 
@@ -198,6 +215,8 @@ void CHalfLifeMultiplay::Think( void )
 #ifndef NO_VOICEGAMEMGR
 	g_VoiceGameMgr.Update( gpGlobals->frametime );
 #endif
+
+	m_pBotGameRulesInterface->Think();
 
 	///// Check game rules /////
 	static int last_frags;
@@ -410,6 +429,11 @@ BOOL CHalfLifeMultiplay::ClientConnected( edict_t *pEntity, const char *pszName,
 	return TRUE;
 }
 
+void CHalfLifeMultiplay::ClientPutInServer( edict_t* pClient )
+{
+	m_pBotGameRulesInterface->ClientPutInServer(pClient);
+}
+
 extern int gmsgSayText;
 extern int gmsgGameMode;
 
@@ -487,6 +511,8 @@ void CHalfLifeMultiplay::InitHUD( CBasePlayer *pl )
 //=========================================================
 void CHalfLifeMultiplay::ClientDisconnected( edict_t *pClient )
 {
+	m_pBotGameRulesInterface->ClientDisconnect(pClient);
+
 	if( pClient )
 	{
 		CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance( pClient );
@@ -1521,6 +1547,14 @@ void CHalfLifeMultiplay::ChangeLevel( void )
 {
 	static char szPreviousMapCycleFile[256];
 	static mapcycle_t mapcycle;
+
+	UTIL_LogPrintf( "Start NavigationArray Save.\n" );
+
+	WorldGraph.SaveNavToFile();
+
+	UTIL_LogPrintf( "NavigationArray Saved.\n" );
+
+	ALERT( at_console, "\nNavigationArray Saved.\n" );
 
 	char szNextMap[32];
 	char szFirstMapInList[32];
