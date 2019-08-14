@@ -23,6 +23,7 @@
 #include "player.h"
 #include "gamerules.h"
 #include "ammodefs.h"
+#include "radialdamage.h"
 
 #ifndef CLIENT_DLL
 #define BOLT_AIR_VELOCITY	2000
@@ -235,7 +236,16 @@ void CCrossbowBolt::ExplodeThink( void )
 
 	pev->owner = NULL; // can't traceline attack owner if this is set
 
-	::RadiusDamage( pev->origin, pev, pevOwner, pev->dmg, 128, CLASS_NONE, DMG_BLAST | DMG_ALWAYSGIB );
+	CRadialDamageInflictor damage;
+
+	damage.SetOrigin(pev->origin);
+	damage.SetInflictor(pev);
+	damage.SetAttacker(pevOwner);
+	damage.SetDamage(pev->dmg);
+	damage.SetRadius(128);
+	damage.SetDamageTypeBits(DMG_BLAST | DMG_ALWAYSGIB);
+
+	damage.ApplyDamage();
 
 	UTIL_Remove( this );
 }

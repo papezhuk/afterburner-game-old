@@ -217,6 +217,63 @@ private:
 	CUtlVector<CGenericWeaponAttributes_SkillRecord> m_Records;
 };
 
+class CGenericWeaponAttributes_CustomCVars
+{
+public:
+	CGenericWeaponAttributes_CustomCVars();
+	CGenericWeaponAttributes_CustomCVars(const CGenericWeaponAttributes_CustomCVars& other);
+	CGenericWeaponAttributes_CustomCVars& operator =(const CGenericWeaponAttributes_CustomCVars& other);
+
+	inline CGenericWeaponAttributes_CustomCVars& AddCVar(cvar_t* var)
+	{
+		m_Vars.AddToTail(var);
+		return *this;
+	}
+
+	// Takes an array of cvar_t* items.
+	inline CGenericWeaponAttributes_CustomCVars& AddCVars(cvar_t** vars, size_t count)
+	{
+		m_Vars.AddMultipleToTail(count, vars);
+		return *this;
+	}
+
+	template<size_t size>
+	inline CGenericWeaponAttributes_CustomCVars& AddCVarsStaticArray(cvar_t*(&vars)[size])
+	{
+		return AddCVars(vars, size);
+	}
+
+	// Takes an array of actual cvar_t instances.
+	inline CGenericWeaponAttributes_CustomCVars& AddCVars(cvar_t* vars, size_t count)
+	{
+		m_Vars.EnsureCapacity(m_Vars.Count() + count);
+
+		for ( uint32_t index = 0; index < count; ++index )
+		{
+			m_Vars.AddToTail(vars + index);
+		}
+
+		return *this;
+	}
+
+	template<size_t size>
+	inline CGenericWeaponAttributes_CustomCVars& AddCVarsStaticArray(cvar_t(&vars)[size])
+	{
+		return AddCVars(vars, size);
+	}
+
+	inline void RegisterCvars() const
+	{
+		FOR_EACH_VEC(m_Vars, index)
+		{
+			CVAR_REGISTER(m_Vars[index]);
+		}
+	}
+
+private:
+	CUtlVector<cvar_t*> m_Vars;
+};
+
 class CGenericWeaponAttributes_Sound
 {
 public:
@@ -506,6 +563,7 @@ public:
 	CGenericWeaponAttributes(const CGenericWeaponAtts_Core& core)
 		: m_Core(core),
 		  m_Skill(),
+		  m_CustomCVars(),
 		  m_NewFireModes{},
 		  m_Animations(),
 		  m_IdleAnimations()
@@ -515,6 +573,7 @@ public:
 	CGenericWeaponAttributes(const CGenericWeaponAttributes& other)
 		: m_Core(other.m_Core),
 		  m_Skill(other.m_Skill),
+		  m_CustomCVars(other.m_CustomCVars),
 		  m_NewFireModes{},
 		  m_Animations(),
 		  m_IdleAnimations()
@@ -558,6 +617,11 @@ public:
 		return m_Skill;
 	}
 
+	inline const CGenericWeaponAttributes_CustomCVars& CustomCVars() const
+	{
+		return m_CustomCVars;
+	}
+
 	inline const CGenericWeaponAtts_Animations& Animations() const
 	{
 		return m_Animations;
@@ -571,6 +635,12 @@ public:
 	inline CGenericWeaponAttributes& Skill(const CGenericWeaponAttributes_Skill& skill)
 	{
 		m_Skill = skill;
+		return *this;
+	}
+
+	inline CGenericWeaponAttributes& CustomCVars(const CGenericWeaponAttributes_CustomCVars& vars)
+	{
+		m_CustomCVars = vars;
 		return *this;
 	}
 
@@ -635,6 +705,7 @@ private:
 
 	CGenericWeaponAtts_Core m_Core;
 	CGenericWeaponAttributes_Skill m_Skill;
+	CGenericWeaponAttributes_CustomCVars m_CustomCVars;
 	CGenericWeaponAtts_Animations m_Animations;
 	CGenericWeaponAtts_IdleAnimations m_IdleAnimations;
 	CGenericWeaponAtts_FireMode m_NewFireModes[2];

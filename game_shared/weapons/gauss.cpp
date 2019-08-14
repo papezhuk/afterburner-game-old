@@ -27,6 +27,7 @@
 #include "game.h"
 #include "ammodefs.h"
 #include "weaponinfo.h"
+#include "radialdamage.h"
 
 LINK_ENTITY_TO_CLASS( weapon_gauss, CGauss )
 
@@ -491,7 +492,16 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 								damage_radius = flDamage * 2.5;
 							}
 
-							::RadiusDamage( beam_tr.vecEndPos + vecDir * 8, pev, m_pPlayer->pev, flDamage, damage_radius, CLASS_NONE, DMG_BLAST );
+							CRadialDamageInflictor damage;
+
+							damage.SetOrigin(beam_tr.vecEndPos + vecDir * 8);
+							damage.SetInflictor(pev);
+							damage.SetAttacker(m_pPlayer->pev);
+							damage.SetDamage(flDamage);
+							damage.SetRadius(damage_radius);
+							damage.SetDamageTypeBits(DMG_BLAST);
+
+							damage.ApplyDamage();
 
 							CSoundEnt::InsertSound( bits_SOUND_COMBAT, pev->origin, NORMAL_EXPLOSION_VOLUME, 3.0 );
 

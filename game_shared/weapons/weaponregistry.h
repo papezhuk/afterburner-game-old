@@ -14,6 +14,7 @@ public:
 	void Add(const CGenericWeaponAttributes* atts);
 	const CGenericWeaponAttributes* Get(int index) const;
 	const CGenericWeaponAttributes* Get(WeaponId_e id) const;
+	void RegisterCvars();
 
 	template<typename T>
 	void ForEach(const T& callback)

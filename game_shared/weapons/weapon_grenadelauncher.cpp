@@ -10,6 +10,8 @@
 #include "bot.h"
 #endif
 
+#define DEV_CVAR(name, value) static cvar_t name = { #name, value, FCVAR_SPONLY }
+
 namespace
 {
 	enum GrenadeLauncherAnimations_e
@@ -27,26 +29,30 @@ namespace
 	static const Vector GRENADELAUNCHER_HALF_BBOX = Vector(4,4,4);
 	static constexpr float GRENADELAUNCHER_GRENADE_FRICTION = 0.95;
 	static constexpr float GRENADELAUNCHER_GRENADE_SPRITE_SCALE = 60;
-	static constexpr float GRENADELAUNCHER_GRENADE_EXPLOSION_RADIUS = 250.0f;
 
 	// Launcher attributes
 	static constexpr float GRENADELAUNCHER_FIRE_INTERVAL = 0.8f;	// Secs
-	static constexpr float GRENADELAUNCHER_LAUNCH_SPEED = 1000.0f;
 	static constexpr float GRENADELAUNCHER_TUMBLEVEL_MIN = -100.0f;
 	static constexpr float GRENADELAUNCHER_TUMBLEVEL_MAX = -500.0f;
-	static constexpr float GRENADELAUNCHER_FUSE_TIME = 4.0f;
 	static constexpr float GRENADELAUNCHER_AMMOBOX_GIVE = 6;
+
+	// Dynamic attributes for tuning purposes
+	DEV_CVAR(grenadelauncher_explosion_radius, "250");
+	DEV_CVAR(grenadelauncher_fuse_time, "4");
+	DEV_CVAR(grenadelauncher_launch_speed, "1000");
 
 #ifdef CLIENT_DLL
 	CWeaponGrenadeLauncher PredictionWeapon;
 #else
 	float GrenadeLauncherDesireToUse(CGenericWeapon& weapon, CBaseBot& bot, CBaseEntity& enemy, float distanceToEnemy)
 	{
+		const float explosionRadius = grenadelauncher_explosion_radius.value;
+
 		// Default, unmodified preference:
 		float pref = static_cast<float>(WeaponPref_GrenadeLauncher) / static_cast<float>(WeaponPref_Max);
 
 		// If the enemy is close enough that we'd damage ourselves with the grenade, scale back the preference accordingly.
-		if ( distanceToEnemy > GRENADELAUNCHER_GRENADE_EXPLOSION_RADIUS )
+		if ( distanceToEnemy > explosionRadius )
 		{
 			return pref;
 		}
@@ -62,16 +68,16 @@ namespace
 		// If there is no tolerance zone at all, return 0 if we touch the radius.
 		if ( explosionFringeToleranceFactor < std::numeric_limits<float>::min() )
 		{
-			return distanceToEnemy <= GRENADELAUNCHER_GRENADE_EXPLOSION_RADIUS ? 0.0f : pref;
+			return distanceToEnemy <= explosionRadius ? 0.0f : pref;
 		}
 
-		const float closestDistance = (1.0f - explosionFringeToleranceFactor) * GRENADELAUNCHER_GRENADE_EXPLOSION_RADIUS;
+		const float closestDistance = (1.0f - explosionFringeToleranceFactor) * explosionRadius;
 
 		// How does the distance to the enemy compare to these two radii?
 		// If <= closestDistance, we don't want to use the weapon.
 		// If >= furtherstDistance, we use the original weapon preference.
 		// Anything in-between is lerped.
-		const float prefModifier = (distanceToEnemy - closestDistance) / (GRENADELAUNCHER_GRENADE_EXPLOSION_RADIUS - closestDistance);
+		const float prefModifier = (distanceToEnemy - closestDistance) / (explosionRadius - closestDistance);
 		return prefModifier * pref;
 	}
 
@@ -145,6 +151,13 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 .Skill(
 	CGenericWeaponAttributes_Skill()
 	.Record("sk_plr_dmg_grenadelauncher", &skilldata_t::plrDmgGrenadeLauncher)
+	.Record("sk_plr_selfdmg_mult_grenadelauncher", &skilldata_t::plrSelfDmgMultGrenadeLauncher)
+)
+.CustomCVars(
+	CGenericWeaponAttributes_CustomCVars()
+	.AddCVar(&grenadelauncher_explosion_radius)
+	.AddCVar(&grenadelauncher_fuse_time)
+	.AddCVar(&grenadelauncher_launch_speed)
 )
 #ifndef CLIENT_DLL
 .BotWeaponAttributes(
@@ -185,11 +198,13 @@ void CWeaponGrenadeLauncher::CreateProjectile(int index,
 	const Vector location = m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs + forward * 16.0f;
 
 	CWeaponGrenadeLauncher_Grenade* grenade = CreateGrenade(m_pPlayer->pev, location, forward);
+	
 	grenade->SetExplodeOnContact(index == 0);
 	grenade->SetRandomTumbleAngVel(GRENADELAUNCHER_TUMBLEVEL_MIN, GRENADELAUNCHER_TUMBLEVEL_MAX);
 	grenade->SetDamageOnExplode(gSkillData.plrDmgGrenadeLauncher);
-	grenade->SetSpeed(GRENADELAUNCHER_LAUNCH_SPEED);
-	grenade->SetFuseTime(index == 1 ? GRENADELAUNCHER_FUSE_TIME : -1);
+	grenade->SetOwnerDamageMultiplier(gSkillData.plrSelfDmgMultGrenadeLauncher);
+	grenade->SetSpeed(grenadelauncher_launch_speed.value);
+	grenade->SetFuseTime(index == 1 ? grenadelauncher_fuse_time.value : -1);
 }
 
 CWeaponGrenadeLauncher_Grenade* CWeaponGrenadeLauncher::CreateGrenade(entvars_t *pevOwner, const Vector& location, const Vector& launchDir)

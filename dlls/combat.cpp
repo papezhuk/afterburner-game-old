@@ -29,6 +29,7 @@
 #include "animation.h"
 #include "weapons.h"
 #include "func_break.h"
+#include "radialdamage.h"
 
 extern DLL_GLOBAL Vector		g_vecAttackDir;
 extern DLL_GLOBAL int			g_iSkillLevel;
@@ -1091,12 +1092,32 @@ void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacke
 
 void CBaseMonster::RadiusDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int iClassIgnore, int bitsDamageType )
 {
-	::RadiusDamage( pev->origin, pevInflictor, pevAttacker, flDamage, flDamage * 2.5, iClassIgnore, bitsDamageType );
+	CRadialDamageInflictor damage;
+
+	damage.SetOrigin(pev->origin);
+	damage.SetInflictor(pevInflictor);
+	damage.SetAttacker(pevAttacker);
+	damage.SetDamage(flDamage);
+	damage.SetRadius(flDamage * 2.5f);
+	damage.SetIgnoreClass(iClassIgnore);
+	damage.SetDamageTypeBits(bitsDamageType);
+
+	damage.ApplyDamage();
 }
 
 void CBaseMonster::RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int iClassIgnore, int bitsDamageType )
 {
-	::RadiusDamage( vecSrc, pevInflictor, pevAttacker, flDamage, flDamage * 2.5, iClassIgnore, bitsDamageType );
+	CRadialDamageInflictor damage;
+
+	damage.SetOrigin(vecSrc);
+	damage.SetInflictor(pevInflictor);
+	damage.SetAttacker(pevAttacker);
+	damage.SetDamage(flDamage);
+	damage.SetRadius(flDamage * 2.5f);
+	damage.SetIgnoreClass(iClassIgnore);
+	damage.SetDamageTypeBits(bitsDamageType);
+
+	damage.ApplyDamage();
 }
 
 //=========================================================

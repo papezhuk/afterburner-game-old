@@ -60,6 +60,8 @@ public:
 	inline void SetExplodeSpriteScale(unsigned char val) { m_iExplodeSpriteScale = val; }
 	inline float ExplosionRadius() const { return pev->fuser1; }
 	inline void SetExplosionRadius(float radius) { pev->fuser1 = radius; }
+	inline float OwnerDamageMultiplier() const { return pev->fuser2; }
+	inline void SetOwnerDamageMultiplier(float multiplier) { pev->fuser2 = multiplier; }
 
 	BOOL m_fRegisteredSound;// whether or not this grenade has issued its DANGER sound to the world sound list yet.
 
@@ -396,7 +398,6 @@ extern void AddMultiDamage( entvars_t *pevInflictor, CBaseEntity *pEntity, float
 extern void DecalGunshot( TraceResult *pTrace, int iBulletType );
 extern void SpawnBlood(Vector vecSpot, int bloodColor, float flDamage);
 extern int DamageDecal( CBaseEntity *pEntity, int bitsDamageType );
-extern void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, float flRadius, int iClassIgnore, int bitsDamageType );
 
 typedef struct
 {

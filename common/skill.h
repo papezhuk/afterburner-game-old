@@ -142,6 +142,7 @@ struct skilldata_t
 	float plrDmgFrinesiAuto;
 	float plrDmgFrinesiPump;
 	float plrDmgGrenadeLauncher;
+	float plrSelfDmgMultGrenadeLauncher;
 	float plrDmgRaptor;
 };
 

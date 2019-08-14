@@ -164,6 +164,7 @@ set (SVDLL_SOURCES
 	../game_shared/weapons/weapon_grenadelauncher.cpp
 	../game_shared/weapons/weapon_raptor.cpp
 	../game_shared/rapidjson_helpers/rapidjson_helpers.cpp
+	../game_shared/gameplay/radialdamage.cpp
 	../miniutl/bitstring.cpp
 	../miniutl/generichash.cpp
 	../miniutl/ipv6text.c
@@ -181,6 +182,7 @@ include_directories (
 	../game_shared
 	../public
 	../game_shared/weapons
+	../game_shared/gameplay
 	../miniutl
 	bots
 	bots/profiles

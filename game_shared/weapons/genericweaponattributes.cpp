@@ -81,10 +81,36 @@ CGenericWeaponAttributes_Skill::CGenericWeaponAttributes_Skill(const CGenericWea
 CGenericWeaponAttributes_Skill& CGenericWeaponAttributes_Skill::operator =(const CGenericWeaponAttributes_Skill& other)
 {
 	m_Records.Purge();
+	m_Records.EnsureCapacity(other.m_Records.Count());
 
 	FOR_EACH_VEC(other.m_Records, index)
 	{
 		m_Records.AddToTail(other.m_Records[index]);
+	}
+
+	return *this;
+}
+
+CGenericWeaponAttributes_CustomCVars::CGenericWeaponAttributes_CustomCVars()
+{
+}
+
+CGenericWeaponAttributes_CustomCVars::CGenericWeaponAttributes_CustomCVars(const CGenericWeaponAttributes_CustomCVars& other)
+{
+	FOR_EACH_VEC(other.m_Vars, index)
+	{
+		m_Vars.AddToTail(other.m_Vars[index]);
+	}
+}
+
+CGenericWeaponAttributes_CustomCVars& CGenericWeaponAttributes_CustomCVars::operator =(const CGenericWeaponAttributes_CustomCVars& other)
+{
+	m_Vars.Purge();
+	m_Vars.EnsureCapacity(other.m_Vars.Count());
+
+	FOR_EACH_VEC(other.m_Vars, index)
+	{
+		m_Vars.AddToTail(other.m_Vars[index]);
 	}
 
 	return *this;

@@ -26,6 +26,7 @@
 #include "nodes.h"
 #include "soundent.h"
 #include "decals.h"
+#include "radialdamage.h"
 
 //===================grenade
 
@@ -97,14 +98,17 @@ void CGrenade::Explode( TraceResult *pTrace, int bitsDamageType )
 
 	pev->owner = NULL; // can't traceline attack owner if this is set
 
-	if ( ExplosionRadius() > 0.0f )
-	{
-		::RadiusDamage(pev->origin, pev, pevOwner, pev->dmg, ExplosionRadius(), CLASS_NONE, bitsDamageType);
-	}
-	else
-	{
-		RadiusDamage( pev, pevOwner, pev->dmg, CLASS_NONE, bitsDamageType );
-	}
+	CRadialDamageInflictor damage;
+
+	damage.SetOrigin(pev->origin);
+	damage.SetInflictor(pev);
+	damage.SetAttacker(pevOwner);
+	damage.SetDamage(pev->dmg);
+	damage.SetRadius(ExplosionRadius() > 0.0f ? ExplosionRadius() : pev->dmg * 2.5f);
+	damage.SetDamageTypeBits(bitsDamageType);
+	damage.SetAttackerDamageMultiplier(OwnerDamageMultiplier());
+
+	damage.ApplyDamage();
 
 	if( RANDOM_FLOAT( 0, 1 ) < 0.5 )
 	{

@@ -26,6 +26,7 @@
 #include	"decals.h"
 #include	"weapons.h"
 #include	"game.h"
+#include	"radialdamage.h"
 
 #define SF_INFOBM_RUN		0x0001
 #define SF_INFOBM_WAIT		0x0002
@@ -1180,7 +1181,17 @@ void CBMortar::Touch( CBaseEntity *pOther )
 	if( pev->owner )
 		pevOwner = VARS(pev->owner);
 
-	RadiusDamage( pev->origin, pev, pevOwner, gSkillData.bigmommaDmgBlast, gSkillData.bigmommaRadiusBlast, CLASS_NONE, DMG_ACID );
+	CRadialDamageInflictor damage;
+
+	damage.SetOrigin(pev->origin);
+	damage.SetInflictor(pev);
+	damage.SetAttacker(pevOwner);
+	damage.SetDamage(gSkillData.bigmommaDmgBlast);
+	damage.SetRadius(gSkillData.bigmommaRadiusBlast);
+	damage.SetDamageTypeBits(DMG_ACID);
+
+	damage.ApplyDamage();
+
 	UTIL_Remove( this );
 }
 #endif

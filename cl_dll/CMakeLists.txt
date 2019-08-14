@@ -73,6 +73,7 @@ set (CLDLL_SOURCES
 	../game_shared/weapons/weapon_frinesi.cpp
 	../game_shared/weapons/weapon_grenadelauncher.cpp
 	../game_shared/weapons/weapon_raptor.cpp
+	../game_shared/gameplay/radialdamage.cpp
 	../miniutl/bitstring.cpp
 	../miniutl/generichash.cpp
 	../miniutl/ipv6text.c
@@ -140,7 +141,8 @@ include_directories (
 	../miniutl
 	../public
 	../utils/false_vgui/include
-	../game_shared/weapons)
+	../game_shared/weapons
+	../game_shared/gameplay)
 
 if(USE_VOICEMGR)
 	#set(CLDLL_SOURCES

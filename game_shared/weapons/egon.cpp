@@ -26,6 +26,7 @@
 #include "gamerules.h"
 #include "ammodefs.h"
 #include "weaponinfo.h"
+#include "radialdamage.h"
 
 #define	EGON_PRIMARY_VOLUME		450
 #define EGON_BEAM_SPRITE		"sprites/xbeam1.spr"
@@ -327,7 +328,16 @@ void CEgon::Fire( const Vector &vecOrigSrc, const Vector &vecDir )
 			if( g_pGameRules->IsMultiplayer() )
 			{
 				// radius damage a little more potent in multiplayer.
-				::RadiusDamage( tr.vecEndPos, pev, m_pPlayer->pev, gSkillData.plrDmgEgonWide/4, 128, CLASS_NONE, DMG_ENERGYBEAM | DMG_BLAST | DMG_ALWAYSGIB );
+				CRadialDamageInflictor damage;
+
+				damage.SetOrigin(tr.vecEndPos);
+				damage.SetInflictor(pev);
+				damage.SetAttacker(m_pPlayer->pev);
+				damage.SetDamage(gSkillData.plrDmgEgonWide/4);
+				damage.SetRadius(128);
+				damage.SetDamageTypeBits(DMG_ENERGYBEAM | DMG_BLAST | DMG_ALWAYSGIB);
+
+				damage.ApplyDamage();
 			}
 
 			if( !m_pPlayer->IsAlive() )

@@ -862,10 +862,7 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &sk_player_leg2 );
 	CVAR_REGISTER( &sk_player_leg3 );
 
-	CWeaponRegistry::StaticInstance().ForEach([](const CGenericWeaponAttributes& atts)
-	{
-		atts.Skill().RegisterCvars();
-	});
+	CWeaponRegistry::StaticInstance().RegisterCvars();
 
 // END REGISTER CVARS FOR SKILL LEVEL STUFF
 

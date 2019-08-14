@@ -38,3 +38,12 @@ const CGenericWeaponAttributes* CWeaponRegistry::Get(WeaponId_e id) const
 {
 	return Get(static_cast<int>(id));
 }
+
+void CWeaponRegistry::RegisterCvars()
+{
+	ForEach([](const CGenericWeaponAttributes& atts)
+	{
+		atts.Skill().RegisterCvars();
+		atts.CustomCVars().RegisterCvars();
+	});
+}
