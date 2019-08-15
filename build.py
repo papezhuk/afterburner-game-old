@@ -114,6 +114,8 @@ def buildGame(gamePath, buildDirectory, config, forceRebuild):
 
 	cmakeArgs = ["cmake"]
 
+	# CMake is weird. The default build type is not debug, but the default
+	# config when calling `--build` *is* debug... >:c
 	if config == "debug":
 		cmakeArgs.append("-DCMAKE_BUILD_TYPE=Debug")
 
@@ -125,7 +127,12 @@ def buildGame(gamePath, buildDirectory, config, forceRebuild):
 	callProcess(cmakeArgs)
 
 	if platform.system() == "Windows":
-		callProcess(["cmake", "--build", "."])
+		processArgs = ["cmake", "--build", "."]
+
+		if config == "release":
+			processArgs += ["--config", "Release"]
+
+		callProcess(processArgs)
 	else:
 		callProcess(["make", "-j8"])
 
