@@ -152,6 +152,7 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 	CGenericWeaponAttributes_Skill()
 	.Record("sk_plr_dmg_grenadelauncher", &skilldata_t::plrDmgGrenadeLauncher)
 	.Record("sk_plr_selfdmg_mult_grenadelauncher", &skilldata_t::plrSelfDmgMultGrenadeLauncher)
+	.Record("sk_plr_dmg_mult_grenadelauncher_hit", &skilldata_t::plrDmgMultGrenadelauncherHit)
 )
 .CustomCVars(
 	CGenericWeaponAttributes_CustomCVars()
@@ -202,6 +203,7 @@ void CWeaponGrenadeLauncher::CreateProjectile(int index,
 	grenade->SetExplodeOnContact(index == 0);
 	grenade->SetRandomTumbleAngVel(GRENADELAUNCHER_TUMBLEVEL_MIN, GRENADELAUNCHER_TUMBLEVEL_MAX);
 	grenade->SetDamageOnExplode(gSkillData.plrDmgGrenadeLauncher);
+	grenade->SetPlayerContactDamageMultiplier(gSkillData.plrDmgMultGrenadelauncherHit);
 	grenade->SetOwnerDamageMultiplier(gSkillData.plrSelfDmgMultGrenadeLauncher);
 	grenade->SetSpeed(grenadelauncher_launch_speed.value);
 	grenade->SetFuseTime(index == 1 ? grenadelauncher_fuse_time.value : -1);

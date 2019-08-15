@@ -213,6 +213,11 @@ void CGrenade::ExplodeTouch( CBaseEntity *pOther )
 	vecSpot = pev->origin - pev->velocity.Normalize() * 32;
 	UTIL_TraceLine( vecSpot, vecSpot + pev->velocity.Normalize() * 64, ignore_monsters, ENT( pev ), &tr );
 
+	if ( pOther->Classify() == CLASS_PLAYER )
+	{
+		pev->dmg *= PlayerContactDamageMultiplier();
+	}
+
 	Explode( &tr, DMG_BLAST );
 }
 
@@ -371,6 +376,10 @@ void CGrenade::Spawn( void )
 
 	pev->dmg = 100;
 	m_fRegisteredSound = FALSE;
+
+	// Initialise to sensible defaults.
+	SetPlayerContactDamageMultiplier(1.0f);
+	SetOwnerDamageMultiplier(1.0f);
 }
 
 CGrenade *CGrenade::ShootContact( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity )

@@ -141,9 +141,11 @@ struct skilldata_t
 	float plrDmgP99;
 	float plrDmgFrinesiAuto;
 	float plrDmgFrinesiPump;
+	float plrDmgRaptor;
+
 	float plrDmgGrenadeLauncher;
 	float plrSelfDmgMultGrenadeLauncher;
-	float plrDmgRaptor;
+	float plrDmgMultGrenadelauncherHit;
 };
 
 extern	DLL_GLOBAL	skilldata_t	gSkillData;

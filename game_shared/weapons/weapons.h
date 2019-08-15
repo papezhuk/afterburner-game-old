@@ -62,6 +62,8 @@ public:
 	inline void SetExplosionRadius(float radius) { pev->fuser1 = radius; }
 	inline float OwnerDamageMultiplier() const { return pev->fuser2; }
 	inline void SetOwnerDamageMultiplier(float multiplier) { pev->fuser2 = multiplier; }
+	inline float PlayerContactDamageMultiplier() const { return pev->fuser3; }
+	inline void SetPlayerContactDamageMultiplier(float multiplier) { pev->fuser3 = multiplier; }
 
 	BOOL m_fRegisteredSound;// whether or not this grenade has issued its DANGER sound to the world sound list yet.
 
