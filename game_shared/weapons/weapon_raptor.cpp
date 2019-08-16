@@ -28,6 +28,7 @@ namespace
 	};
 
 	static constexpr float RAPTOR_FIRE_RATE = 1.0f / 0.4f;
+	static constexpr float RAPTOR_BOT_REFIRE_DELAY = 0.2f;
 	static constexpr float RAPTOR_AUTOAIM_DEG = AUTOAIM_10DEGREES;
 	static constexpr float RAPTOR_BASE_DAMAGE = 30.0f;
 	static constexpr float RAPTOR_BASE_SPREAD = 0.0f;
@@ -45,7 +46,7 @@ namespace
 	{
 		fightStyle.SetSecondaryFire(false);
 		fightStyle.RandomizeAimAtHead(80);
-		fightStyle.SetNextShootTime(1.0f / RAPTOR_FIRE_RATE, 0.2f, 0.6f);
+		fightStyle.SetNextShootTime(1.0f / RAPTOR_FIRE_RATE, RAPTOR_BOT_REFIRE_DELAY, 0.2f, 1.0f);
 	}
 #endif
 }

@@ -54,11 +54,17 @@ namespace
 	static constexpr float FRINESI_FIRE_RATE_AUTO = 4.0f;
 	static constexpr float FRINESI_RECOIL_AUTO = -5.0f;
 
+	// Go from 4 shots/sec to 3 shots/sec
+	static constexpr float FRINESI_BOT_REFIRE_DELAY_AUTO = (1.0f/3.0f) - (1.0f/FRINESI_FIRE_RATE_AUTO);
+
 	static constexpr float FRINESI_BASE_DAMAGE_PUMP = 159.0f / static_cast<float>(FRINESI_PELLETS_PER_SHOT);
 	static constexpr float FRINESI_BASE_SPREAD_PUMP = 0.1f;
 	static constexpr float FRINESI_FIRE_RATE_PUMP = 1.0f;
 	static constexpr float FRINESI_RECOIL_PUMP = -10.0f;
 	static constexpr float FRINESI_PUMP_DELAY = 0.42f;
+
+	// Go from 1 shot/sec to 1 shot per 1.5 secs
+	static constexpr float FRINESI_BOT_REFIRE_DELAY_PUMP = 1.5f - (1.0f/FRINESI_FIRE_RATE_PUMP);
 
 #ifdef CLIENT_DLL
 	static CWeaponFrinesi PredictionWeapon;
@@ -87,7 +93,9 @@ namespace
 		}
 
 		fightStyle.RandomizeSecondaryFire(chanceOfSecondaryFire);
-		fightStyle.SetNextShootTime(1.0f / (fightStyle.GetSecondaryFire() ? FRINESI_FIRE_RATE_PUMP : FRINESI_FIRE_RATE_AUTO), 0.8f, 2.0f);
+		fightStyle.SetNextShootTime(1.0f / (fightStyle.GetSecondaryFire() ? FRINESI_FIRE_RATE_PUMP : FRINESI_FIRE_RATE_AUTO),
+									fightStyle.GetSecondaryFire() ? FRINESI_BOT_REFIRE_DELAY_PUMP : FRINESI_BOT_REFIRE_DELAY_AUTO,
+									0.8f, 2.0f);
 	}
 #endif
 }

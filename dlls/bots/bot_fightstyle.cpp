@@ -104,19 +104,24 @@ void CBaseBotFightStyle::RandomizeSecondaryFire( const int SecondaryFirePropensi
 //    The delay parameters are based on Botman's HPB bot
 ///////////////////////////////////////////////////////////////////////////////
 
-void CBaseBotFightStyle::SetNextShootTime(const float tOff, const float tMin, const float tMax)
+void CBaseBotFightStyle::SetNextShootTime(const float weaponFireInterval,
+										  const float minWaitTime,
+										  const float extraWaitMin,
+										  const float extraWaitMax)
 {
 	float delayFactor = 1.0f - pOwner->Stats.GetTraitReflexes()/100.0f;
 	float tstart = fNextShootTime > gpGlobals->time ? fNextShootTime : gpGlobals->time;
-	fNextShootTime = tstart + tOff + (RANDOM_FLOAT(tMin, tMax) * delayFactor);
+
+	fNextShootTime = tstart + weaponFireInterval + minWaitTime +
+		(RANDOM_FLOAT(extraWaitMin, extraWaitMax) * delayFactor);
 
 	if (GetHoldDownAttack()) // for continuous firing, stop every two seconds
 	{
-		fEndShootTime = fNextShootTime + 2.0;
+		fEndShootTime = fNextShootTime + 2.0f;
 	}
 	else // Stop shooting 0.1+GetBotThinkDelay seconds after the first shot
 	{
-		fEndShootTime = fNextShootTime + 0.1 + pOwner->GetBotThinkDelay();
+		fEndShootTime = fNextShootTime + 0.1f + pOwner->GetBotThinkDelay();
 	}
 }
 
@@ -124,7 +129,7 @@ void CBaseBotFightStyle::UseWeaponDefault( void )
 {
 	SetSecondaryFire(FALSE);
 	RandomizeAimAtHead(50);
-	SetNextShootTime(0.75, 1.5, 2.2);
+	SetNextShootTime(0.75, 0.0f, 1.5, 2.2);
 }
 
 // Old Half-Life weapon use functions are below, for posterity.

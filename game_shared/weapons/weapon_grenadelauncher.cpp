@@ -32,6 +32,7 @@ namespace
 
 	// Launcher attributes
 	static constexpr float GRENADELAUNCHER_FIRE_INTERVAL = 0.8f;	// Secs
+	static constexpr float GRENADELAUNCHER_BOT_REFIRE_DELAY = 0.5f;	// Secs
 	static constexpr float GRENADELAUNCHER_TUMBLEVEL_MIN = -100.0f;
 	static constexpr float GRENADELAUNCHER_TUMBLEVEL_MAX = -500.0f;
 	static constexpr float GRENADELAUNCHER_AMMOBOX_GIVE = 6;
@@ -85,7 +86,9 @@ namespace
 	{
 		fightStyle.SetSecondaryFire(false);
 		fightStyle.SetAimAt(AIM_SPLASH);
-		fightStyle.SetNextShootTime(1.0f / GRENADELAUNCHER_FIRE_INTERVAL, 2.0f, 5.0f);
+		fightStyle.SetNextShootTime(GRENADELAUNCHER_FIRE_INTERVAL,
+									GRENADELAUNCHER_BOT_REFIRE_DELAY,
+									2.0f, 5.0f);
 	}
 #endif
 }
@@ -199,7 +202,7 @@ void CWeaponGrenadeLauncher::CreateProjectile(int index,
 	const Vector location = m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs + forward * 16.0f;
 
 	CWeaponGrenadeLauncher_Grenade* grenade = CreateGrenade(m_pPlayer->pev, location, forward);
-	
+
 	grenade->SetExplodeOnContact(index == 0);
 	grenade->SetRandomTumbleAngVel(GRENADELAUNCHER_TUMBLEVEL_MIN, GRENADELAUNCHER_TUMBLEVEL_MAX);
 	grenade->SetDamageOnExplode(gSkillData.plrDmgGrenadeLauncher);

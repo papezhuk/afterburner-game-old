@@ -33,6 +33,7 @@
 #include "game.h"
 #include "bot_misc.h"
 #include "bot_cvars.h"
+#include "weaponids.h"
 
 class CBaseBot;
 class CGenericWeapon;
@@ -164,6 +165,11 @@ public:
 		bSecondaryFire = newValue;
 	}
 
+	void SetNextShootTime(const float weaponFireInterval,
+						  const float minWaitTime,
+						  const float extraWaitMin,
+						  const float extraWaitMax);
+
 	// Pass in an int between 0 and 100 to detemine the chance that the next shot will:
 	// - Be aimed as a headshot
 	void RandomizeAimAtHead(const int AimAtHeadPropensity);
@@ -179,7 +185,6 @@ public:
 
 	inline bool GetHoldDownAttack() const { return bHoldDownAttack; }
 	inline bool GetSecondaryFire() { return bSecondaryFire; }
-	void SetNextShootTime(const float tOff, const  float tMin, const  float tMax);
 	inline float GetNextShootTime() const { return fNextShootTime; }
 	inline float GetEndShootTime() const { return fEndShootTime; }
 	CBaseBot* GetOwner() const { return pOwner; }
@@ -268,38 +273,6 @@ public:
 class CBaseBotStats
 { // TODO: eventually we can use the SetTraits to auto-adjust difficulty midgame
 private:
-
-	// could use string_t with MAKE_STRING, ALLOC_STRING, & STRING instead
-	char	Name[64];
-	char	Model[64];
-	char	TopColor[4];
-	char	BottomColor[4];
-/*
-	float	PrefCrossbow;
-	float	PrefCrowbar;
-	float	PrefEgon;
-	float	PrefGauss;
-	float	PrefGlock;
-	float	PrefHandGrenade;
-	float	PrefHornetGun;
-	float	PrefMP5;
-	float	PrefPython;
-	float	PrefRPG;
-	float	PrefSatchel;
-	float	PrefShotgun;
-	float	PrefSnark;
-	float	PrefTripMine;
-*/
-	float	PrefAxe;
-	float	PrefGrenadelauncher;
-	float	PrefLightning;
-	float	PrefNailgun;
-	float	PrefQuakegun;
-	float	PrefRocketlauncher;
-	float	PrefSupernailgun;
-	float	PrefSupershotgun;
-
-
 	float	TraitAccuracy; // traits are all [1,100]
 	float	TraitAggression;
 	float	TraitChatPropensity;
@@ -307,91 +280,31 @@ private:
 	float	TraitPerception;
 	float	TraitReflexes;
 
+	float TraitWeaponPreference[MAX_WEAPONS];
+
 public:
-
-	void	SetName( char *newString ) { strcpy( Name, newString ); }
-	void	SetModel( char *newString ) { strcpy( Model, newString ); }
-	void	SetTopColor( char *newString ) { strcpy( TopColor, newString ); }
-	void	SetBottomColor( char *newString ) { strcpy( BottomColor, newString ); }
-/*
-	void	SetPrefCrossbow( const float newPref ) { PrefCrossbow = newPref; }
-	void	SetPrefCrowbar( const float newPref ) { PrefCrowbar = newPref; }
-	void	SetPrefEgon( const float newPref ) { PrefEgon = newPref; }
-	void	SetPrefGauss( const float newPref ) { PrefGauss = newPref; }
-	void	SetPrefGlock( const float newPref ) { PrefGlock = newPref; }
-	void	SetPrefHandGrenade( const float newPref ) { PrefHandGrenade = newPref; }
-	void	SetPrefHornetGun( const float newPref ) { PrefHornetGun = newPref; }
-	void	SetPrefMP5( const float newPref ) { PrefMP5 = newPref; }
-	void	SetPrefPython( const float newPref ) { PrefPython = newPref; }
-	void	SetPrefRPG( const float newPref ) { PrefRPG = newPref; }
-	void	SetPrefSatchel( const float newPref ) { PrefSatchel = newPref; }
-	void	SetPrefShotgun( const float newPref ) { PrefShotgun = newPref; }
-	void	SetPrefSnark( const float newPref ) { PrefSnark = newPref; }
-	void	SetPrefTripMine( const float newPref ) { PrefTripMine = newPref; }
-*/
-
-	void	SetPrefAxe ( const float newPref ) { PrefAxe = newPref; }
-	void	SetPrefGrenadelauncher ( const float newPref ) { PrefGrenadelauncher = newPref; }
-	void	SetPrefLightning ( const float newPref ) { PrefLightning = newPref; }
-	void	SetPrefNailgun ( const float newPref ) { PrefNailgun = newPref; }
-	void	SetPrefQuakegun ( const float newPref ) { PrefQuakegun = newPref; }
-	void	SetPrefRocketlauncher ( const float newPref ) { PrefRocketlauncher = newPref; }
-	void	SetPrefSupernailgun ( const float newPref ) { PrefSupernailgun = newPref; }
-	void	SetPrefSupershotgun ( const float newPref ) { PrefSupershotgun = newPref; }
-
 	void	SetTraitAccuracy( const float newTrait ) { TraitAccuracy = newTrait; }
 	void	SetTraitAggression( const float newTrait ) { TraitAggression = newTrait; }
 	void	SetTraitChatPropensity( const float newTrait ) { TraitChatPropensity = newTrait; }
 	void	SetTraitJumpPropensity( const float newTrait ) { TraitJumpPropensity = newTrait; }
 	void	SetTraitPerception( const float newTrait ) { TraitPerception = newTrait; }
 	void	SetTraitReflexes( const float newTrait ) { TraitReflexes = newTrait; }
+	void	SetTraitWeaponPreference(WeaponId_e id, const float newTrait);
 
 public:
 
 	CBaseBotStats();
 	~CBaseBotStats();
 
-	char	*GetName() { return Name; }
-	char	*GetModel() { return Model; }
-	char	*GetTopColor() { return TopColor; }
-	char	*GetBottomColor() { return BottomColor; }
-/*
-	float	GetPrefCrossbow() { return PrefCrossbow; }
-	float	GetPrefCrowbar() { return PrefCrowbar; }
-	float	GetPrefEgon() { return PrefEgon; }
-	float	GetPrefGauss() { return PrefGauss; }
-	float	GetPrefGlock() { return PrefGlock; }
-	float	GetPrefHandGrenade() { return PrefHandGrenade; }
-	float	GetPrefHornetGun() { return PrefHornetGun; }
-	float	GetPrefMP5() { return PrefMP5; }
-	float	GetPrefPython() { return PrefPython; }
-	float	GetPrefRPG() { return PrefRPG; }
-	float	GetPrefSatchel() { return PrefSatchel; }
-	float	GetPrefShotgun() { return PrefShotgun; }
-	float	GetPrefSnark() { return PrefSnark; }
-	float	GetPrefTripMine() { return PrefTripMine; }
-*/
+	float	GetTraitAccuracy() const { return FDifficultyAdjusted( TraitAccuracy ); }
+	float	GetTraitAggression() const { return TraitAggression; }
+	float	GetTraitJumpPropensity() const { return ( TraitJumpPropensity * ( bot_jump.value / 100 ) ); }
+	float	GetTraitChatPropensity() const { return ( TraitChatPropensity * ( bot_chat.value / 100 ) ); }
+	float	GetTraitPerception() const { return FDifficultyAdjusted( TraitPerception ); }
+	float	GetTraitReflexes() const { return FDifficultyAdjusted( TraitReflexes ); }
+	float	GetTraitWeaponPreference(WeaponId_e id) const;
 
-	float	GetPrefAxe() { return PrefAxe; }
-	float	GetPrefGrenadelauncher() { return PrefGrenadelauncher; }
-	float	GetPrefLightning() { return PrefLightning; }
-	float	GetPrefNailgun() { return PrefNailgun; }
-	float	GetPrefQuakegun() { return PrefQuakegun; }
-	float	GetPrefRocketlauncher() { return PrefRocketlauncher; }
-	float	GetPrefSupernailgun() { return PrefSupernailgun; }
-	float	GetPrefSupershotgun() { return PrefSupershotgun; }
-
-	float	GetTraitAccuracy() { return FDifficultyAdjusted( TraitAccuracy ); }
-	float	GetTraitAggression() { return TraitAggression; }
-	float	GetTraitJumpPropensity() { return ( TraitJumpPropensity * ( bot_jump.value / 100 ) ); }
-	float	GetTraitChatPropensity() { return ( TraitChatPropensity * ( bot_chat.value / 100 ) ); }
-	float	GetTraitPerception() { return FDifficultyAdjusted( TraitPerception ); }
-	float	GetTraitReflexes() { return FDifficultyAdjusted( TraitReflexes ); }
-
-	float	FDifficultyAdjusted( float currentTrait );
-	float   FindWeaponDesire( CBasePlayerItem *pWeapon, float DistanceToEnemy );
-	BOOL	ReadBotFile( char *filename );
-
+	float	FDifficultyAdjusted( float currentTrait ) const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -432,7 +345,7 @@ protected:
 				{
 					pEnemy = newEnemy;
 					FightStyle.SetHoldDownAttack( FALSE );
-					FightStyle.SetNextShootTime (0.0, 0.5, 1.0);
+					FightStyle.SetNextShootTime (0.0, 0.0f, 0.5, 1.0);
 				}
 	void		SetGoal( CBaseEntity *newGoal ) { pGoal = newGoal; }
 	void		SetGoUpOnLadder( const BOOL newValue ) { bGoUpOnLadder = newValue; }

@@ -273,7 +273,9 @@ void CBaseBot::ActionChooseWeapon( void )
 
 			// This randomizes what weapon a given bot will choose at any particular moment
 			// and yet maintains preferencial weapon bias.
-			float CheckWeaponDesire = attributes.ExecDesireToUse(*genericWeapon, *this, *currentEnemy, DistanceToEnemy) * RANDOM_FLOAT(0,1);
+			float CheckWeaponDesire = attributes.ExecDesireToUse(*genericWeapon, *this, *currentEnemy, DistanceToEnemy);
+			CheckWeaponDesire *= (Stats.GetTraitWeaponPreference(genericWeapon->WeaponAttributes().Core().Id()) / 100.0f);
+			CheckWeaponDesire *= RANDOM_FLOAT(0,1);
 
 			if ( CheckWeaponDesire > BestWeaponDesire )
 			{

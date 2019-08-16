@@ -35,6 +35,7 @@ namespace
 	};
 
 	static constexpr float P99_FIRE_RATE = 6.0f;
+	static constexpr float P99_BOT_REFIRE_DELAY = 1.0f/6.0f;
 	static constexpr float P99_AUTOAIM_DEG = AUTOAIM_10DEGREES;
 	static constexpr float P99_BASE_DAMAGE = 20.0f;
 	static constexpr float P99_BASE_SPREAD = 0.03f;
@@ -52,7 +53,7 @@ namespace
 	{
 		fightStyle.SetSecondaryFire(false);
 		fightStyle.RandomizeAimAtHead(80);
-		fightStyle.SetNextShootTime(1.0f / P99_FIRE_RATE, 0.4f, 0.7f);
+		fightStyle.SetNextShootTime(1.0f / P99_FIRE_RATE, P99_BOT_REFIRE_DELAY, 0.4f, 0.7f);
 	}
 #endif
 }

@@ -3,8 +3,7 @@
 enum class WeaponId_e
 {
 	WeaponNone = 0,
-	WeaponGenericTest = 17,	// TODO: Change once other weapons are gone
-	WeaponP99,
+	WeaponP99 = 17,	// TODO: Change once other weapons are gone
 	WeaponFrinesi,
 	WeaponGrenadeLauncher,
 	WeaponRaptor

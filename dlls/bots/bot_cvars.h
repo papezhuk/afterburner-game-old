@@ -14,18 +14,6 @@ extern cvar_t bot_chat;
 extern cvar_t bot_dontshoot; // does not shoot at humans or bots
 extern cvar_t bot_observer; // does not shoot at humans
 
-// bot spawning cvars
-extern cvar_t bot_name;
-extern cvar_t bot_model;
-extern cvar_t bot_top_color;
-extern cvar_t bot_bottom_color;
-extern cvar_t bot_trait_jump;
-extern cvar_t bot_trait_accuracy;
-extern cvar_t bot_trait_aggression;
-extern cvar_t bot_trait_chat;
-extern cvar_t bot_trait_perception;
-extern cvar_t bot_trait_reflexes;
-
 extern cvar_t bot_profile_file;
 
 void Bot_RegisterCVars(void);
