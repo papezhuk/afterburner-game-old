@@ -40,10 +40,10 @@
 // Constructors/Destructors
 ///////////////////////////////////////////////////////////////////////////////
 
-CBaseBotFightStyle::CBaseBotFightStyle( ):
+CBaseBotFightStyle::CBaseBotFightStyle():
 AimAt( AIM_BODY ),
 bHoldDownAttack( FALSE ),
-//bSecondaryFire( FALSE ),
+bSecondaryFire( FALSE ),
 fNextShootTime ( gpGlobals->time )
 {
 }
@@ -108,7 +108,7 @@ void CBaseBotFightStyle::SetNextShootTime(const float tOff, const float tMin, co
 {
 	float delayFactor = 1.0f - pOwner->Stats.GetTraitReflexes()/100.0f;
 	float tstart = fNextShootTime > gpGlobals->time ? fNextShootTime : gpGlobals->time;
-	fNextShootTime = tstart + tOff + RANDOM_LONG(tMin, tMax)*delayFactor;
+	fNextShootTime = tstart + tOff + (RANDOM_FLOAT(tMin, tMax) * delayFactor);
 
 	if (GetHoldDownAttack()) // for continuous firing, stop every two seconds
 	{
@@ -118,6 +118,13 @@ void CBaseBotFightStyle::SetNextShootTime(const float tOff, const float tMin, co
 	{
 		fEndShootTime = fNextShootTime + 0.1 + pOwner->GetBotThinkDelay();
 	}
+}
+
+void CBaseBotFightStyle::UseWeaponDefault( void )
+{
+	SetSecondaryFire(FALSE);
+	RandomizeAimAtHead(50);
+	SetNextShootTime(0.75, 1.5, 2.2);
 }
 
 // Old Half-Life weapon use functions are below, for posterity.
@@ -360,14 +367,3 @@ void CBaseBotFightStyle::UseTripMine( void )
 	pBotOwner->ActionChooseWeapon(); // don't fight with a tripmine
 }
 */
-
-///////////////////////////////////////////////////////////////////////////////
-// UseWeapon
-///////////////////////////////////////////////////////////////////////////////
-
-void CBaseBotFightStyle::UseWeaponDefault( void )
-{
-	SetSecondaryFire(FALSE);
-	RandomizeAimAtHead(50);
-	SetNextShootTime(0.75, 1.5, 2.2);
-}

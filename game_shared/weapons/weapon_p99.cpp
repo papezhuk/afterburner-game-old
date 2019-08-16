@@ -52,7 +52,7 @@ namespace
 	{
 		fightStyle.SetSecondaryFire(false);
 		fightStyle.RandomizeAimAtHead(80);
-		fightStyle.SetNextShootTime(1.0f / P99_FIRE_RATE, 0.2f, 0.4f);
+		fightStyle.SetNextShootTime(1.0f / P99_FIRE_RATE, 0.4f, 0.7f);
 	}
 #endif
 }

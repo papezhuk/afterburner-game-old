@@ -99,24 +99,21 @@ void CBaseBot::ActionOpenFire( void )
 	}
 	else
 	{
-/*		CBasePlayerWeapon *pActiveWeapon = (CBasePlayerWeapon *)m_pActiveItem;
+		CBasePlayerWeapon *pActiveWeapon = (CBasePlayerWeapon *)m_pActiveItem;
 
 		if ( pActiveWeapon->pszAmmo1()
-			&& ( pActiveWeapon->m_iClip <= 0 )
-			&& ( pActiveWeapon->iMaxClip() != WEAPON_NOCLIP )
-			)
+			 && ( pActiveWeapon->m_iClip <= 0 )
+			 && ( pActiveWeapon->iMaxClip() != WEAPON_NOCLIP ) )
 		{
 			ActionReload();
 		}
-		else if (   FightStyle.GetNextShootTime() <= gpGlobals->time
-				&& !pActiveWeapon->m_fInReload
-				)
+		else if ( FightStyle.GetNextShootTime() <= gpGlobals->time && !pActiveWeapon->m_fInReload )
 		{
 			if ( FightStyle.GetSecondaryFire() )
 			{
 				if ( !pActiveWeapon->pszAmmo1()
-					|| ( pActiveWeapon->iMaxClip() == WEAPON_NOCLIP )
-					|| ( m_rgAmmo[pActiveWeapon->m_iSecondaryAmmoType] != 0 )
+					 || ( pActiveWeapon->iMaxClip() == WEAPON_NOCLIP )
+					 || ( m_rgAmmo[pActiveWeapon->m_iSecondaryAmmoType] != 0 )
 					)
 				{
 					pev->button |= IN_ATTACK2;
@@ -129,8 +126,8 @@ void CBaseBot::ActionOpenFire( void )
 			else
 			{
 				if ( !pActiveWeapon->pszAmmo2()
-					|| ( pActiveWeapon->iMaxClip() == WEAPON_NOCLIP )
-					|| ( m_rgAmmo[pActiveWeapon->m_iPrimaryAmmoType] != 0 )
+					 || ( pActiveWeapon->iMaxClip() == WEAPON_NOCLIP )
+					 || ( m_rgAmmo[pActiveWeapon->m_iPrimaryAmmoType] != 0 )
 					)
 				{
 					pev->button |= IN_ATTACK;
@@ -140,7 +137,8 @@ void CBaseBot::ActionOpenFire( void )
 					pev->button |= IN_ATTACK2;
 				}
 			}
-		} */
+		}
+
 		pev->button |= IN_ATTACK;
 	}
 }
@@ -487,7 +485,7 @@ void CBaseBot::ActionLook( int SearchDistance )
 // ActionReload
 ///////////////////////////////////////////////////////////////////////////////
 
-/* BOOL CBaseBot::ActionReload( void )
+BOOL CBaseBot::ActionReload( void )
 {
 	CBasePlayerWeapon *pActiveWeapon = (CBasePlayerWeapon *)m_pActiveItem;
 
@@ -503,7 +501,7 @@ void CBaseBot::ActionLook( int SearchDistance )
 	{
 		return FALSE;
 	}
-} */
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // ActionSpeak
@@ -874,10 +872,10 @@ void CBaseBot::ThinkSteering( void )
 		{
 			if ( Memory.GetEnemyInSight() != FALSE ) // i.e. this is the first time through
 			{
-//				if ( !ActionReload() ) // change weapons if we're not going to reload
-//				{
+				if ( !ActionReload() ) // change weapons if we're not going to reload
+				{
 					ActionChooseWeapon();
-//				}
+				}
 			}
 
 			Memory.EnemyOutOfSight();
@@ -937,7 +935,7 @@ void CBaseBot::ThinkSteering( void )
 	}
 	else
 	{
-//		ActionReload();
+		ActionReload();
 
 		if ( GetGoal() )
 		{

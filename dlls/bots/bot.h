@@ -494,7 +494,7 @@ public:
 	void		ActionChooseWeapon( void );
 	void		ActionLook( int SearchDistance = SEARCH_DISTANCE );
 	void		ActionOpenFire( void );
-//	BOOL		ActionReload( void );
+	BOOL		ActionReload( void );
 	void		ActionSpeak( const char *pText );
 
 	void		AimAtBias( void );
