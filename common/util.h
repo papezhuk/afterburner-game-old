@@ -240,6 +240,16 @@ extern CBaseEntity	*UTIL_FindEntityByClassname(CBaseEntity *pStartEntity, const 
 extern CBaseEntity	*UTIL_FindEntityByTargetname(CBaseEntity *pStartEntity, const char *szName );
 extern CBaseEntity	*UTIL_FindEntityGeneric(const char *szName, Vector &vecSrc, float flRadius );
 
+inline float UTIL_DegreesToRadians(float deg)
+{
+	return (deg / 180.0f) * M_PI;
+}
+
+inline float UTIL_RadiansToDegrees(float rad)
+{
+	return (rad / M_PI) * 180;
+}
+
 // returns a CBaseEntity pointer to a player by index.  Only returns if the player is spawned and connected
 // otherwise returns NULL
 // Index is 1 based

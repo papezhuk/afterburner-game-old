@@ -41,6 +41,7 @@ namespace
 	DEV_CVAR(grenadelauncher_explosion_radius, "250");
 	DEV_CVAR(grenadelauncher_fuse_time, "4");
 	DEV_CVAR(grenadelauncher_launch_speed, "1000");
+	DEV_CVAR(grenadelauncher_launch_pitch_adjust, "5");
 
 #ifdef CLIENT_DLL
 	CWeaponGrenadeLauncher PredictionWeapon;
@@ -162,6 +163,7 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 	.AddCVar(&grenadelauncher_explosion_radius)
 	.AddCVar(&grenadelauncher_fuse_time)
 	.AddCVar(&grenadelauncher_launch_speed)
+	.AddCVar(&grenadelauncher_launch_pitch_adjust)
 )
 #ifndef CLIENT_DLL
 .BotWeaponAttributes(
@@ -197,7 +199,7 @@ void CWeaponGrenadeLauncher::CreateProjectile(int index,
 											  const CGenericWeaponAtts_FireMode& fireMode,
 											  const CGenericWeaponAtts_BaseFireMechanic& mechanic)
 {
-	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
+	UTIL_MakeVectors(GetGrenadeLaunchAngles());
 	const Vector forward = gpGlobals->v_forward;
 	const Vector location = m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs + forward * 16.0f;
 
@@ -221,10 +223,34 @@ CWeaponGrenadeLauncher_Grenade* CWeaponGrenadeLauncher::CreateGrenade(entvars_t 
 	pGrenade->pev->velocity = launchDir;
 	pGrenade->pev->angles = UTIL_VecToAngles(pGrenade->pev->velocity);
 	pGrenade->pev->owner = ENT(pevOwner);
+	pGrenade->pev->gravity = 1.4f;
 	pGrenade->SetFuseTime(-1.0f);
 	pGrenade->SetExplodeSpriteScale(GRENADELAUNCHER_GRENADE_SPRITE_SCALE);
 
 	return pGrenade;
+}
+
+Vector CWeaponGrenadeLauncher::GetGrenadeLaunchAngles() const
+{
+	Vector viewAngles = m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle;
+
+	// Add some more pitch depending on the cosine of the original pitch.
+	// If the player is looking horizontally, we want the grenade to be
+	// launched a little more upward; if they are looking straight up or
+	// down, we don't want any modification at all.
+	float extraPitch = -grenadelauncher_launch_pitch_adjust.value;
+	viewAngles[0] += cos(UTIL_DegreesToRadians(viewAngles[0])) * extraPitch;
+
+	if ( viewAngles[0] < -89.0f )
+	{
+		viewAngles[0] = -89.0f;
+	}
+	else if ( viewAngles[0] > 89.0f )
+	{
+		viewAngles[0] = 89.0f;
+	}
+
+	return viewAngles;
 }
 #endif
 

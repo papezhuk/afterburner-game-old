@@ -20,6 +20,8 @@ protected:
 
 private:
 	static CWeaponGrenadeLauncher_Grenade* CreateGrenade(entvars_t *pevOwner, const Vector& location, const Vector& launchDir);
+
+	Vector GetGrenadeLaunchAngles() const;
 #endif
 };
 
