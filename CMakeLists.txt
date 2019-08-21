@@ -96,6 +96,9 @@ endif()
 
 if(MSVC)
 	add_definitions(-DNOMINMAX)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /WX")
+else()
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wno-format-truncation")
 endif()
 
 if(BUILD_CLIENT)

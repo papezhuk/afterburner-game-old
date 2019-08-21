@@ -73,7 +73,7 @@ void	CBaseBotGlobals::IncreaseDifficulty( void )
 //		CVAR_SET_FLOAT("bot_skill", 100);
 	}
 	SERVER_COMMAND(serverCommand );
-	if (IS_DEDICATED_SERVER()) printf( serverCommand );
+	if (IS_DEDICATED_SERVER()) printf( "%s", serverCommand );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -96,7 +96,7 @@ void	CBaseBotGlobals::DecreaseDifficulty( void )
 //		CVAR_SET_FLOAT("bot_skill", 0);
 	}
 	SERVER_COMMAND(serverCommand);
-	if (IS_DEDICATED_SERVER()) printf( serverCommand );
+	if (IS_DEDICATED_SERVER()) printf( "%s", serverCommand );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -73,15 +73,21 @@ void WeaponsResource::LoadWeaponSprites( WEAPON *pWeapon )
 {
 	int i, iRes;
 
+	if( !pWeapon )
+	{
+		return;
+	}
+
 	if( ScreenWidth < 640 )
+	{
 		iRes = 320;
+	}
 	else
+	{
 		iRes = 640;
+	}
 
 	char sz[128];
-
-	if( !pWeapon )
-		return;
 
 	memset( &pWeapon->rcActive, 0, sizeof(wrect_t) );
 	memset( &pWeapon->rcInactive, 0, sizeof(wrect_t) );
@@ -92,7 +98,7 @@ void WeaponsResource::LoadWeaponSprites( WEAPON *pWeapon )
 	pWeapon->hAmmo = 0;
 	pWeapon->hAmmo2 = 0;
 
-	sprintf( sz, "sprites/%s.txt", pWeapon->szName );
+	snprintf( sz, sizeof(sz), "sprites/%s.txt", pWeapon->szName );
 	client_sprite_t *pList = SPR_GetList( sz, &i );
 
 	if( !pList )

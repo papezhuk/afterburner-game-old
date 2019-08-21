@@ -380,7 +380,7 @@ void CGraph::SaveNavToFile( void )
 				if ( WorldGraph.NavigationArray[i][j][k] != 1 )
 				{
 					sprintf( printThis, "%d.%d.%d=%d\n", i, j, k, WorldGraph.NavigationArray[i][j][k] );
-					fprintf( navFile, printThis );
+					fprintf( navFile, "%s", printThis );
 				}
 			}
 		}

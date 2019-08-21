@@ -248,7 +248,7 @@ void CBotGameRulesInterface::CreateBot(const CBotProfileTable::ProfileData* prof
 
 		if ( IS_DEDICATED_SERVER() )
 		{
-			printf(errorMsg);
+			printf("%s", errorMsg);
 		}
 
 		return;
