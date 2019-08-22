@@ -96,7 +96,11 @@ endif()
 
 if(MSVC)
 	add_definitions(-DNOMINMAX)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /WX")
+
+	# Needed to avoid warnings with MiniUTL.
+	# 4005 = Macro redefinition
+	# 4244 = Possible loss of data on type cast
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /WX /wd4005 /wd4244")
 else()
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wno-format-truncation")
 endif()

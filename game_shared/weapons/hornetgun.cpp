@@ -247,10 +247,12 @@ void CHgun::SecondaryAttack( void )
 
 void CHgun::Reload( void )
 {
-	if( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] >= AmmoDef_Hornet.MaxCarry )
+	if( static_cast<uint32_t>(m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]) >= AmmoDef_Hornet.MaxCarry )
+	{
 		return;
+	}
 
-	while( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] < AmmoDef_Hornet.MaxCarry && m_flRechargeTime < gpGlobals->time )
+	while( static_cast<uint32_t>(m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]) < AmmoDef_Hornet.MaxCarry && m_flRechargeTime < gpGlobals->time )
 	{
 		m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]++;
 		m_flRechargeTime += 0.5;

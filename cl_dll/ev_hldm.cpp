@@ -446,7 +446,7 @@ void GenericWeaponFireBullets(int idx,
 {
 	int i;
 	pmtrace_t tr;
-	int iShot;
+	uint32_t iShot;
 
 	const uint32_t cShots = mechanic.BulletsPerShot();
 	for( iShot = 1; iShot <= cShots; iShot++ )

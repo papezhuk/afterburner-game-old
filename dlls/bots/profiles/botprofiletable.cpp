@@ -65,7 +65,7 @@ void CBotProfileTable::RandomProfileNameList(CUtlVector<CUtlString>& list, size_
 	list.EnsureCapacity(count);
 	auto rng = std::default_random_engine {(unsigned int)RANDOM_LONG(0, 1000)};
 
-	while ( list.Count() < count )
+	while ( static_cast<size_t>(list.Count()) < count )
 	{
 		// This has to be a std::vector in order to randomise it.
 		std::vector<const char*> intermediateList;
@@ -82,7 +82,7 @@ void CBotProfileTable::RandomProfileNameList(CUtlVector<CUtlString>& list, size_
 		{
 			list.AddToTail(CUtlString(name));
 
-			if ( list.Count() >= count )
+			if ( static_cast<size_t>(list.Count()) >= count )
 			{
 				break;
 			}
