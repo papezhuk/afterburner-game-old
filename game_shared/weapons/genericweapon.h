@@ -109,6 +109,8 @@ private:
 	CUtlVector<float> m_ViewAnimDurations;
 	int m_iWeaponSlot;
 	int m_iWeaponSlotPosition;
+	bool m_bPrimaryAttackHeldDown;
+	bool m_bSecondaryAttackHeldDown;
 };
 
 class CGenericAmmo : public CBasePlayerAmmo

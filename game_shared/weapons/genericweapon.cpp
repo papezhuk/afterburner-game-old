@@ -19,7 +19,9 @@ CGenericWeapon::CGenericWeapon()
 	  m_iViewModelIndex(0),
 	  m_iViewModelBody(0),
 	  m_iWeaponSlot(-1),
-	  m_iWeaponSlotPosition(-1)
+	  m_iWeaponSlotPosition(-1),
+	  m_bPrimaryAttackHeldDown(false),
+	  m_bSecondaryAttackHeldDown(false)
 {
 }
 
@@ -257,17 +259,29 @@ void CGenericWeapon::ItemPostFrame()
 	if( !(m_pPlayer->pev->button & IN_ATTACK ) )
 	{
 		m_flLastFireTime = 0.0f;
+		m_bPrimaryAttackHeldDown = false;
 	}
 
-	if( ( m_pPlayer->pev->button & IN_ATTACK2 ) && CanAttack( m_flNextSecondaryAttack, gpGlobals->time, UseDecrement() ) )
+	if ( !(m_pPlayer->pev->button & IN_ATTACK2) )
+	{
+		m_bSecondaryAttackHeldDown = false;
+	}
+
+	if( (m_pPlayer->pev->button & IN_ATTACK2) &&
+		CanAttack(m_flNextSecondaryAttack, gpGlobals->time, UseDecrement()) &&
+		(WeaponAttributes().FireMode(1).FullAuto() || !m_bSecondaryAttackHeldDown) )
 	{
 		SetFireOnEmptyState(1);
 		SecondaryAttack();
+		m_bSecondaryAttackHeldDown = true;
 	}
-	else if( ( m_pPlayer->pev->button & IN_ATTACK ) && CanAttack( m_flNextPrimaryAttack, gpGlobals->time, UseDecrement() ) )
+	else if( (m_pPlayer->pev->button & IN_ATTACK) &&
+			 CanAttack(m_flNextPrimaryAttack, gpGlobals->time, UseDecrement()) &&
+			 (WeaponAttributes().FireMode(0).FullAuto() || !m_bPrimaryAttackHeldDown) )
 	{
 		SetFireOnEmptyState(0);
 		PrimaryAttack();
+		m_bPrimaryAttackHeldDown = true;
 	}
 	else if( m_pPlayer->pev->button & IN_RELOAD && iMaxClip() != WEAPON_NOCLIP && !m_fInReload )
 	{

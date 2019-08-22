@@ -31,7 +31,7 @@ cvar_t teamplay		= { "mp_teamplay","0", FCVAR_SERVER };
 cvar_t fraglimit	= { "mp_fraglimit","0", FCVAR_SERVER };
 cvar_t timelimit	= { "mp_timelimit","0", FCVAR_SERVER };
 cvar_t friendlyfire	= { "mp_friendlyfire","0", FCVAR_SERVER };
-cvar_t falldamage	= { "mp_falldamage","0", FCVAR_SERVER };
+cvar_t falldamage	= { "mp_falldamage","1", FCVAR_SERVER };
 cvar_t weaponstay	= { "mp_weaponstay","0", FCVAR_SERVER };
 cvar_t selfgauss	= { "mp_selfgauss", "1", FCVAR_SERVER };
 cvar_t satchelfix	= { "mp_satchelfix", "0", FCVAR_SERVER };
@@ -45,7 +45,7 @@ cvar_t defaultteam	= { "mp_defaultteam","0" };
 cvar_t allowmonsters	= { "mp_allowmonsters","0", FCVAR_SERVER };
 cvar_t bhopcap		= { "mp_bhopcap", "1", FCVAR_SERVER };
 
-cvar_t allow_spectators = { "allow_spectators", "0", FCVAR_SERVER };	// 0 prevents players from being spectators
+cvar_t allow_spectators = { "allow_spectators", "1", FCVAR_SERVER };	// 0 prevents players from being spectators
 cvar_t multibyte_only = { "mp_multibyte_only", "0", FCVAR_SERVER };
 
 cvar_t mp_chattime	= { "mp_chattime","10", FCVAR_SERVER };
