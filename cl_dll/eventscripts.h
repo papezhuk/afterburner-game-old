@@ -18,12 +18,23 @@
 
 // Some of these are HL/TFC specific?
 void EV_EjectBrass( float *origin, float *velocity, float rotation, int model, int soundtype );
-void EV_GetGunPosition( struct event_args_s *args, float *pos, float *origin );
-void EV_GetDefaultShellInfo( struct event_args_s *args, float *origin, float *velocity, float *ShellVelocity, float *ShellOrigin, float *forward, float *right, float *up, float forwardScale, float upScale, float rightScale );
+void EV_GetGunPosition( const struct event_args_s *args, float *pos, const float *origin );
 qboolean EV_IsLocal( int idx );
 qboolean EV_IsPlayer( int idx );
 void EV_CreateTracer( float *start, float *end );
 void EV_CreateBulletTracer(float* start, float* end);
+
+void EV_GetDefaultShellInfo(const struct event_args_s *args,
+							const float *origin,
+							const float *velocity,
+							float *ShellVelocity,
+							float *ShellOrigin,
+							const float *forward,
+							const float *right,
+							const float *up,
+							float forwardScale,
+							float upScale,
+							float rightScale);
 
 struct cl_entity_s *GetEntity( int idx );
 struct cl_entity_s *GetViewEntity( void );

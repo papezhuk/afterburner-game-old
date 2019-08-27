@@ -106,7 +106,7 @@ EV_GetGunPosition
 Figure out the height of the gun
 =================
 */
-void EV_GetGunPosition( event_args_t *args, float *pos, float *origin )
+void EV_GetGunPosition( const event_args_t *args, float *pos, const float *origin )
 {
 	int idx;
 	vec3_t view_ofs;
@@ -155,7 +155,17 @@ EV_GetDefaultShellInfo
 Determine where to eject shells from
 =================
 */
-void EV_GetDefaultShellInfo( event_args_t *args, float *origin, float *velocity, float *ShellVelocity, float *ShellOrigin, float *forward, float *right, float *up, float forwardScale, float upScale, float rightScale )
+void EV_GetDefaultShellInfo(const struct event_args_s *args,
+							const float *origin,
+							const float *velocity,
+							float *ShellVelocity,
+							float *ShellOrigin,
+							const float *forward,
+							const float *right,
+							const float *up,
+							float forwardScale,
+							float upScale,
+							float rightScale)
 {
 	int i;
 	vec3_t view_ofs;
