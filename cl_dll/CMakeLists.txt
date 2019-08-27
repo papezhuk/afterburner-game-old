@@ -82,6 +82,7 @@ set (CLDLL_SOURCES
 	../miniutl/utlmemory.cpp
 	../miniutl/utlstring.cpp
 	ev_hldm.cpp
+	events/baseweaponeventplayer.cpp
 	events/hitscanweaponeventplayer.cpp
 	hl/hl_baseentity.cpp
 	hl/hl_events.cpp

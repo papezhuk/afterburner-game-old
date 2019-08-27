@@ -41,10 +41,10 @@
 #include "genericweaponattributes.h"
 #include "weaponregistry.h"
 #include "genericweapon.h"
-#include "ieventplayer.h"
+#include "baseweaponeventplayer.h"
 #include "hitscanweaponeventplayer.h"
 
-static IEventPlayer* EventPlayers[MAX_WEAPONS][WEAPON_MAX_FIRE_MODES];
+static BaseWeaponEventPlayer* EventPlayers[MAX_WEAPONS][WEAPON_MAX_FIRE_MODES];
 
 extern engine_studio_api_t IEngineStudio;
 
@@ -114,7 +114,7 @@ void EV_HandleGenericWeaponFire(event_args_t* args)
 		return;
 	}
 
-	IEventPlayer* eventPlayer = EventPlayers[weaponId][fireModeIndex];
+	BaseWeaponEventPlayer* eventPlayer = EventPlayers[weaponId][fireModeIndex];
 
 	if ( !eventPlayer )
 	{
@@ -487,92 +487,6 @@ void EV_HLDM_FireBullets( int idx, float *forward, float *right, float *up, int 
 
 		gEngfuncs.pEventAPI->EV_PopPMStates();
 	}
-}
-
-// Generic handlers
-
-static void GenericWeaponProjectileFire(event_args_t *args, const CGenericWeaponAtts_FireMode& fireMode, const CGenericWeaponAtts_ProjectileFireMechanic& mechanic)
-{
-	const int idx = args->entindex;
-	const bool empty = args->bparam1;
-
-	vec3_t origin;
-	VectorCopy(args->origin, origin);
-
-	if( EV_IsLocal(idx) )
-	{
-		EV_MuzzleFlash();
-
-		int animIndex = empty ? fireMode.AnimIndex_FireEmpty() : fireMode.AnimIndex_FireNotEmpty();
-		if ( empty && animIndex < 0 )
-		{
-			animIndex = fireMode.AnimIndex_FireNotEmpty();
-		}
-
-		int body = fireMode.ViewModelBodyOverride();
-		if ( body < 0 )
-		{
-			const struct cl_entity_s* const viewModelEnt = GetViewEntity();
-			if ( viewModelEnt )
-			{
-				body = viewModelEnt->curstate.body;
-			}
-			else
-			{
-				body = 0;
-			}
-		}
-
-		gEngfuncs.pEventAPI->EV_WeaponAnimation(animIndex, body);
-		V_PunchAxis(0, fireMode.ViewPunchY());
-	}
-
-	if ( fireMode.HasSounds() )
-	{
-		const CGenericWeaponAttributes_Sound& fireSound = fireMode.Sounds();
-		const float volume = (fireSound.MinVolume() < fireSound.MaxVolume())
-			? gEngfuncs.pfnRandomFloat(fireSound.MinVolume(), fireSound.MaxVolume())
-			: fireSound.MaxVolume();
-		const int pitch = (fireSound.MinPitch() < fireSound.MaxPitch())
-			? gEngfuncs.pfnRandomLong(fireSound.MinPitch(), fireSound.MaxPitch())
-			: fireSound.MaxPitch();
-		const char* const soundName = fireSound.SoundList().ItemByProbabilisticValue(gEngfuncs.pfnRandomFloat(0.0f, 1.0f));
-
-		gEngfuncs.pEventAPI->EV_PlaySound(idx,
-										origin,
-										CHAN_WEAPON,
-										soundName,
-										volume,
-										ATTN_NORM,
-										0,
-										pitch);
-	}
-}
-
-void EV_HandleGenericProjectileFire(event_args_t* args)
-{
-	const CGenericWeaponAtts_FireMode::FireModeSignature* signature =
-		(CGenericWeaponAtts_FireMode::FireModeSignature*)args->localUserData;
-
-	const WeaponId_e weaponId = static_cast<const WeaponId_e>(signature->m_iWeaponId);
-	const uint8_t fireModeIndex = static_cast<const uint8_t>(signature->m_iFireMode);
-
-	const CGenericWeaponAttributes* atts = CWeaponRegistry::StaticInstance().Get(weaponId);
-	if ( !atts )
-	{
-		ASSERT(false);
-		return;
-	}
-
-	const CGenericWeaponAtts_FireMode& fireMode = atts->FireMode(fireModeIndex);
-	const CGenericWeaponAtts_BaseFireMechanic* mechanic = fireMode.Mechanic();
-	if ( !mechanic || mechanic->Id() != CGenericWeaponAtts_BaseFireMechanic::FireMechanic_e::Projectile )
-	{
-		ASSERT(false);
-		return;
-	}
-
-	GenericWeaponProjectileFire(args, fireMode, *(mechanic->AsType<const CGenericWeaponAtts_ProjectileFireMechanic>()));
 }
 
 //======================
