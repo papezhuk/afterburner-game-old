@@ -1,5 +1,5 @@
 #include "hitscanweaponeventplayer.h"
-/*#include "weaponregistry.h"
+#include "weaponregistry.h"
 #include "event_args.h"
 #include "cdll_int.h"
 #include "cl_dll.h"
@@ -8,23 +8,27 @@
 #include "eventscripts.h"
 #include "cl_entity.h"
 #include "view.h"
-#include "in_defs.h"*/
+#include "in_defs.h"
 #include "hud.h"
 #include "cl_util.h"
 #include "parsemsg.h"
+#include "genericweapon.h"
+#include "pmtrace.h"
+#include "pm_defs.h"
+#include "ev_hldm.h"
 
-/*namespace
+namespace
 {
 	// TODO: These probably need to be different per weapon?
 	static constexpr float SHELLEJECT_FWD_SCALE = 20;
 	static constexpr float SHELLEJECT_RIGHT_SCALE = -12;
 	static constexpr float SHELLEJECT_UP_SCALE = 4;
-}*/
+}
 
-void HitscanWeaponEventPlayer::PlayEvent(/*const event_args_t* eventArgs,
-										 const CGenericWeaponAtts_FireMode::FireModeSignature* signature*/)
+void HitscanWeaponEventPlayer::PlayEvent(const event_args_t* eventArgs,
+										 const CGenericWeaponAtts_FireMode::FireModeSignature* signature)
 {
-	/*m_pEventArgs = eventArgs;
+	m_pEventArgs = eventArgs;
 	m_pSignature = signature;
 
 	if ( !Initialise() )
@@ -40,10 +44,10 @@ void HitscanWeaponEventPlayer::PlayEvent(/*const event_args_t* eventArgs,
 	}
 
 	EjectShellFromViewModel();
-	PlayFireSound();*/
+	PlayFireSound();
 }
 
-/*void HitscanWeaponEventPlayer::CreateBulletTracers()
+void HitscanWeaponEventPlayer::CreateBulletTracers()
 {
 	const uint32_t numShots = m_pMechanic->BulletsPerShot();
 
@@ -55,12 +59,50 @@ void HitscanWeaponEventPlayer::PlayEvent(/*const event_args_t* eventArgs,
 		{
 			for ( uint8_t axis = 0; axis < 3; ++axis )
 			{
-				shotDir[axis] = m_vecFwd[axis] + (flSpreadX * m_vecRight[axis]) + (flSpreadY * m_vecUp [axis]);
+				shotDir[axis] = m_vecFwd[axis] + (m_flSpreadX * m_vecRight[axis]) + (m_flSpreadY * m_vecUp [axis]);
 			}
 		}
 		else
 		{
+			// We are firing multiple shots, so we need to generate the spread for each one.
+			float spreadX = 0.0f;
+			float spreadY = 0.0f;
+
+			CGenericWeapon::GetSharedCircularGaussianSpread(m_iEntIndex, m_iRandomSeed, spreadX, spreadY);
+
+			for ( uint8_t axis = 0; axis < 3; ++axis )
+			{
+				shotDir[axis] = m_vecFwd[axis] +
+					(spreadX * m_pFireMode->SpreadX() * m_vecRight[axis]) +
+					(spreadY * m_pFireMode->SpreadY() * m_vecUp[axis]);
+			}
 		}
+
+		vec3_t traceEnd = m_vecGunPosition + (CGenericWeapon::DEFAULT_BULLET_TRACE_DISTANCE * shotDir);
+
+		gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(false, true);
+
+		// Store off the old count
+		gEngfuncs.pEventAPI->EV_PushPMStates();
+
+		// Now add in all of the players.
+		gEngfuncs.pEventAPI->EV_SetSolidPlayers(m_iEntIndex - 1);
+
+		gEngfuncs.pEventAPI->EV_SetTraceHull(2);	// TODO: What's 2?
+
+		pmtrace_t traceResult;
+		gEngfuncs.pEventAPI->EV_PlayerTrace(m_vecGunPosition, traceEnd, PM_STUDIO_BOX, -1, &traceResult);
+
+		EV_HLDM_CheckTracer(m_iEntIndex, m_vecGunPosition, traceResult.endpos, m_vecFwd, m_vecRight, BULLET_GENERIC);
+
+		// do damage, paint decals
+		if ( traceResult.fraction != 1.0 )
+		{
+			EV_HLDM_PlayTextureSound(m_iEntIndex, &traceResult, m_vecGunPosition, traceEnd, BULLET_GENERIC);
+			EV_HLDM_DecalGunshot(&traceResult, BULLET_GENERIC);
+		}
+
+		gEngfuncs.pEventAPI->EV_PopPMStates();
 	}
 }
 
@@ -192,4 +234,4 @@ bool HitscanWeaponEventPlayer::Initialise()
 	EV_GetGunPosition(m_pEventArgs, m_vecGunPosition, m_vecEntOrigin);
 
 	return true;
-}*/
+}

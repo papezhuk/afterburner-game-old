@@ -16,6 +16,8 @@
 
 class CGenericWeapon;
 
+static constexpr uint8_t WEAPON_MAX_FIRE_MODES = 2;
+
 template<typename T>
 class WeightedValueList
 {
@@ -660,7 +662,7 @@ public:
 	{
 		static const CGenericWeaponAtts_FireMode dummy;
 
-		if ( mode < 0 || mode > 1 )
+		if ( mode < 0 || mode >= WEAPON_MAX_FIRE_MODES )
 		{
 			ASSERTSZ_Q(false, "Invalid fire mode index");
 			return dummy;

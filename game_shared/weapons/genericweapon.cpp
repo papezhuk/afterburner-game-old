@@ -168,7 +168,7 @@ void CGenericWeapon::SecondaryAttack()
 
 bool CGenericWeapon::FireUsingMode(int index)
 {
-	if ( index < 0 || index > 1 )
+	if ( index < 0 || index >= WEAPON_MAX_FIRE_MODES )
 	{
 		return false;
 	}

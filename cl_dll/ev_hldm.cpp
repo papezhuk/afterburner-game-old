@@ -41,6 +41,10 @@
 #include "genericweaponattributes.h"
 #include "weaponregistry.h"
 #include "genericweapon.h"
+#include "ieventplayer.h"
+#include "hitscanweaponeventplayer.h"
+
+static IEventPlayer* EventPlayers[MAX_WEAPONS][WEAPON_MAX_FIRE_MODES];
 
 extern engine_studio_api_t IEngineStudio;
 
@@ -63,6 +67,62 @@ extern cvar_t *cl_lw;
 #define VECTOR_CONE_10DEGREES Vector( 0.08716, 0.08716, 0.08716 )
 #define VECTOR_CONE_15DEGREES Vector( 0.13053, 0.13053, 0.13053 )
 #define VECTOR_CONE_20DEGREES Vector( 0.17365, 0.17365, 0.17365 )
+
+void EV_HLDM_Init()
+{
+	CWeaponRegistry::StaticInstance().ForEach([](const CGenericWeaponAttributes& atts)
+	{
+		const uint32_t index = static_cast<uint32_t>(atts.Core().Id());
+		ASSERT(index < MAX_WEAPONS);
+
+		for ( uint8_t fireModeIndex = 0; fireModeIndex < WEAPON_MAX_FIRE_MODES; ++fireModeIndex )
+		{
+			const CGenericWeaponAtts_FireMode& fireMode = atts.FireMode(fireModeIndex);
+
+			if ( !fireMode.HasMechanic() )
+			{
+				continue;
+			}
+
+			switch ( fireMode.Mechanic()->Id() )
+			{
+				case CGenericWeaponAtts_BaseFireMechanic::Hitscan:
+				{
+					EventPlayers[index][fireModeIndex] = new HitscanWeaponEventPlayer();
+					break;
+				}
+
+				default:
+				{
+					break;
+				}
+			}
+		}
+	});
+}
+
+void EV_HandleGenericWeaponFire(event_args_t* args)
+{
+	const CGenericWeaponAtts_FireMode::FireModeSignature* signature =
+		(CGenericWeaponAtts_FireMode::FireModeSignature*)args->localUserData;
+
+	const uint32_t weaponId = static_cast<const uint32_t>(signature->m_iWeaponId);
+	const uint8_t fireModeIndex = static_cast<const uint8_t>(signature->m_iFireMode);
+
+	if ( weaponId >= MAX_WEAPONS || fireModeIndex >= WEAPON_MAX_FIRE_MODES )
+	{
+		return;
+	}
+
+	IEventPlayer* eventPlayer = EventPlayers[weaponId][fireModeIndex];
+
+	if ( !eventPlayer )
+	{
+		return;
+	}
+
+	eventPlayer->PlayEvent(args, signature);
+}
 
 // play a strike sound based on the texture that was hit by the attack traceline.  VecSrc/VecEnd are the
 // original traceline endpoints used by the attacker, iBulletType is the type of bullet that hit the texture.
@@ -431,167 +491,6 @@ void EV_HLDM_FireBullets( int idx, float *forward, float *right, float *up, int 
 
 // Generic handlers
 
-// TODO: This is an ugly function signature.
-void GenericWeaponFireBullets(int idx,
-							  vec3_t& forward,
-							  vec3_t& right,
-							  vec3_t& up,
-							  vec3_t& vecSrc,
-							  vec3_t& vecDirShooting,
-							  const CGenericWeaponAtts_FireMode& fireMode,
-							  const CGenericWeaponAtts_HitscanFireMechanic& mechanic,
-							  float flSpreadX,
-							  float flSpreadY,
-							  int randomSeed)
-{
-	int i;
-	pmtrace_t tr;
-	uint32_t iShot;
-
-	const uint32_t cShots = mechanic.BulletsPerShot();
-	for( iShot = 1; iShot <= cShots; iShot++ )
-	{
-		vec3_t vecDir;
-		vec3_t vecEnd;
-		float x = 0;
-		float y = 0;
-
-		if ( cShots > 1 )
-		{
-			// We are firing multiple shots, so we need to generate the spread for each one.
-			CGenericWeapon::GetSharedCircularGaussianSpread(iShot, randomSeed, x, y);
-
-			for( i = 0 ; i < 3; i++ )
-			{
-				vecDir[i] = vecDirShooting[i] + x * fireMode.SpreadX() * right[i] + y * fireMode.SpreadY() * up [i];
-			}
-		}
-		else
-		{
-			for( i = 0 ; i < 3; i++ )
-			{
-				vecDir[i] = vecDirShooting[i] + flSpreadX * right[i] + flSpreadY * up [i];
-			}
-		}
-
-		vecEnd = vecSrc + CGenericWeapon::DEFAULT_BULLET_TRACE_DISTANCE * vecDir;
-
-		gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(false, true);
-
-		// Store off the old count
-		gEngfuncs.pEventAPI->EV_PushPMStates();
-
-		// Now add in all of the players.
-		gEngfuncs.pEventAPI->EV_SetSolidPlayers( idx - 1 );
-
-		gEngfuncs.pEventAPI->EV_SetTraceHull(2);
-		gEngfuncs.pEventAPI->EV_PlayerTrace(vecSrc, vecEnd, PM_STUDIO_BOX, -1, &tr);
-
-		EV_HLDM_CheckTracer(idx, vecSrc, tr.endpos, forward, right, BULLET_GENERIC);
-
-		// do damage, paint decals
-		if( tr.fraction != 1.0 )
-		{
-			EV_HLDM_PlayTextureSound(idx, &tr, vecSrc, vecEnd, BULLET_GENERIC);
-			EV_HLDM_DecalGunshot(&tr, BULLET_GENERIC);
-		}
-
-		gEngfuncs.pEventAPI->EV_PopPMStates();
-	}
-}
-
-static void GenericWeaponHitscanFire(event_args_t *args, const CGenericWeaponAtts_FireMode& fireMode, const CGenericWeaponAtts_HitscanFireMechanic& mechanic)
-{
-	const int idx = args->entindex;
-	const bool empty = args->bparam1;
-	const int shell = gEngfuncs.pEventAPI->EV_FindModelIndex(mechanic.ShellModelName());
-
-	vec3_t origin;
-	vec3_t angles;
-	vec3_t velocity;
-	vec3_t forward;
-	vec3_t right;
-	vec3_t up;
-	VectorCopy( args->origin, origin );
-	VectorCopy( args->angles, angles );
-	VectorCopy( args->velocity, velocity );
-	AngleVectors( angles, forward, right, up );
-
-	if( EV_IsLocal( idx ) )
-	{
-		EV_MuzzleFlash();
-
-		int animIndex = empty ? fireMode.AnimIndex_FireEmpty() : fireMode.AnimIndex_FireNotEmpty();
-		if ( empty && animIndex < 0 )
-		{
-			animIndex = fireMode.AnimIndex_FireNotEmpty();
-		}
-
-		int body = fireMode.ViewModelBodyOverride();
-		if ( body < 0 )
-		{
-			const struct cl_entity_s* const viewModelEnt = GetViewEntity();
-			if ( viewModelEnt )
-			{
-				body = viewModelEnt->curstate.body;
-			}
-			else
-			{
-				body = 0;
-			}
-		}
-
-		gEngfuncs.pEventAPI->EV_WeaponAnimation(animIndex, body);
-		V_PunchAxis(0, fireMode.ViewPunchY());
-	}
-
-	vec3_t ShellVelocity;
-	vec3_t ShellOrigin;
-	EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20, -12, 4 );
-	EV_EjectBrass( ShellOrigin, ShellVelocity, angles[YAW], shell, TE_BOUNCE_SHELL );
-
-	if ( fireMode.HasSounds() )
-	{
-		const CGenericWeaponAttributes_Sound& fireSound = fireMode.Sounds();
-		const float volume = (fireSound.MinVolume() < fireSound.MaxVolume())
-			? gEngfuncs.pfnRandomFloat(fireSound.MinVolume(), fireSound.MaxVolume())
-			: fireSound.MaxVolume();
-		const int pitch = (fireSound.MinPitch() < fireSound.MaxPitch())
-			? gEngfuncs.pfnRandomLong(fireSound.MinPitch(), fireSound.MaxPitch())
-			: fireSound.MaxPitch();
-		const char* const soundName = fireSound.SoundList().ItemByProbabilisticValue(gEngfuncs.pfnRandomFloat(0.0f, 1.0f));
-
-		gEngfuncs.pEventAPI->EV_PlaySound(idx,
-										origin,
-										CHAN_WEAPON,
-										soundName,
-										volume,
-										ATTN_NORM,
-										0,
-										pitch);
-	}
-
-	vec3_t vecSrc;
-	vec3_t vecAiming;
-	EV_GetGunPosition( args, vecSrc, origin );
-	VectorCopy( forward, vecAiming );
-
-	// We don't use the X/Y spread from the weapon attributes here, because the bullet firing
-	// code has already been run on the server. We need to use the values we've been given
-	// from this in order to make sure the tracers match the fired bullets.
-	GenericWeaponFireBullets(idx,
-						forward,
-						right,
-						up,
-						vecSrc,
-						vecAiming,
-						fireMode,
-						mechanic,
-						args->fparam1,
-						args->fparam2,
-						args->iparam1);
-}
-
 static void GenericWeaponProjectileFire(event_args_t *args, const CGenericWeaponAtts_FireMode& fireMode, const CGenericWeaponAtts_ProjectileFireMechanic& mechanic)
 {
 	const int idx = args->entindex;
@@ -648,32 +547,6 @@ static void GenericWeaponProjectileFire(event_args_t *args, const CGenericWeapon
 										0,
 										pitch);
 	}
-}
-
-void EV_HandleGenericHitscanFire(event_args_t* args)
-{
-	const CGenericWeaponAtts_FireMode::FireModeSignature* signature =
-		(CGenericWeaponAtts_FireMode::FireModeSignature*)args->localUserData;
-
-	const WeaponId_e weaponId = static_cast<const WeaponId_e>(signature->m_iWeaponId);
-	const uint8_t fireModeIndex = static_cast<const uint8_t>(signature->m_iFireMode);
-
-	const CGenericWeaponAttributes* atts = CWeaponRegistry::StaticInstance().Get(weaponId);
-	if ( !atts )
-	{
-		ASSERT(false);
-		return;
-	}
-
-	const CGenericWeaponAtts_FireMode& fireMode = atts->FireMode(fireModeIndex);
-	const CGenericWeaponAtts_BaseFireMechanic* mechanic = fireMode.Mechanic();
-	if ( !mechanic || mechanic->Id() != CGenericWeaponAtts_BaseFireMechanic::FireMechanic_e::Hitscan )
-	{
-		ASSERT(false);
-		return;
-	}
-
-	GenericWeaponHitscanFire(args, fireMode, *(mechanic->AsType<const CGenericWeaponAtts_HitscanFireMechanic>()));
 }
 
 void EV_HandleGenericProjectileFire(event_args_t* args)

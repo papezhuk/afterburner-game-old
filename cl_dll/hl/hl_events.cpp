@@ -19,6 +19,7 @@
 #include "ev_hldm.h"
 #include "weaponregistry.h"
 #include "genericweaponattributes.h"
+#include "genericweapon.h"
 
 /*
 ======================
@@ -35,6 +36,8 @@ That was what we were going to do, but we ran out of time...oh well.
 */
 void Game_HookEvents( void )
 {
+	EV_HLDM_Init();
+
 	gEngfuncs.pfnHookEvent( "events/glock1.sc", EV_FireGlock1, NULL );
 	gEngfuncs.pfnHookEvent( "events/glock2.sc", EV_FireGlock2, NULL );
 	gEngfuncs.pfnHookEvent( "events/shotgun1.sc", EV_FireShotGunSingle, NULL );
@@ -58,7 +61,7 @@ void Game_HookEvents( void )
 	// Hook up all registered weapons to generic event handlers for firing.
 	CWeaponRegistry::StaticInstance().ForEach([](const CGenericWeaponAttributes& atts)
 	{
-		for ( uint8_t fireModeIndex = 0; fireModeIndex < 2; ++fireModeIndex )
+		for ( uint8_t fireModeIndex = 0; fireModeIndex < WEAPON_MAX_FIRE_MODES; ++fireModeIndex )
 		{
 			const CGenericWeaponAtts_FireMode& fireMode = atts.FireMode(fireModeIndex);
 			if ( !fireMode.HasMechanic() )
@@ -66,25 +69,7 @@ void Game_HookEvents( void )
 				continue;
 			}
 
-			switch ( fireMode.Mechanic()->Id() )
-			{
-				case CGenericWeaponAtts_BaseFireMechanic::FireMechanic_e::Hitscan:
-				{
-					gEngfuncs.pfnHookEvent(fireMode.Event(), EV_HandleGenericHitscanFire, (void*)fireMode.Signature());
-					break;
-				}
-
-				case CGenericWeaponAtts_BaseFireMechanic::FireMechanic_e::Projectile:
-				{
-					gEngfuncs.pfnHookEvent(fireMode.Event(), EV_HandleGenericProjectileFire, (void*)fireMode.Signature());
-					break;
-				}
-
-				default:
-				{
-					break;
-				}
-			}
+			gEngfuncs.pfnHookEvent(fireMode.Event(), EV_HandleGenericWeaponFire, (void*)fireMode.Signature());
 		}
 	});
 }

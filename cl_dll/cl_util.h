@@ -40,8 +40,14 @@
 								gHUD.y.UserCmd_##x( ); \
 							}
 
+#ifndef CVAR_GET_FLOAT
 inline float CVAR_GET_FLOAT( const char *x ) {	return gEngfuncs.pfnGetCvarFloat( (char*)x ); }
+#endif
+
+#ifndef CVAR_GET_STRING
 inline char* CVAR_GET_STRING( const char *x ) {	return gEngfuncs.pfnGetCvarString( (char*)x ); }
+#endif
+
 inline struct cvar_s *CVAR_CREATE( const char *cv, const char *val, const int flags ) {	return gEngfuncs.pfnRegisterVariable( (char*)cv, (char*)val, flags ); }
 
 #define SPR_Load ( *gEngfuncs.pfnSPR_Load )

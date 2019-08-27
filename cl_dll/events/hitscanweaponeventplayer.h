@@ -1,14 +1,14 @@
 #pragma once
 
-#include "genericweaponattributes.h"
-/*#include "ev_hldm.h"*/
+#include "ieventplayer.h"
 
-class HitscanWeaponEventPlayer
+class HitscanWeaponEventPlayer : public IEventPlayer
 {
 public:
-	void PlayEvent(/*const event_args_t* eventArgs, const CGenericWeaponAtts_FireMode::FireModeSignature* signature*/);
+	virtual void PlayEvent(const event_args_t* eventArgs,
+						   const CGenericWeaponAtts_FireMode::FireModeSignature* signature) override;
 
-/*private:
+private:
 	bool Initialise();
 	void AnimateViewModel();
 	void EjectShellFromViewModel();
@@ -33,5 +33,5 @@ public:
 	vec3_t m_vecFwd;
 	vec3_t m_vecRight;
 	vec3_t m_vecUp;
-	vec3_t m_vecGunPosition;*/
+	vec3_t m_vecGunPosition;
 };

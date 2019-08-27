@@ -19,7 +19,9 @@
 #ifndef PARSEMSG_H
 #define PARSEMSG_H
 
+#ifndef ASSERT
 #define ASSERT( x )
+#endif
 
 void BEGIN_READ( void *buf, int size );
 int READ_CHAR( void );

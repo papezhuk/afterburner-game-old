@@ -88,7 +88,7 @@ protected:
 #endif
 	}
 
-	unsigned short m_FireEvents[2];
+	unsigned short m_FireEvents[WEAPON_MAX_FIRE_MODES];
 
 private:
 	void PrecacheFireMode(uint8_t fireModeIndex);
