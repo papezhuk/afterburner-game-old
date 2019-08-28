@@ -7,7 +7,8 @@ const int WEAPON_HUD_SLOTS[MAX_WEAPON_SLOTS][MAX_WEAPON_POSITIONS] =
 {
 	// Slot 1
 	{
-		WEAPON_CROWBAR
+		WEAPON_CROWBAR,
+		static_cast<int>(WeaponId_e::WeaponFists)
 	},
 
 	// Slot 2

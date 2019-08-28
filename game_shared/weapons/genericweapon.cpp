@@ -39,7 +39,11 @@ void CGenericWeapon::Spawn()
 	Precache();
 	m_iId = static_cast<int>(core.Id());
 	FindWeaponSlotInfo();
-	SET_MODEL(ENT(pev), core.WorldModelName());
+
+	if ( core.WorldModelName() )
+	{
+		SET_MODEL(ENT(pev), core.WorldModelName());
+	}
 
 	m_iDefaultAmmo = core.PrimaryAmmoOnFirstPickup();
 

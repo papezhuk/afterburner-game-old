@@ -1354,7 +1354,7 @@ int V_FindViewModelByWeaponModel( int weaponindex )
 		const char* name = atts->Core().PlayerModelName();
 		if ( strnicmp(weaponModel->name, name, len) )
 		{
-			return gEngfuncs.pEventAPI->EV_FindModelIndex(name);
+			return gEngfuncs.pEventAPI->EV_FindModelIndex(atts->Core().ViewModelName());
 		}
 	}
 

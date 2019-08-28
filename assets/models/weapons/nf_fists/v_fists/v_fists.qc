@@ -1,6 +1,6 @@
 $cd "."
 $cdtexture "." "..\..\common"
-$modelname "v_dukes.mdl"
+$modelname "v_fists.mdl"
 
 $root "Bip01"
 $scale 1.0
@@ -13,7 +13,7 @@ $cbox 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000
 
 $bodygroup "studio"
 {
-	studio "v_dukes_reference_ref"
+	studio "v_fists_reference_ref"
 }
 
 $hbox 0 "Bip01 L Forearm" 0.000000 -1.140000 -1.040000 11.368420 0.189989 0.000003

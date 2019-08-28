@@ -7,7 +7,8 @@
 enum WeaponPreferenceWeight
 {
 	// Least preferable
-	WeaponPref_P99 = 1,
+	WeaponPref_Fists = 1,
+	WeaponPref_P99,
 	WeaponPref_Raptor,
 	WeaponPref_Frinesi,
 	WeaponPref_GrenadeLauncher,

@@ -6,5 +6,6 @@ enum class WeaponId_e
 	WeaponP99 = 17,	// TODO: Change once other weapons are gone
 	WeaponFrinesi,
 	WeaponGrenadeLauncher,
-	WeaponRaptor
+	WeaponRaptor,
+	WeaponFists
 };
