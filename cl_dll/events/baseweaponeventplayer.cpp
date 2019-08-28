@@ -11,6 +11,8 @@
 #include "cl_util.h"
 #include "view.h"
 #include "in_defs.h"
+#include "rapidjson/document.h"
+#include "rapidjson_helpers/rapidjson_helpers.h"
 
 namespace
 {
@@ -20,8 +22,28 @@ namespace
 	static constexpr float SHELLEJECT_UP_SCALE = 4;
 }
 
+void BaseWeaponEventPlayer::LoadEventScript(const CUtlString& path)
+{
+	rapidjson::Document document;
+
+	if ( !rapidjson::LoadFileFromClient(path, document, "BaseWeaponEventPlayer") )
+	{
+		return;
+	}
+
+	if ( !document.IsObject() )
+	{
+		ALERT(at_error, "BaseWeaponEventPlayer: Weapon script %s root is not an object.\n",
+			  path.String());
+		
+		return;
+	}
+
+	ParseEventScript(document);
+}
+
 void BaseWeaponEventPlayer::PlayEvent(const event_args_t* eventArgs,
-				   				const CGenericWeaponAtts_FireMode::FireModeSignature* signature)
+				   					  const CGenericWeaponAtts_FireMode::FireModeSignature* signature)
 {
 	m_pEventArgs = eventArgs;
 	m_pSignature = signature;
@@ -33,6 +55,10 @@ void BaseWeaponEventPlayer::PlayEvent(const event_args_t* eventArgs,
 	}
 
 	EventStart();
+}
+
+void BaseWeaponEventPlayer::ParseEventScript(const rapidjson::Document& document)
+{
 }
 
 bool BaseWeaponEventPlayer::Initialise()

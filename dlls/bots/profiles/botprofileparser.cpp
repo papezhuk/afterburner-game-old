@@ -8,7 +8,6 @@
 #include "botprofiletable.h"
 #include "rapidjson/document.h"
 #include "rapidjson_helpers/rapidjson_helpers.h"
-#include "rapidjson/error/en.h"
 #include "utlstring.h"
 
 #define LOG(level, ...) ALERT(level, "BotProfileParser: " __VA_ARGS__);
@@ -53,25 +52,11 @@ CBotProfileParser::CBotProfileParser(CBotProfileTable& table) :
 bool CBotProfileParser::Parse(const CUtlString& filePath)
 {
 	m_Table.Clear();
-
-	int length = 0;
-	byte* fileData = LOAD_FILE_FOR_ME(filePath.String(), &length);
-
-	if ( !fileData )
-	{
-		return false;
-	}
-
+	
 	rapidjson::Document document;
-	rapidjson::ParseResult parseResult = document.Parse(reinterpret_cast<char*>(fileData));
-	FREE_FILE(fileData);
 
-	if ( parseResult.IsError() )
+	if ( !rapidjson::LoadFileFromServer(filePath, document, "BotProfileParser") )
 	{
-		LOG(at_error, "JSON document could not be parsed. Error at offset %u: %s\n",
-			parseResult.Offset(),
-			rapidjson::GetParseError_En(parseResult.Code()));
-
 		return false;
 	}
 

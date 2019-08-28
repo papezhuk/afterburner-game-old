@@ -102,7 +102,8 @@ if(MSVC)
 	# 4244 = Possible loss of data on type cast
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /WX /wd4005 /wd4244")
 else()
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wno-format-truncation")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wno-format-truncation -fvisibility=hidden")
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--no-undefined")
 endif()
 
 if(BUILD_CLIENT)

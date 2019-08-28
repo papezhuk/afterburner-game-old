@@ -1,18 +1,24 @@
 #pragma once
 
 #include "genericweaponattributes.h"
+#include "utlstring.h"
+#include "rapidjson/document.h"
 
 typedef struct event_args_s event_args_t;
 
 class BaseWeaponEventPlayer
 {
 public:
+	virtual ~BaseWeaponEventPlayer() {}
+
+	void LoadEventScript(const CUtlString& path);
 	void PlayEvent(const event_args_t* eventArgs,
 				   const CGenericWeaponAtts_FireMode::FireModeSignature* signature);
 
 protected:
 	virtual void EventStart() = 0;
 	virtual bool Initialise();
+	virtual void ParseEventScript(const rapidjson::Document& document);
 
 	void AnimateViewModel();
 	void EjectShellFromViewModel();

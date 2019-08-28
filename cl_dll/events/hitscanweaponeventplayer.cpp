@@ -11,6 +11,8 @@
 #include "genericweapon.h"
 #include "pm_defs.h"
 #include "ev_hldm.h"
+#include "rapidjson/document.h"
+#include "rapidjson_helpers/rapidjson_helpers.h"
 
 void HitscanWeaponEventPlayer::EventStart()
 {
@@ -46,7 +48,7 @@ void HitscanWeaponEventPlayer::CreateBulletTracers()
 			float spreadX = 0.0f;
 			float spreadY = 0.0f;
 
-			CGenericWeapon::GetSharedCircularGaussianSpread(m_iEntIndex, m_iRandomSeed, spreadX, spreadY);
+			CGenericWeapon::GetSharedCircularGaussianSpread(shot, m_iRandomSeed, spreadX, spreadY);
 
 			for ( uint8_t axis = 0; axis < 3; ++axis )
 			{
@@ -71,13 +73,22 @@ void HitscanWeaponEventPlayer::CreateBulletTracers()
 		pmtrace_t traceResult;
 		gEngfuncs.pEventAPI->EV_PlayerTrace(m_vecGunPosition, traceEnd, PM_STUDIO_BOX, -1, &traceResult);
 
-		EV_HLDM_CheckTracer(m_iEntIndex, m_vecGunPosition, traceResult.endpos, m_vecFwd, m_vecRight, BULLET_GENERIC);
+		// Only actually draw trace lines on multiples of the trace stride.
+		if ( m_iTracerStride < 2 || (m_iShotsFired % m_iTracerStride) == 0 )
+		{
+			EV_HLDM_CheckTracer(m_iEntIndex, m_vecGunPosition, traceResult.endpos, m_vecFwd, m_vecRight, BULLET_GENERIC);
+		}
 
-		// do damage, paint decals
+		// Do damage + paint decals.
 		if ( traceResult.fraction != 1.0 )
 		{
 			EV_HLDM_PlayTextureSound(m_iEntIndex, &traceResult, m_vecGunPosition, traceEnd, BULLET_GENERIC);
 			EV_HLDM_DecalGunshot(&traceResult, BULLET_GENERIC);
+		}
+
+		if ( m_iTracerStride > 1 )
+		{
+			m_iShotsFired = (m_iShotsFired + 1) % m_iTracerStride;
 		}
 
 		gEngfuncs.pEventAPI->EV_PopPMStates();
@@ -96,4 +107,9 @@ bool HitscanWeaponEventPlayer::Initialise()
 	m_iRandomSeed = m_pEventArgs->iparam1;
 
 	return true;
+}
+
+void HitscanWeaponEventPlayer::ParseEventScript(const rapidjson::Document& document)
+{
+	m_iTracerStride = rapidjson::GetProperty<int>(document, "tracerStride", rapidjson::kNumberType, 1);
 }

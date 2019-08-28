@@ -41,10 +41,13 @@
 #include "genericweaponattributes.h"
 #include "weaponregistry.h"
 #include "genericweapon.h"
+
+#include <memory>
 #include "baseweaponeventplayer.h"
 #include "hitscanweaponeventplayer.h"
+#include "projectileweaponeventplayer.h"
 
-static BaseWeaponEventPlayer* EventPlayers[MAX_WEAPONS][WEAPON_MAX_FIRE_MODES];
+static std::unique_ptr<BaseWeaponEventPlayer> EventPlayers[MAX_WEAPONS][WEAPON_MAX_FIRE_MODES];
 
 extern engine_studio_api_t IEngineStudio;
 
@@ -84,19 +87,48 @@ void EV_HLDM_Init()
 				continue;
 			}
 
+			if ( !fireMode.Event() )
+			{
+				ALERT(at_error, "EV_HLDM_Init: Weapon '%s' does not specify an event script for fire mode %u!\n",
+					  atts.Core().Classname(),
+					  fireModeIndex);
+				
+				continue;
+			}
+
+			BaseWeaponEventPlayer* eventPlayer = nullptr;
+
 			switch ( fireMode.Mechanic()->Id() )
 			{
 				case CGenericWeaponAtts_BaseFireMechanic::Hitscan:
 				{
-					EventPlayers[index][fireModeIndex] = new HitscanWeaponEventPlayer();
+					eventPlayer = new HitscanWeaponEventPlayer();
+					break;
+				}
+				
+				case CGenericWeaponAtts_BaseFireMechanic::Projectile:
+				{
+					eventPlayer = new ProjectileWeaponEventPlayer();
 					break;
 				}
 
 				default:
 				{
+					gEngfuncs.Con_Printf("EV_HLDM_Init: No event handler for fire mode mechanic ID %u!\n",
+										 atts.Core().Classname(),
+					 					 static_cast<uint32_t>(fireMode.Mechanic()->Id()));
+
 					break;
 				}
 			}
+
+			if ( !eventPlayer )
+			{
+				continue;
+			}
+
+			EventPlayers[index][fireModeIndex].reset(eventPlayer);
+			eventPlayer->LoadEventScript(fireMode.Event());
 		}
 	});
 }
@@ -114,7 +146,7 @@ void EV_HandleGenericWeaponFire(event_args_t* args)
 		return;
 	}
 
-	BaseWeaponEventPlayer* eventPlayer = EventPlayers[weaponId][fireModeIndex];
+	std::unique_ptr<BaseWeaponEventPlayer>& eventPlayer = EventPlayers[weaponId][fireModeIndex];
 
 	if ( !eventPlayer )
 	{

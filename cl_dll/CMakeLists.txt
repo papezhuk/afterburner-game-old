@@ -73,6 +73,7 @@ set (CLDLL_SOURCES
 	../game_shared/weapons/weapon_frinesi.cpp
 	../game_shared/weapons/weapon_grenadelauncher.cpp
 	../game_shared/weapons/weapon_raptor.cpp
+	../game_shared/rapidjson_helpers/rapidjson_helpers.cpp
 	../game_shared/gameplay/radialdamage.cpp
 	../miniutl/bitstring.cpp
 	../miniutl/generichash.cpp
@@ -84,6 +85,7 @@ set (CLDLL_SOURCES
 	ev_hldm.cpp
 	events/baseweaponeventplayer.cpp
 	events/hitscanweaponeventplayer.cpp
+	events/projectileweaponeventplayer.cpp
 	hl/hl_baseentity.cpp
 	hl/hl_events.cpp
 	hl/hl_objects.cpp

@@ -1,2 +1,7 @@
-// Apparently these were going to be genuine scripts, but the devs ran out of time.
-// Now, they just need to exist in order to correspond to a game event.
+{
+	"_comment":
+	[
+		"Purely visual settings are stored in the event files.",
+		"Anything gameplay-related should be put into the weapon attributes in code."
+	]
+}
