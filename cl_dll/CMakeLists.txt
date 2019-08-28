@@ -65,7 +65,7 @@ set (CLDLL_SOURCES
 	../game_shared/weapons/genericweapon.cpp
 	../game_shared/weapons/generichitscanweapon.cpp
 	../game_shared/weapons/genericprojectileweapon.cpp
-	../game_shared/weapons/genericweaponattributes.cpp
+	../game_shared/weaponattributes/genericweaponattributes.cpp
 	../game_shared/weapons/ammodefs.cpp
 	../game_shared/weapons/weaponslots.cpp
 	../game_shared/studio_utils_shared.cpp
@@ -147,6 +147,8 @@ include_directories (
 	../public
 	../utils/false_vgui/include
 	../game_shared/weapons
+	../game_shared/weaponattributes
+	../game_shared/util
 	../game_shared/gameplay)
 
 if(USE_VOICEMGR)

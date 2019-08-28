@@ -1,5 +1,6 @@
 #include "genericprojectileweapon.h"
 #include "soundent.h"
+#include "weaponatts_projectilefiremechanic.h"
 
 void CGenericProjectileWeapon::Precache()
 {

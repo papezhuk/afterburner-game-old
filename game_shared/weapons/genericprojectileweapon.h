@@ -2,6 +2,8 @@
 
 #include "genericweapon.h"
 
+class CGenericWeaponAtts_ProjectileFireMechanic;
+
 class CGenericProjectileWeapon : public CGenericWeapon
 {
 public:

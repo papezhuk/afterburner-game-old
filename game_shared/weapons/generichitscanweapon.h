@@ -2,8 +2,13 @@
 
 #include "genericweapon.h"
 
+class CGenericWeaponAtts_HitscanFireMechanic;
+
 class CGenericHitscanWeapon : public CGenericWeapon
 {
+public:
+	virtual void WeaponIdle() override;
+
 protected:
 	virtual bool SwitchFire(int index,
 							const CGenericWeaponAtts_FireMode& fireMode,

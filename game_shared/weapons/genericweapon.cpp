@@ -84,11 +84,21 @@ void CGenericWeapon::PrecacheSounds(const CGenericWeaponAttributes_Sound& sounds
 
 void CGenericWeapon::PrecacheCore(const CGenericWeaponAtts_Core& core)
 {
-	m_iViewModelIndex = PRECACHE_MODEL(core.ViewModelName());
-	StudioGetAnimationDurations(m_iViewModelIndex, m_ViewAnimDurations);
+	if ( core.ViewModelName() )
+	{
+		m_iViewModelIndex = PRECACHE_MODEL(core.ViewModelName());
+		StudioGetAnimationDurations(m_iViewModelIndex, m_ViewAnimDurations);
+	}
 
-	PRECACHE_MODEL(core.PlayerModelName());
-	PRECACHE_MODEL(core.WorldModelName());
+	if ( core.PlayerModelName() )
+	{
+		PRECACHE_MODEL(core.PlayerModelName());
+	}
+
+	if ( core.WorldModelName() )
+	{
+		PRECACHE_MODEL(core.WorldModelName());
+	}
 
 	const char* pickupSoundOverride = core.PickupSoundOverride();
 	PRECACHE_SOUND(pickupSoundOverride ? pickupSoundOverride : DEFAULT_WEAPON_PICKUP_SOUND);
@@ -352,14 +362,8 @@ void CGenericWeapon::WeaponIdle()
 {
 	const CGenericWeaponAttributes& atts = WeaponAttributes();
 	const CGenericWeaponAtts_Core& core = atts.Core();
-	const CGenericWeaponAtts_BaseFireMechanic* const primaryMechanic = atts.FireMode(0).Mechanic();
 
 	ResetEmptySound();
-
-	if ( primaryMechanic && primaryMechanic->Id() == CGenericWeaponAtts_BaseFireMechanic::FireMechanic_e::Hitscan )
-	{
-		m_pPlayer->GetAutoaimVector(primaryMechanic->AsType<CGenericWeaponAtts_HitscanFireMechanic>()->AutoAim());
-	}
 
 	if( m_flTimeWeaponIdle > UTIL_WeaponTimeBase() )
 	{

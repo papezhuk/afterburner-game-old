@@ -13,6 +13,7 @@
 #include "ev_hldm.h"
 #include "rapidjson/document.h"
 #include "rapidjson_helpers/rapidjson_helpers.h"
+#include "weaponatts_hitscanfiremechanic.h"
 
 void HitscanWeaponEventPlayer::EventStart()
 {

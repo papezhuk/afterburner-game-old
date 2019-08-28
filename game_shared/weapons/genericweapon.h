@@ -92,7 +92,6 @@ protected:
 
 private:
 	void PrecacheFireMode(uint8_t fireModeIndex);
-	void PrecacheHitscanResources(const CGenericWeaponAtts_HitscanFireMechanic& fireMode);
 	void PrecacheCore(const CGenericWeaponAtts_Core& core);
 
 	void SetFireOnEmptyState(uint8_t mode);

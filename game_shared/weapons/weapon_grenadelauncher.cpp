@@ -3,6 +3,7 @@
 #include "skill.h"
 #include "gamerules.h"
 #include "weapon_pref_weights.h"
+#include "weaponatts_projectilefiremechanic.h"
 
 #ifndef CLIENT_DLL
 #include <limits>

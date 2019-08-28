@@ -13,6 +13,7 @@
 #include "in_defs.h"
 #include "rapidjson/document.h"
 #include "rapidjson_helpers/rapidjson_helpers.h"
+#include "weaponatts_hitscanfiremechanic.h"
 
 namespace
 {
@@ -35,7 +36,7 @@ void BaseWeaponEventPlayer::LoadEventScript(const CUtlString& path)
 	{
 		ALERT(at_error, "BaseWeaponEventPlayer: Weapon script %s root is not an object.\n",
 			  path.String());
-		
+
 		return;
 	}
 

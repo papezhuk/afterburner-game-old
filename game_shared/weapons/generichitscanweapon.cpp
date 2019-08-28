@@ -1,5 +1,18 @@
 #include "generichitscanweapon.h"
+#include "weaponatts_hitscanfiremechanic.h"
 #include "skill.h"
+
+void CGenericHitscanWeapon::WeaponIdle()
+{
+	const CGenericWeaponAtts_BaseFireMechanic* const primaryMechanic = WeaponAttributes().FireMode(0).Mechanic();
+
+	if ( primaryMechanic && primaryMechanic->Id() == CGenericWeaponAtts_BaseFireMechanic::FireMechanic_e::Hitscan )
+	{
+		m_pPlayer->GetAutoaimVector(primaryMechanic->AsType<CGenericWeaponAtts_HitscanFireMechanic>()->AutoAim());
+	}
+
+	CGenericWeapon::WeaponIdle();
+}
 
 void CGenericHitscanWeapon::SwitchPrecache(const CGenericWeaponAtts_BaseFireMechanic& mechanic)
 {
