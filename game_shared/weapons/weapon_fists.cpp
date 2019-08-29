@@ -29,7 +29,8 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 )
 .Animations(
 	CGenericWeaponAtts_Animations()
-	.Extension("onehanded" /*TODO*/)
+	.Extension("crowbar")
+	.Index_Draw(FISTS_IDLE1)
 )
 .IdleAnimations(
 	CGenericWeaponAtts_IdleAnimations()
@@ -38,6 +39,7 @@ static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAtt
 .Skill(
 	CGenericWeaponAttributes_Skill()
 	.Record("sk_plr_dmg_fists", &skilldata_t::plrDmgFists)
+	.Record("sk_plr_dmg_fists_alt", &skilldata_t::plrDmgFistsAlt)
 )
 ;
 
