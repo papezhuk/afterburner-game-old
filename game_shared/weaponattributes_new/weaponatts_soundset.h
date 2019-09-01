@@ -7,7 +7,7 @@
 
 namespace WeaponAtts
 {
-	struct CWASoundSet : public CWABase
+	struct WASoundSet : public WABase
 	{
 		float MinVolume = 1.0f;
 		float MaxVolume = 1.0f;

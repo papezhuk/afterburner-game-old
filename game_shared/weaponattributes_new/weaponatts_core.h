@@ -5,7 +5,7 @@
 
 namespace WeaponAtts
 {
-	struct CWACore : public CWABase
+	struct WACore : public WABase
 	{
 		WeaponId_e Id = WeaponId_e::WeaponNone;
 		const char* Classname = nullptr;

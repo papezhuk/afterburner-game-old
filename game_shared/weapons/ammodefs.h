@@ -4,8 +4,10 @@
 
 struct CAmmoDef
 {
-	const char* Name;
+	const char* ClassName;
+	const char* AmmoName;
 	uint32_t MaxCarry;
+	uint32_t AmmoBoxGive;
 };
 
 extern const CAmmoDef AmmoDef_9mm;

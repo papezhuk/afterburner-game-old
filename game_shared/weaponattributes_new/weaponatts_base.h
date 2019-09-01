@@ -4,7 +4,7 @@
 
 namespace WeaponAtts
 {
-	struct CWABase
+	struct WABase
 	{
 		// Override to validate specific members of the class using assertions.
 		virtual void Validate() const

@@ -7,7 +7,7 @@ template<typename T>
 class WeightedValueList
 {
 public:
-	uint32_t Add(const T& value, float weight, bool normalise = true)
+	uint32_t Add(const T& value, float weight = 1.0f, bool normalise = true)
 	{
 		m_Items.AddToTail({value, weight, 0.0f});
 
@@ -17,6 +17,12 @@ public:
 		}
 
 		return m_Items.Count();
+	}
+
+	// Convenience for adding items with equal chance to be chosen.
+	WeightedValueList<T>& operator <<(const T& value)
+	{
+		Add(value, 1.0f, true);
 	}
 
 	const T& Value(uint32_t index) const
@@ -71,6 +77,11 @@ public:
 	size_t Count() const
 	{
 		return m_Items.Count();
+	}
+
+	void Clear()
+	{
+		m_Items.Purge();
 	}
 
 	void NormaliseWeights()

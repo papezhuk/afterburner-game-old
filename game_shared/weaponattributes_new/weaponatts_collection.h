@@ -1,29 +1,47 @@
 #pragma once
 
 #include <functional>
+#include <memory>
+
 #include "weaponatts_core.h"
 #include "weaponatts_skillrecord.h"
 #include "weaponatts_viewmodel.h"
+#include "weaponatts_playermodel.h"
 #include "weaponatts_soundset.h"
+#include "weaponatts_ammodef.h"
+#include "weaponatts_baseattack.h"
 #include "utlvector.h"
+
+#ifdef CLIENT_DLL
+#include "weaponatts_client.h"
+#endif
 
 namespace WeaponAtts
 {
-	struct CWACollection
+	// Weapon attributes are designed to comprise a sort of static database of useful
+	// properties for a weapon. The CGenericWeapon class and its subclasses use these
+	// properties to establish the behaviour of each weapon.
+	struct WACollection
 	{
-		CWACore Core;
-		CUtlVector<CWASkillRecord> SkillRecords;
+		WACore Core;
+		WAAmmoDef Ammo;
+		CUtlVector<WASkillRecord> SkillRecords;
 		CUtlVector<cvar_t*> CustomCvars;
+		CUtlVector<std::shared_ptr<WABaseAttack>> AttackModes;
 
-		CWAViewModel ViewModel;
+		WAViewModel ViewModel;
+		WAPlayerModel PlayerModel;
 
-		CWACollection(const std::function<void(CWACollection&)>& initialiser);
-		CWACollection& operator =(const CWACollection& other);
+#ifdef CLIENT_DLL
+		WAClient Client;
+#endif
 
+		WACollection(const std::function<void(WACollection&)>& initialiser);
 		void RegisterCvars() const;
 
 	private:
 		void Register() const;
 		void Validate() const;
+		void GenerateAttackModeSignatures() const;
 	};
 }

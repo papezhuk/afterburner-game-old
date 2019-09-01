@@ -4,6 +4,7 @@
 #include "weapons.h"
 #include "genericweaponattributes.h"
 #include "utlvector.h"
+#include "weaponatts_collection.h"
 
 // Build on top of CBasePlayerWeapon, because this is so tied into the engine
 // already it'd be a pain to replace it (at least at this stage).
@@ -24,7 +25,16 @@ public:
 	virtual int iItemSlot() override;
 	virtual void ItemPostFrame() override;
 
-	virtual const CGenericWeaponAttributes& WeaponAttributes() const = 0;
+	virtual const WeaponAtts::WACollection& WeaponAttributes() const = 0;
+
+#ifndef CLIENT_DLL
+	// Don't know if this is the best place to put these?
+	// Currently refactoring weapon attributes and didn't like putting
+	// non-static behaviour like this into static attributes.
+	// Evaluate whether this should be moved elsewhere.
+	virtual float Bot_CalcDesireToUse(CGenericWeapon& weapon, CBaseBot& bot, CBaseEntity& enemy, float distanceToEnemy) const = 0;
+	virtual void Bot_SetFightStyle(CBaseBotFightStyle& fightStyle) const = 0;
+#endif
 
 	static constexpr float DEFAULT_BULLET_TRACE_DISTANCE = 8192;
 	static void GetSharedCircularGaussianSpread(uint32_t shot, int shared_rand, float& x, float& y);
@@ -115,11 +125,10 @@ private:
 class CGenericAmmo : public CBasePlayerAmmo
 {
 public:
-	CGenericAmmo(const char* modelName, const CAmmoDef& ammoDef, int giveAmount, const char* pickupSoundName = NULL)
+	CGenericAmmo(const char* modelName, const CAmmoDef& ammoDef, const char* pickupSoundName = NULL)
 		: CBasePlayerAmmo(),
 		  m_szModelName(modelName),
 		  m_AmmoDef(ammoDef),
-		  m_iGiveAmount(giveAmount),
 		  m_szPickupSoundName(pickupSoundName)
 	{
 		ASSERT(m_szModelName);
@@ -141,7 +150,7 @@ public:
 
 	BOOL AddAmmo(CBaseEntity *pOther)
 	{
-		if( pOther->GiveAmmo(m_iGiveAmount, m_AmmoDef.Name, m_AmmoDef.MaxCarry) != -1 )
+		if( pOther->GiveAmmo(m_AmmoDef.AmmoBoxGive, m_AmmoDef.AmmoName, m_AmmoDef.MaxCarry) != -1 )
 		{
 			EMIT_SOUND(ENT(pev), CHAN_ITEM, DEFAULT_PICKUP_SOUND, 1, ATTN_NORM);
 			return TRUE;
@@ -152,7 +161,7 @@ public:
 
 	inline const char* AmmoName() const
 	{
-		return m_AmmoDef.Name;
+		return m_AmmoDef.AmmoName;
 	}
 
 private:
@@ -160,6 +169,5 @@ private:
 
 	const char* m_szModelName;
 	const CAmmoDef& m_AmmoDef;
-	int m_iGiveAmount;
 	const char* m_szPickupSoundName;
 };

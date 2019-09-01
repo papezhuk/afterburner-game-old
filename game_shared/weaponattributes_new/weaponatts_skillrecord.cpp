@@ -4,7 +4,7 @@
 
 namespace WeaponAtts
 {
-	CWASkillRecord::CWASkillRecord(const char* cvarBaseName, SkillDataEntryPtr entry) :
+	WASkillRecord::WASkillRecord(const char* cvarBaseName, SkillDataEntryPtr entry) :
 		m_Entry(entry),
 		m_BaseName(cvarBaseName)
 	{
@@ -21,7 +21,7 @@ namespace WeaponAtts
 		}
 	}
 
-	CWASkillRecord::CWASkillRecord(const CWASkillRecord& other) :
+	WASkillRecord::WASkillRecord(const WASkillRecord& other) :
 		m_Entry(other.m_Entry),
 		m_BaseName(other.m_BaseName)
 	{
@@ -33,7 +33,7 @@ namespace WeaponAtts
 		}
 	}
 
-	void CWASkillRecord::RegisterCvars() const
+	void WASkillRecord::RegisterCvars() const
 	{
 		for ( uint32_t index = 0; index < TOTAL_SKILL_LEVELS; ++index )
 		{
@@ -41,7 +41,7 @@ namespace WeaponAtts
 		}
 	}
 
-	void CWASkillRecord::UpdateSkillValue(skilldata_t* instance) const
+	void WASkillRecord::UpdateSkillValue(skilldata_t* instance) const
 	{
 		ASSERTSZ_Q(instance, "skilldata_t instance is not valid.");
 		ASSERTSZ_Q(instance->iSkillLevel > 0 && instance->iSkillLevel <= TOTAL_SKILL_LEVELS, "Skill level is not valid.");

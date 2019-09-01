@@ -4,198 +4,35 @@
 #include "gamerules.h"
 #include "weapon_pref_weights.h"
 #include "weaponatts_hitscanfiremechanic.h"
+#include "weapon_frinesi_atts.h"
 
 #ifndef CLIENT_DLL
 #include "bot.h"
 #endif
 
-namespace
+enum FrinesiReloadState_e
 {
-	enum FrinesiAnimations_e
-	{
-		FRINESI_IDLE1 = 0,
-		FRINESI_SHOOT,
-		FRINESI_SHOOT_BIG,
-		FRINESI_RELOAD,
-		FRINESI_PUMP,
-		FRINESI_START_RELOAD,
-		FRINESI_DRAW,
-		FRINESI_HOLSTER,
-		FRINESI_IDLE2,
-		FRINESI_IDLE3,
-		FRINESI_IDLE4
-	};
+	RELOAD_IDLE = 0,
+	RELOAD_LOAD_SHELL,
+	RELOAD_INCREMENT_CLIP
+};
 
-	enum FrinesiReloadState_e
-	{
-		RELOAD_IDLE = 0,
-		RELOAD_LOAD_SHELL,
-		RELOAD_INCREMENT_CLIP
-	};
-
-	static constexpr int RELOAD_MASK = 0x3;
-	static constexpr int RELOAD_FLAG_INTERRUPTED = (1 << 2);
-	static constexpr int RELOAD_FLAG_LOADED_ONCE = (1 << 3);
-	static constexpr int NextReloadState(int orig, int next)
-	{
-		return (orig & ~(RELOAD_MASK)) | next;
-	}
-
-	// From Nightfire:
-	// - 6 bullets per shot in either mode
-	// - 81 damage over all 6 shots in auto mode = 13.5 per shot
-	// - 159 damage over all 6 shots in pump mode = 26.5 per shot
-
-	static constexpr uint8_t FRINESI_PELLETS_PER_SHOT = 6;
-	static constexpr float FRINESI_AUTOAIM_DEG = AUTOAIM_5DEGREES;
-	static constexpr int FRINESI_AMMOBOX_GIVE = 20;
-
-	static constexpr float FRINESI_BASE_DAMAGE_AUTO = 81.0f / static_cast<float>(FRINESI_PELLETS_PER_SHOT);
-	static constexpr float FRINESI_BASE_SPREAD_AUTO = 0.05f;
-	static constexpr float FRINESI_FIRE_RATE_AUTO = 4.0f;
-	static constexpr float FRINESI_RECOIL_AUTO = -5.0f;
-
-	// Go from 4 shots/sec to 3 shots/sec
-	static constexpr float FRINESI_BOT_REFIRE_DELAY_AUTO = (1.0f/3.0f) - (1.0f/FRINESI_FIRE_RATE_AUTO);
-
-	static constexpr float FRINESI_BASE_DAMAGE_PUMP = 159.0f / static_cast<float>(FRINESI_PELLETS_PER_SHOT);
-	static constexpr float FRINESI_BASE_SPREAD_PUMP = 0.1f;
-	static constexpr float FRINESI_FIRE_RATE_PUMP = 1.0f;
-	static constexpr float FRINESI_RECOIL_PUMP = -10.0f;
-	static constexpr float FRINESI_PUMP_DELAY = 0.42f;
-
-	// Go from 1 shot/sec to 1 shot per 1.5 secs
-	static constexpr float FRINESI_BOT_REFIRE_DELAY_PUMP = 1.5f - (1.0f/FRINESI_FIRE_RATE_PUMP);
-
-#ifdef CLIENT_DLL
-	static CWeaponFrinesi PredictionWeapon;
-#else
-	float FrinesiDesireToUse(CGenericWeapon& weapon, CBaseBot&, CBaseEntity&, float distanceToEnemy)
-	{
-		return static_cast<float>(WeaponPref_Frinesi) / static_cast<float>(WeaponPref_Max);
-	}
-
-	void FrinesiUseWeapon(CGenericWeapon& weapon, CBaseBotFightStyle& fightStyle)
-	{
-		static constexpr float SECONDARY_FIRE_PROXIMITY = 700.0f;
-
-		fightStyle.RandomizeAimAtHead(60);
-		int chanceOfSecondaryFire = 20;
-
-		// If we're able to determine that the enemy is near enough,
-		// increase the chance of using secondary fire.
-
-		CBaseBot* bot = fightStyle.GetOwner();
-		CBaseEntity* enemy = bot->GetEnemy();
-
-		if ( enemy && (enemy->pev->origin - bot->pev->origin).Length() <= SECONDARY_FIRE_PROXIMITY )
-		{
-			chanceOfSecondaryFire = 90;
-		}
-
-		fightStyle.RandomizeSecondaryFire(chanceOfSecondaryFire);
-		fightStyle.SetNextShootTime(1.0f / (fightStyle.GetSecondaryFire() ? FRINESI_FIRE_RATE_PUMP : FRINESI_FIRE_RATE_AUTO),
-									fightStyle.GetSecondaryFire() ? FRINESI_BOT_REFIRE_DELAY_PUMP : FRINESI_BOT_REFIRE_DELAY_AUTO,
-									0.8f, 2.0f);
-	}
-#endif
+static constexpr int RELOAD_MASK = 0x3;
+static constexpr int RELOAD_FLAG_INTERRUPTED = (1 << 2);
+static constexpr int RELOAD_FLAG_LOADED_ONCE = (1 << 3);
+static constexpr int NextReloadState(int orig, int next)
+{
+	return (orig & ~(RELOAD_MASK)) | next;
 }
 
-static const CGenericWeaponAttributes StaticWeaponAttributes = CGenericWeaponAttributes(
-	CGenericWeaponAtts_Core()
-	.Id(WeaponId_e::WeaponFrinesi)
-	.Classname("weapon_frinesi")
-	.Flags(0)
-	.SwitchWeight(WeaponPref_Frinesi)
-	.PrimaryAmmoDef(&AmmoDef_Frinesi)
-	.PrimaryAmmoClassname("ammo_frinesi")
-	.MaxClip(8)
-	.PrimaryAmmoOnFirstPickup(8)
-	.UsesSpecialReload(true)
-	.ViewModelName("models/weapon_frinesi/v_frinesi.mdl")
-	.PlayerModelName("models/weapon_frinesi/p_frinesi.mdl")
-	.WorldModelName("models/weapon_frinesi/w_frinesi.mdl")
-#ifdef CLIENT_DLL
-	.ClientPredictionWeapon(&PredictionWeapon)
-#endif
-)
-// Auto
-.FireMode(0, CGenericWeaponAtts_FireMode()
-	.Event("events/weapon_frinesi/fire01.sc")
-	.FiresUnderwater(true)
-	.UsesAmmo(CGenericWeaponAtts_FireMode::AmmoType_e::Primary)
-	.FireRate(FRINESI_FIRE_RATE_AUTO)
-	.UniformSpread(FRINESI_BASE_SPREAD_AUTO)
-	.AnimIndex_FireNotEmpty(FRINESI_SHOOT)
-	.ViewPunchY(FRINESI_RECOIL_AUTO)
-	.Volume(LOUD_GUN_VOLUME)
-	.MuzzleFlashBrightness(NORMAL_GUN_FLASH)
-	.Sounds(CGenericWeaponAttributes_Sound()
-		.Sound("weapons/weapon_frinesi/frinesi_fire.wav")
-		.MinVolume(0.95f)
-		.MaxVolume(1.0f)
-		.MinPitch(98)
-		.MaxPitch(102)
-	)
-	.Mechanic(&((*new CGenericWeaponAtts_HitscanFireMechanic())
-		.BulletsPerShot(FRINESI_PELLETS_PER_SHOT)
-		.BaseDamagePerShot(&skilldata_t::plrDmgFrinesiAuto)
-		.AutoAim(FRINESI_AUTOAIM_DEG)
-		.ShellModelName("models/shell.mdl") // TODO: Nightfire has a shell model - use that? Multiple skins?
-	))
-)
-// Pump
-.FireMode(1, CGenericWeaponAtts_FireMode()
-	.Event("events/weapon_frinesi/fire02.sc")
-	.FiresUnderwater(true)
-	.UsesAmmo(CGenericWeaponAtts_FireMode::AmmoType_e::Primary)
-	.FireRate(FRINESI_FIRE_RATE_PUMP)
-	.UniformSpread(FRINESI_BASE_SPREAD_PUMP)
-	.AnimIndex_FireNotEmpty(FRINESI_SHOOT_BIG)
-	.ViewPunchY(FRINESI_RECOIL_PUMP)
-	.Volume(LOUD_GUN_VOLUME)
-	.MuzzleFlashBrightness(NORMAL_GUN_FLASH)
-	.Sounds(CGenericWeaponAttributes_Sound()
-		.Sound("weapons/weapon_frinesi/frinesi_altfire.wav")
-		.MinVolume(0.95f)
-		.MaxVolume(1.0f)
-		.MinPitch(98)
-		.MaxPitch(102)
-	)
-	.Mechanic(&((*new CGenericWeaponAtts_HitscanFireMechanic())
-		.BulletsPerShot(FRINESI_PELLETS_PER_SHOT)
-		.BaseDamagePerShot(&skilldata_t::plrDmgFrinesiPump)
-		.AutoAim(FRINESI_AUTOAIM_DEG)
-		.ShellModelName("models/shell.mdl") // TODO: Nightfire has a shell model - use that? Multiple skins?
-	))
-)
-.Animations(
-	CGenericWeaponAtts_Animations()
-	.Extension("shotgun")
-	.Index_Draw(FRINESI_DRAW)
-	.Index_ReloadWhenNotEmpty(FRINESI_START_RELOAD)
-	.ReloadSounds(CGenericWeaponAttributes_Sound()
-		.Sound("weapons/weapon_frinesi/frinesi_reload1.wav")
-		.Sound("weapons/weapon_frinesi/frinesi_reload2.wav")
-		.MinVolume(1.0f)
-		.MaxVolume(1.0f)
-		.MinPitch(98)
-		.MaxPitch(102)
-	)
-)
-.Skill(
-	CGenericWeaponAttributes_Skill()
-	.Record("sk_plr_dmg_frinesi_auto", &skilldata_t::plrDmgFrinesiAuto)
-	.Record("sk_plr_dmg_frinesi_pump", &skilldata_t::plrDmgFrinesiPump)
-)
-#ifndef CLIENT_DLL
-.BotWeaponAttributes(
-	CBotWeaponAttributes()
-	.DesireToUse(&FrinesiDesireToUse)
-	.UseWeapon(&FrinesiUseWeapon)
-)
-#endif
-;
+static constexpr const char* FRINESI_COCK_SOUND = "weapons/weapon_frinesi/frinesi_cock.wav";
+
+static constexpr float FRINESI_BASE_DAMAGE_AUTO = 81.0f / static_cast<float>(FRINESI_PELLETS_PER_SHOT);
+static constexpr float FRINESI_BASE_SPREAD_AUTO = 0.05f;
+
+static constexpr float FRINESI_BASE_DAMAGE_PUMP = 159.0f / static_cast<float>(FRINESI_PELLETS_PER_SHOT);
+static constexpr float FRINESI_BASE_SPREAD_PUMP = 0.1f;
+static constexpr float FRINESI_PUMP_DELAY = 0.42f;
 
 LINK_ENTITY_TO_CLASS(weapon_frinesi, CWeaponFrinesi)
 
@@ -217,7 +54,7 @@ CWeaponFrinesi::CWeaponFrinesi()
 void CWeaponFrinesi::Precache()
 {
 	CGenericWeapon::Precache();
-	PRECACHE_SOUND("weapons/weapon_frinesi/frinesi_cock.wav");
+	PRECACHE_SOUND(FRINESI_COCK_SOUND);
 
 	// Cache the durations for our reload animations, so we can use them later.
 	m_flReloadStartDuration = ViewModelAnimationDuration(FRINESI_START_RELOAD);
@@ -312,7 +149,7 @@ int CWeaponFrinesi::HandleSpecialReload(int currentState)
 			}
 
 			if ( ((currentState & RELOAD_FLAG_INTERRUPTED) && (currentState & RELOAD_FLAG_LOADED_ONCE)) ||
-				 m_iClip >= WeaponAttributes().Core().MaxClip() ||
+				 m_iClip >= WeaponAttributes().Ammo.MaxClip ||
 				 m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] < 1 )
 			{
 				// Reloading has finished. Do a pump and delay any further activity until it's finished.
@@ -323,7 +160,7 @@ int CWeaponFrinesi::HandleSpecialReload(int currentState)
 				return NextReloadState(0, RELOAD_IDLE);
 			}
 
-			PlaySound(WeaponAttributes().Animations().ReloadSounds(), CHAN_ITEM);
+			PlaySound(WeaponAttributes().ViewModel.ReloadSounds(), CHAN_ITEM);
 			SendWeaponAnim(FRINESI_RELOAD);
 
 			// Go into the increment clip state once this animation has finished.
@@ -353,7 +190,7 @@ void CWeaponFrinesi::PlayPumpSound()
 {
 	EMIT_SOUND_DYN(ENT(m_pPlayer->pev),
 					   CHAN_ITEM,
-					   "weapons/weapon_frinesi/frinesi_cock.wav",
+					   FRINESI_COCK_SOUND,
 					   1.0f,
 					   ATTN_NORM,
 					   0,
@@ -382,7 +219,7 @@ bool CWeaponFrinesi::WritePredictionData(weapon_data_t* to)
 	return true;
 }
 
-const CGenericWeaponAttributes& CWeaponFrinesi::WeaponAttributes() const
+const WeaponAtts::WACollection& CWeaponFrinesi::WeaponAttributes() const
 {
 	return StaticWeaponAttributes;
 }
@@ -394,13 +231,48 @@ TYPEDESCRIPTION	CWeaponFrinesi::m_SaveData[] =
 };
 
 IMPLEMENT_SAVERESTORE(CWeaponFrinesi, CGenericWeapon)
+
+float CWeaponFrinesi::Bot_CalcDesireToUse(CGenericWeapon& weapon, CBaseBot& bot, CBaseEntity& enemy, float distanceToEnemy) const
+{
+	return static_cast<float>(WeaponPref_Frinesi) / static_cast<float>(WeaponPref_Max);
+}
+
+void CWeaponFrinesi::Bot_SetFightStyle(CBaseBotFightStyle& fightStyle) const
+{
+	// Go from 1 shot/sec to 1 shot per 1.5 secs
+	static constexpr float BOT_REFIRE_DELAY_PUMP = 1.5f - (1.0f/FRINESI_FIRE_RATE_PUMP);
+
+	// Go from 4 shots/sec to 3 shots/sec
+	static constexpr float BOT_REFIRE_DELAY_AUTO = (1.0f/3.0f) - (1.0f/FRINESI_FIRE_RATE_AUTO);
+
+	static constexpr float SECONDARY_FIRE_PROXIMITY = 700.0f;
+
+	fightStyle.RandomizeAimAtHead(60);
+	int chanceOfSecondaryFire = 20;
+
+	// If we're able to determine that the enemy is near enough,
+	// increase the chance of using secondary fire.
+
+	CBaseBot* bot = fightStyle.GetOwner();
+	CBaseEntity* enemy = bot->GetEnemy();
+
+	if ( enemy && (enemy->pev->origin - bot->pev->origin).Length() <= SECONDARY_FIRE_PROXIMITY )
+	{
+		chanceOfSecondaryFire = 90;
+	}
+
+	fightStyle.RandomizeSecondaryFire(chanceOfSecondaryFire);
+	fightStyle.SetNextShootTime(1.0f / (fightStyle.GetSecondaryFire() ? FRINESI_FIRE_RATE_PUMP : FRINESI_FIRE_RATE_AUTO),
+								fightStyle.GetSecondaryFire() ? BOT_REFIRE_DELAY_PUMP : BOT_REFIRE_DELAY_AUTO,
+								0.8f, 2.0f);
+}
 #endif
 
 class CAmmoFrinesi : public CGenericAmmo
 {
 public:
 	CAmmoFrinesi()
-		: CGenericAmmo("models/weapon_frinesi/w_ammo_shotgun.mdl", AmmoDef_Frinesi, FRINESI_AMMOBOX_GIVE)
+		: CGenericAmmo("models/weapon_frinesi/w_ammo_shotgun.mdl", Ammo_Frinesi)
 	{
 	}
 };

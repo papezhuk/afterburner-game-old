@@ -1,12 +1,13 @@
 #pragma once
 
+#ifdef CLIENT_DLL
 #include "weaponatts_base.h"
 
 class CBasePlayerWeapon;
 
 namespace WeaponAtts
 {
-	struct CWAClient : public CWABase
+	struct WAClient : public WABase
 	{
 		CBasePlayerWeapon* PredictionWeapon = nullptr;
 
@@ -16,3 +17,4 @@ namespace WeaponAtts
 		}
 	};
 }
+#endif // CLIENT_DLL

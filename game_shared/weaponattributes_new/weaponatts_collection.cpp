@@ -3,33 +3,28 @@
 
 namespace WeaponAtts
 {
-	CWACollection::CWACollection(const std::function<void(CWACollection&)>& initialiser)
+	WACollection::WACollection(const std::function<void(WACollection&)>& initialiser)
 	{
 		initialiser(*this);
-	}
 
-	CWACollection& CWACollection::operator =(const CWACollection& other)
-	{
-		// Assignment is the final operation that happens once all
-		// other components have been initialised.
 		Validate();
+		GenerateAttackModeSignatures();
 		Register();
-		return *this;
 	}
 
-	void CWACollection::Register() const
+	void WACollection::Register() const
 	{
 		// TODO: Update weapon registry with new attribute class support!
 		//CWeaponRegistry::StaticInstance().Add(this);
 	}
 
-	void CWACollection::Validate() const
+	void WACollection::Validate() const
 	{
 		Core.Validate();
 		ViewModel.Validate();
 	}
 
-	void CWACollection::RegisterCvars() const
+	void WACollection::RegisterCvars() const
 	{
 		FOR_EACH_VEC(SkillRecords, index)
 		{
@@ -39,6 +34,14 @@ namespace WeaponAtts
 		FOR_EACH_VEC(CustomCvars, index)
 		{
 			CVAR_REGISTER(CustomCvars[index]);
+		}
+	}
+
+	void WACollection::GenerateAttackModeSignatures() const
+	{
+		FOR_EACH_VEC(AttackModes, index)
+		{
+			AttackModes[index]->SetSignature(Core.Id, index);
 		}
 	}
 }
