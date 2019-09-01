@@ -36,6 +36,7 @@ inline void MESSAGE_BEGIN( int msg_dest, int msg_type, const float *pOrigin, ent
 
 #include "hulldefs.h"
 #include "utlstring.h"
+#include "debug_assert.h"
 
 extern globalvars_t				*gpGlobals;
 
@@ -399,20 +400,6 @@ extern void UTIL_StripToken( const char *pKey, char *pDest );// for redundant ke
 extern void SetMovedir(entvars_t* pev);
 extern Vector VecBModelOrigin( entvars_t* pevBModel );
 extern int BuildChangeList( LEVELLIST *pLevelList, int maxList );
-
-//
-// How did I ever live without ASSERT?
-//
-#ifdef _DEBUG
-void DBG_AssertFunction(bool fExpr, const char* szExpr, const char* szFile, int szLine, const char* szMessage, bool showAlert = true);
-#define ASSERT(f)		DBG_AssertFunction(f, #f, __FILE__, __LINE__, NULL)
-#define ASSERTSZ(f, sz)	DBG_AssertFunction(f, #f, __FILE__, __LINE__, sz)
-#define ASSERTSZ_Q(f, sz) DBG_AssertFunction(f, #f, __FILE__, __LINE__, sz, false)
-#else	// !DEBUG
-#define ASSERT(f)
-#define ASSERTSZ(f, sz)
-#define ASSERTSZ_Q(f, sz)
-#endif	// !DEBUG
 
 extern DLL_GLOBAL const Vector g_vecZero;
 

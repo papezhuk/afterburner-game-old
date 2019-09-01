@@ -152,6 +152,8 @@ set (SVDLL_SOURCES
 	../game_shared/weapons/squeakgrenade.cpp
 	../game_shared/weapons/tripmine.cpp
 	../game_shared/weaponattributes/genericweaponattributes.cpp
+	../game_shared/weaponattributes_new/weaponatts_collection.cpp
+	../game_shared/weaponattributes_new/weaponatts_skillrecord.cpp
 	../game_shared/weapons/weaponregistry.cpp
 	../game_shared/weapons/genericweapon.cpp
 	../game_shared/weapons/generichitscanweapon.cpp
@@ -184,6 +186,7 @@ include_directories (
 	../public
 	../game_shared/weapons
 	../game_shared/weaponattributes
+	../game_shared/weaponattributes_new
 	../game_shared/util
 	../game_shared/gameplay
 	../miniutl
