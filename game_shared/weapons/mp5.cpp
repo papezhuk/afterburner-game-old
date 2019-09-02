@@ -78,9 +78,9 @@ void CMP5::Precache( void )
 int CMP5::GetItemInfo( ItemInfo *p )
 {
 	p->pszName = STRING( pev->classname );
-	p->pszAmmo1 = AmmoDef_9mm.Name;
+	p->pszAmmo1 = AmmoDef_9mm.AmmoName;
 	p->iMaxAmmo1 = AmmoDef_9mm.MaxCarry;
-	p->pszAmmo2 = AmmoDef_M203Grenade.Name;
+	p->pszAmmo2 = AmmoDef_M203Grenade.AmmoName;
 	p->iMaxAmmo2 = AmmoDef_M203Grenade.MaxCarry;
 	p->iMaxClip = MP5_MAX_CLIP;
 	p->iSlot = 2;
@@ -280,7 +280,7 @@ class CMP5AmmoClip : public CBasePlayerAmmo
 	}
 	BOOL AddAmmo( CBaseEntity *pOther )
 	{
-		int bResult = ( pOther->GiveAmmo( AMMO_MP5CLIP_GIVE, AmmoDef_9mm.Name, AmmoDef_9mm.MaxCarry ) != -1 );
+		int bResult = ( pOther->GiveAmmo( AMMO_MP5CLIP_GIVE, AmmoDef_9mm.AmmoName, AmmoDef_9mm.MaxCarry ) != -1 );
 		if( bResult )
 		{
 			EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM );
@@ -307,7 +307,7 @@ class CMP5Chainammo : public CBasePlayerAmmo
 	}
 	BOOL AddAmmo( CBaseEntity *pOther )
 	{
-		int bResult = ( pOther->GiveAmmo( AMMO_CHAINBOX_GIVE, AmmoDef_9mm.Name, AmmoDef_9mm.MaxCarry ) != -1 );
+		int bResult = ( pOther->GiveAmmo( AMMO_CHAINBOX_GIVE, AmmoDef_9mm.AmmoName, AmmoDef_9mm.MaxCarry ) != -1 );
 		if( bResult )
 		{
 			EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM );
@@ -333,7 +333,7 @@ class CMP5AmmoGrenade : public CBasePlayerAmmo
 	}
 	BOOL AddAmmo( CBaseEntity *pOther )
 	{
-		int bResult = ( pOther->GiveAmmo( AMMO_M203BOX_GIVE, AmmoDef_M203Grenade.Name, AmmoDef_M203Grenade.MaxCarry ) != -1 );
+		int bResult = ( pOther->GiveAmmo( AMMO_M203BOX_GIVE, AmmoDef_M203Grenade.AmmoName, AmmoDef_M203Grenade.MaxCarry ) != -1 );
 
 		if( bResult )
 		{

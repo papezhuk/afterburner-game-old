@@ -310,7 +310,7 @@ void CCrossbow::Precache( void )
 int CCrossbow::GetItemInfo( ItemInfo *p )
 {
 	p->pszName = STRING( pev->classname );
-	p->pszAmmo1 = AmmoDef_Bolt.Name;
+	p->pszAmmo1 = AmmoDef_Bolt.AmmoName;
 	p->iMaxAmmo1 = AmmoDef_Bolt.MaxCarry;
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
@@ -559,7 +559,7 @@ class CCrossbowAmmo : public CBasePlayerAmmo
 	}
 	BOOL AddAmmo( CBaseEntity *pOther )
 	{
-		if( pOther->GiveAmmo( AMMO_CROSSBOWCLIP_GIVE, AmmoDef_Bolt.Name, AmmoDef_Bolt.MaxCarry ) != -1 )
+		if( pOther->GiveAmmo( AMMO_CROSSBOWCLIP_GIVE, AmmoDef_Bolt.AmmoName, AmmoDef_Bolt.MaxCarry ) != -1 )
 		{
 			EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM );
 			return TRUE;

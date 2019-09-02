@@ -28,18 +28,22 @@ LINK_ENTITY_TO_CLASS(weapon_mp9, CWeaponP99)
 
 CWeaponP99::CWeaponP99()
 	: CGenericHitscanWeapon(),
+	  m_pAttackUnsilenced(nullptr),
+	  m_pAttackSilenced(nullptr),
 	  m_bSilenced(false)
 {
+	ASSERT(WeaponAttributes().AttackModes.Count() == 2);
+
+	m_pAttackUnsilenced = dynamic_cast<const WeaponAtts::WAHitscanAttack*>(WeaponAttributes().AttackModes[0].get());
+	m_pAttackSilenced = dynamic_cast<const WeaponAtts::WAHitscanAttack*>(WeaponAttributes().AttackModes[1].get());
+
+	ASSERT(m_pAttackUnsilenced);
+	ASSERT(m_pAttackSilenced);
 }
 
 const WeaponAtts::WACollection& CWeaponP99::WeaponAttributes() const
 {
 	return StaticWeaponAttributes;
-}
-
-void CWeaponP99::PrimaryAttack()
-{
-	FireUsingMode(m_bSilenced ? 1 : 0);
 }
 
 void CWeaponP99::SecondaryAttack()
@@ -51,6 +55,7 @@ void CWeaponP99::SecondaryAttack()
 
 	m_bSilenced = !m_bSilenced;
 	SetViewModelBody(m_bSilenced ? P99BODY_SILENCED : P99BODY_UNSILENCED);
+	m_pPrimaryAttackMode = m_bSilenced ? m_pAttackSilenced : m_pAttackUnsilenced;
 
 	DelayPendingActions(ViewModelAnimationDuration(anim));
 }
@@ -93,7 +98,7 @@ TYPEDESCRIPTION	CWeaponP99::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE(CWeaponP99, CGenericWeapon)
 
-float CWeaponP99::Bot_CalcDesireToUse(CGenericWeapon& weapon, CBaseBot& bot, CBaseEntity& enemy, float distanceToEnemy) const
+float CWeaponP99::Bot_CalcDesireToUse(CBaseBot& bot, CBaseEntity& enemy, float distanceToEnemy) const
 {
 	return static_cast<float>(WeaponPref_P99) / static_cast<float>(WeaponPref_Max);
 }

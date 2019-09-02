@@ -22,9 +22,3 @@ extern const CAmmoDef AmmoDef_Snark;
 extern const CAmmoDef AmmoDef_Hornet;
 extern const CAmmoDef AmmoDef_M203Grenade;
 extern const CAmmoDef AmmoDef_Uranium;
-
-// Nightfire weapon ammo
-extern const CAmmoDef AmmoDef_P99;
-extern const CAmmoDef AmmoDef_Frinesi;
-extern const CAmmoDef AmmoDef_GrenadeLauncher;
-extern const CAmmoDef AmmoDef_Raptor;

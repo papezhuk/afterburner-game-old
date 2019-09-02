@@ -15,7 +15,8 @@ namespace
 
 CGenericWeapon::CGenericWeapon()
 	: CBasePlayerWeapon(),
-	  m_FireEvents{0},
+	  m_pPrimaryAttackMode(nullptr),
+	  m_pSecondaryAttackMode(nullptr),
 	  m_iViewModelIndex(0),
 	  m_iViewModelBody(0),
 	  m_iWeaponSlot(-1),
@@ -32,53 +33,56 @@ CGenericWeapon::~CGenericWeapon()
 
 void CGenericWeapon::Spawn()
 {
-	const CGenericWeaponAtts_Core& core = WeaponAttributes().Core();
+	const WeaponAtts::WACore& core = WeaponAttributes().Core;
 	core.Validate();
 
-	pev->classname = MAKE_STRING(core.Classname()); // hack to allow for old names
+	pev->classname = MAKE_STRING(core.Classname); // hack to allow for old names
 	Precache();
-	m_iId = static_cast<int>(core.Id());
+	m_iId = static_cast<int>(core.Id);
 	FindWeaponSlotInfo();
 
-	if ( core.WorldModelName() )
+	const WeaponAtts::WAPlayerModel& pm = WeaponAttributes().PlayerModel;
+
+	if ( pm.WorldModelName )
 	{
-		SET_MODEL(ENT(pev), core.WorldModelName());
+		SET_MODEL(ENT(pev), pm.WorldModelName);
 	}
 
-	m_iDefaultAmmo = core.PrimaryAmmoOnFirstPickup();
+	m_iDefaultAmmo = WeaponAttributes().Ammo.PrimaryAmmoOnFirstPickup;
 
 	FallInit();// get ready to fall down.
 }
 
 void CGenericWeapon::Precache()
 {
-	const CGenericWeaponAttributes& atts = WeaponAttributes();
+	const WeaponAtts::WACollection& atts = WeaponAttributes();
 
-	PrecacheCore(atts.Core());
-	PrecacheFireMode(0);
-	PrecacheFireMode(1);
-	PrecacheSounds(atts.Animations().ReloadSounds());
+	PrecacheCore(atts.Core);
+	PrecacheViewModel(atts.ViewModel);
+	PrecachePlayerModel(atts.PlayerModel);
+
+	FOR_EACH_VEC(atts.AttackModes, index)
+	{
+		ASSERT(atts.AttackModes[index].get());
+		PrecacheAttackMode(*atts.AttackModes[index], index);
+	}
 }
 
-void CGenericWeapon::PrecacheFireMode(uint8_t fireModeIndex)
+void CGenericWeapon::PrecacheAttackMode(const WeaponAtts::WABaseAttack& attackMode, const uint32_t index)
 {
-	const CGenericWeaponAttributes& atts = WeaponAttributes();
-	const CGenericWeaponAtts_FireMode& fireMode = atts.FireMode(fireModeIndex);
+	PrecacheSoundSet(attackMode.AttackSounds);
 
-	if ( !fireMode.Event() || !fireMode.HasMechanic() )
+	if ( m_AttackModeEvents.Count() < index + 1 )
 	{
-		m_FireEvents[fireModeIndex] = 0;
-		return;
+		m_AttackModeEvents.SetCount(index + 1);
 	}
 
-	m_FireEvents[fireModeIndex] = PRECACHE_EVENT(1, fireMode.Event());
-
-	SwitchPrecache(*fireMode.Mechanic());
+	m_AttackModeEvents[index] = PRECACHE_EVENT(1, attackMode.EventScript);
 }
 
-void CGenericWeapon::PrecacheSounds(const CGenericWeaponAttributes_Sound& sounds)
+void CGenericWeapon::PrecacheSoundSet(const WeaponAtts::WASoundSet& sounds)
 {
-	const WeightedValueList<const char*>& soundList = sounds.SoundList();
+	const WeightedValueList<const char*>& soundList = sounds.SoundNames;
 
 	for ( uint32_t index = 0; index < soundList.Count(); ++index )
 	{
@@ -86,46 +90,55 @@ void CGenericWeapon::PrecacheSounds(const CGenericWeaponAttributes_Sound& sounds
 	}
 }
 
-void CGenericWeapon::PrecacheCore(const CGenericWeaponAtts_Core& core)
+void CGenericWeapon::PrecacheCore(const WeaponAtts::WACore& core)
 {
-	if ( core.ViewModelName() )
+	if ( core.PickupSoundOverride )
 	{
-		m_iViewModelIndex = PRECACHE_MODEL(core.ViewModelName());
-		StudioGetAnimationDurations(m_iViewModelIndex, m_ViewAnimDurations);
+		PRECACHE_SOUND(core.PickupSoundOverride);
+	}
+}
+
+void CGenericWeapon::PrecacheViewModel(const WeaponAtts::WAViewModel& viewModel)
+{
+	if ( viewModel.ModelName )
+	{
+		PRECACHE_MODEL(viewModel.ModelName);
 	}
 
-	if ( core.PlayerModelName() )
+	PrecacheSoundSet(viewModel.ReloadSounds);
+}
+
+void CGenericWeapon::PrecachePlayerModel(const WeaponAtts::WAPlayerModel& playerModel)
+{
+	if ( playerModel.PlayerModelName )
 	{
-		PRECACHE_MODEL(core.PlayerModelName());
+		PRECACHE_MODEL(playerModel.PlayerModelName);
 	}
 
-	if ( core.WorldModelName() )
+	if ( playerModel.WorldModelName )
 	{
-		PRECACHE_MODEL(core.WorldModelName());
+		PRECACHE_MODEL(playerModel.WorldModelName);
 	}
-
-	const char* pickupSoundOverride = core.PickupSoundOverride();
-	PRECACHE_SOUND(pickupSoundOverride ? pickupSoundOverride : DEFAULT_WEAPON_PICKUP_SOUND);
 }
 
 int CGenericWeapon::GetItemInfo(ItemInfo *p)
 {
 	FindWeaponSlotInfo();
 
-	const CGenericWeaponAtts_Core& core = WeaponAttributes().Core();
+	const WeaponAtts::WACollection& atts = WeaponAttributes();
 
 	p->pszName = STRING(pev->classname);
-	p->iMaxClip = core.MaxClip();
+	p->iMaxClip = atts.Ammo.MaxClip;
 	p->iSlot = m_iWeaponSlot;
 	p->iPosition = m_iWeaponSlotPosition;
-	p->iFlags = core.Flags();
-	p->iId = m_iId = static_cast<int>(core.Id());
-	p->iWeight = core.SwitchWeight();
+	p->iFlags = atts.Core.Flags;
+	p->iId = m_iId = static_cast<int>(atts.Core.Id);
+	p->iWeight = atts.Core.SwitchWeight;
 
-	const CAmmoDef* primaryAmmo = core.PrimaryAmmoDef();
+	const CAmmoDef* primaryAmmo = atts.Ammo.PrimaryAmmo;
 	if ( primaryAmmo )
 	{
-		p->pszAmmo1 = primaryAmmo->Name;
+		p->pszAmmo1 = primaryAmmo->AmmoName;
 		p->iMaxAmmo1 = primaryAmmo->MaxCarry;
 	}
 	else
@@ -134,10 +147,10 @@ int CGenericWeapon::GetItemInfo(ItemInfo *p)
 		p->iMaxAmmo1 = -1;
 	}
 
-	const CAmmoDef* secondaryAmmo = core.SecondaryAmmoDef();
+	const CAmmoDef* secondaryAmmo = atts.Ammo.SecondaryAmmo;
 	if ( secondaryAmmo )
 	{
-		p->pszAmmo2 = secondaryAmmo->Name;
+		p->pszAmmo2 = secondaryAmmo->AmmoName;
 		p->iMaxAmmo2 = secondaryAmmo->MaxCarry;
 	}
 	else
@@ -164,54 +177,68 @@ int CGenericWeapon::AddToPlayer(CBasePlayer *pPlayer)
 
 BOOL CGenericWeapon::Deploy()
 {
-	const CGenericWeaponAtts_Core& core = WeaponAttributes().Core();
-	const CGenericWeaponAtts_Animations& anims = WeaponAttributes().Animations();
+	const WeaponAtts::WACollection& atts = WeaponAttributes();
 
-	return DefaultDeploy(core.ViewModelName(), core.PlayerModelName(), anims.Index_Draw(), anims.Extension(), m_iViewModelBody);
+	return DefaultDeploy(atts.ViewModel.ModelName,
+						 atts.PlayerModel.PlayerModelName,
+						 atts.ViewModel.Anim_Draw,
+						 atts.PlayerModel.PlayerAnimExtension,
+						 m_iViewModelBody);
 }
 
 void CGenericWeapon::PrimaryAttack()
 {
-	FireUsingMode(0);
+	InvokeAttack(WeaponAttackType::Primary);
 }
 
 void CGenericWeapon::SecondaryAttack()
 {
-	FireUsingMode(1);
+	InvokeAttack(WeaponAttackType::Secondary);
 }
 
-bool CGenericWeapon::FireUsingMode(int index)
+bool CGenericWeapon::InvokeAttack(WeaponAttackType type)
 {
-	if ( index < 0 || index >= WEAPON_MAX_FIRE_MODES )
+	if ( type == WeaponAttackType::None )
 	{
 		return false;
 	}
 
-	const CGenericWeaponAtts_FireMode& fireMode = WeaponAttributes().FireMode(index);
+	return InvokeWithAttackMode(type, type == WeaponAttackType::Primary ? m_pPrimaryAttackMode : m_pSecondaryAttackMode);
+}
 
-	if ( !fireMode.HasMechanic() )
+bool CGenericWeapon::InvokeWithAttackMode(WeaponAttackType type, const WeaponAtts::WABaseAttack* attackMode)
+{
+	if ( type == WeaponAttackType::None )
 	{
 		return false;
 	}
 
-	if ( (m_pPlayer->pev->waterlevel == 3 && !fireMode.FiresUnderwater()) || !HasAmmo(fireMode) )
+	if ( (m_pPlayer->pev->waterlevel == 3 && !attackMode->FunctionsUnderwater) || !HasAmmo(attackMode) )
 	{
 		if( m_fFireOnEmpty )
 		{
 			PlayEmptySound();
-			DelayFiring(0.2f, false, index);
+			DelayFiring(0.2f, false, type);
 		}
 
 		return false;
 	}
 
-	return SwitchFire(index, fireMode, *fireMode.Mechanic());
+	return true;
 }
 
+// TODO: Allow this to handle secondary too? Do we need this?
 void CGenericWeapon::Reload()
 {
-	const CGenericWeaponAttributes& atts = WeaponAttributes();
-	const int maxClip = atts.Core().MaxClip();
+	const WeaponAtts::WAAmmoBasedAttack* ammoAttack = dynamic_cast<const WeaponAtts::WAAmmoBasedAttack*>(m_pPrimaryAttackMode);
+
+	if ( !ammoAttack )
+	{
+		return;
+	}
+
+	const WeaponAtts::WACollection& atts = WeaponAttributes();
+	const int maxClip = atts.Ammo.MaxClip;
 
 	if ( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] < 1 || m_iClip == maxClip ||
 		 m_flNextPrimaryAttack > UTIL_WeaponTimeBase() )
@@ -219,35 +246,38 @@ void CGenericWeapon::Reload()
 		return;
 	}
 
-	if ( atts.Core().UsesSpecialReload() )
+	if ( ammoAttack->SpecialReload )
 	{
 		// Reload is more complicated, so let the derived weapon class do it.
 		m_fInSpecialReload = HandleSpecialReload(m_fInSpecialReload);
 		return;
 	}
 
-	int anim = m_iClip < 1
-		? atts.Animations().Index_ReloadWhenEmpty()
-		: atts.Animations().Index_ReloadWhenNotEmpty();
+	const WeightedValueList<int>* reloadAnimList = m_iClip < 1
+		? &atts.ViewModel.AnimList_ReloadEmpty
+		: &atts.ViewModel.AnimList_Reload;
 
-	if ( m_iClip < 1 && anim < 0 )
+	if ( m_iClip < 1 && reloadAnimList->Count() < 1 )
 	{
-		anim = atts.Animations().Index_ReloadWhenNotEmpty();
+		reloadAnimList = &atts.ViewModel.AnimList_Reload;
 	}
 
-	const float animDuration = ViewModelAnimationDuration(anim);
+	int anim = reloadAnimList->Count() > 0
+		? reloadAnimList->ItemByProbabilisticValue(UTIL_SharedRandomFloat(m_pPlayer->random_seed, 0, 1))
+		: -1;
+
+	const float animDuration = anim >= 0
+		? ViewModelAnimationDuration(anim)
+		: 0;
 
 	if ( DefaultReload(maxClip, anim, animDuration, m_iViewModelBody) )
 	{
-		if ( atts.Animations().HasSounds() )
-		{
-			PlaySound(atts.Animations().ReloadSounds());
-		}
-
+		PlaySound(atts.ViewModel.ReloadSounds);
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + animDuration + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 0, 1);
 	}
 }
 
+// TODO: Refactor this!
 void CGenericWeapon::ItemPostFrame()
 {
 	WeaponTick();
@@ -281,19 +311,19 @@ void CGenericWeapon::ItemPostFrame()
 		m_bSecondaryAttackHeldDown = false;
 	}
 
-	if( (m_pPlayer->pev->button & IN_ATTACK2) &&
+	if( m_pSecondaryAttackMode && (m_pPlayer->pev->button & IN_ATTACK2) &&
 		CanAttack(m_flNextSecondaryAttack, gpGlobals->time, UseDecrement()) &&
-		(WeaponAttributes().FireMode(1).FullAuto() || !m_bSecondaryAttackHeldDown) )
+		(m_pSecondaryAttackMode->IsContinuous || !m_bSecondaryAttackHeldDown) )
 	{
-		SetFireOnEmptyState(1);
+		SetFireOnEmptyState(m_pSecondaryAttackMode);
 		SecondaryAttack();
 		m_bSecondaryAttackHeldDown = true;
 	}
-	else if( (m_pPlayer->pev->button & IN_ATTACK) &&
+	else if( m_pPrimaryAttackMode && (m_pPlayer->pev->button & IN_ATTACK) &&
 			 CanAttack(m_flNextPrimaryAttack, gpGlobals->time, UseDecrement()) &&
-			 (WeaponAttributes().FireMode(0).FullAuto() || !m_bPrimaryAttackHeldDown) )
+			 (m_pPrimaryAttackMode->IsContinuous || !m_bPrimaryAttackHeldDown) )
 	{
-		SetFireOnEmptyState(0);
+		SetFireOnEmptyState(m_pPrimaryAttackMode);
 		PrimaryAttack();
 		m_bPrimaryAttackHeldDown = true;
 	}
@@ -339,17 +369,39 @@ void CGenericWeapon::ItemPostFrame()
 	}
 }
 
-void CGenericWeapon::SetFireOnEmptyState(uint8_t mode)
+void CGenericWeapon::SetFireOnEmptyState(const WeaponAtts::WABaseAttack* attackMode)
 {
-	const CGenericWeaponAtts_FireMode& fireMode = WeaponAttributes().FireMode(mode);
+	const WeaponAtts::WAAmmoBasedAttack* ammoAttack = dynamic_cast<const WeaponAtts::WAAmmoBasedAttack*>(attackMode);
 
-	if ( !fireMode.HasMechanic() || fireMode.UsesAmmo() == CGenericWeaponAtts_FireMode::AmmoType_e::None )
+	if ( !ammoAttack )
 	{
 		return;
 	}
 
-	const char* ammoName = fireMode.UsesAmmo() == CGenericWeaponAtts_FireMode::AmmoType_e::Primary ? pszAmmo1() : pszAmmo2();
-	int ammoIndex = fireMode.UsesAmmo() == CGenericWeaponAtts_FireMode::AmmoType_e::Primary ? PrimaryAmmoIndex() : SecondaryAmmoIndex();
+	const char* ammoName = nullptr;
+	int ammoIndex = -1;
+
+	switch ( ammoAttack->UsesAmmoPool )
+	{
+		case WeaponAtts::WAAmmoBasedAttack::AmmoPool::Primary:
+		{
+			ammoName = pszAmmo1();
+			ammoIndex = PrimaryAmmoIndex();
+			break;
+		}
+
+		case WeaponAtts::WAAmmoBasedAttack::AmmoPool::Secondary:
+		{
+			ammoName = pszAmmo2();
+			ammoIndex = SecondaryAmmoIndex();
+			break;
+		}
+
+		default:
+		{
+			return;
+		}
+	}
 
 	if( ammoName && ammoIndex >= 0 && m_pPlayer->m_rgAmmo[ammoIndex] < 1 )
 	{
@@ -364,8 +416,7 @@ int CGenericWeapon::HandleSpecialReload(int currentState)
 
 void CGenericWeapon::WeaponIdle()
 {
-	const CGenericWeaponAttributes& atts = WeaponAttributes();
-	const CGenericWeaponAtts_Core& core = atts.Core();
+	const WeaponAtts::WACollection& Atts = WeaponAttributes();
 
 	ResetEmptySound();
 
@@ -374,7 +425,9 @@ void CGenericWeapon::WeaponIdle()
 		return;
 	}
 
-	if ( core.UsesSpecialReload() ? IdleProcess_CheckSpecialReload() : IdleProcess_CheckReload() )
+	const WeaponAtts::WAAmmoBasedAttack* ammoAttack = dynamic_cast<const WeaponAtts::WAAmmoBasedAttack*>(m_pPrimaryAttackMode);
+
+	if ( (ammoAttack && ammoAttack->SpecialReload) ? IdleProcess_CheckSpecialReload() : IdleProcess_CheckReload() )
 	{
 		// Reload did something, so don't play idle animations;
 		return;
@@ -385,7 +438,8 @@ void CGenericWeapon::WeaponIdle()
 
 bool CGenericWeapon::IdleProcess_CheckReload()
 {
-	if ( WeaponAttributes().Core().AutoReload() && m_iClip < 1 && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] > 0 )
+	const WeaponAtts::WAAmmoBasedAttack* attackMode = dynamic_cast<const WeaponAtts::WAAmmoBasedAttack*>(m_pPrimaryAttackMode);
+	if ( attackMode && attackMode->AutoReload && m_iClip < 1 && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] > 0 )
 	{
 		Reload();
 		return true;
@@ -408,42 +462,50 @@ bool CGenericWeapon::IdleProcess_CheckSpecialReload()
 
 void CGenericWeapon::IdleProcess_PlayIdleAnimation()
 {
-	const CGenericWeaponAtts_IdleAnimations& idleAnims = WeaponAttributes().IdleAnimations();
+	const WeaponAtts::WAViewModel& vm = WeaponAttributes().ViewModel;
+	const WeightedValueList<int>* animList = m_iClip < 1
+		? &vm.AnimList_IdleEmpty
+		: &vm.AnimList_Idle;
 
-	if ( idleAnims.List().Count() < 1 || (!idleAnims.IdleWhenClipEmpty() && m_iClip < 1) )
+	if ( m_iClip < 1 && animList->Count() < 1 )
+	{
+		animList = &vm.AnimList_Idle;
+	}
+
+	if ( animList->Count() < 1 )
 	{
 		return;
 	}
 
 	const float flRand = UTIL_SharedRandomFloat(m_pPlayer->random_seed, 0.0, 1.0);
-	const uint32_t anim = idleAnims.List().ItemByProbabilisticValue(flRand);
+	const int anim = animList->ItemByProbabilisticValue(flRand);
 
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + ViewModelAnimationDuration(anim);
 	SendWeaponAnim(anim, m_iViewModelBody);
 }
 
-void CGenericWeapon::PlaySound(const CGenericWeaponAttributes_Sound& sound, int channel)
+void CGenericWeapon::PlaySound(const WeaponAtts::WASoundSet& sound, int channel)
 {
-	if ( sound.SoundList().Count() < 1 )
+		if ( sound.SoundNames.Count() < 1 )
 	{
 		return;
 	}
 
 	const float flRand = UTIL_SharedRandomFloat(m_pPlayer->random_seed, 0.0, 1.0);
-	const char* soundName = sound.SoundList().ItemByProbabilisticValue(flRand);
-	const float volume = (sound.MinVolume() < sound.MaxVolume())
-		? UTIL_SharedRandomFloat(m_pPlayer->random_seed, sound.MinVolume(), sound.MaxVolume())
-		: sound.MaxVolume();
-	const int pitch = (sound.MinPitch() < sound.MaxPitch())
-		? UTIL_SharedRandomLong(m_pPlayer->random_seed, sound.MinPitch(), sound.MaxPitch())
-		: sound.MaxPitch();
+	const char* soundName = sound.SoundNames.ItemByProbabilisticValue(flRand);
+	const float volume = (sound.MinVolume < sound.MaxVolume)
+		? UTIL_SharedRandomFloat(m_pPlayer->random_seed, sound.MinVolume, sound.MaxVolume)
+		: sound.MaxVolume;
+	const int pitch = (sound.MinPitch < sound.MaxPitch)
+		? UTIL_SharedRandomLong(m_pPlayer->random_seed, sound.MinPitch, sound.MaxPitch)
+		: sound.MaxPitch;
 
 	EMIT_SOUND_DYN(ENT(m_pPlayer->pev),
 				   channel,
 				   soundName,
 				   volume,
-				   sound.Attenuation(),
-				   sound.Flags(),
+				   sound.Attenuation,
+				   sound.Flags,
 				   pitch);
 }
 
@@ -479,31 +541,39 @@ void CGenericWeapon::DelayPendingActions(float secs, bool allowIfEarlier)
 	SetNextIdleTime(secs, allowIfEarlier);
 }
 
-void CGenericWeapon::DelayFiring(float secs, bool allowIfEarlier, int mode)
+void CGenericWeapon::DelayFiring(float secs, bool allowIfEarlier, WeaponAttackType type)
 {
-	if ( mode < 0 || mode == 0 )
+	if ( type == WeaponAttackType::None || type == WeaponAttackType::Primary )
 	{
 		SetNextPrimaryAttack(secs, allowIfEarlier);
 	}
 
-	if ( mode < 0 || mode == 1 )
+	if ( type == WeaponAttackType::None || type == WeaponAttackType::Secondary )
 	{
 		SetNextSecondaryAttack(secs, allowIfEarlier);
 	}
 }
 
-bool CGenericWeapon::HasAmmo(const CGenericWeaponAtts_FireMode& fireMode, int minCount, bool useClip) const
+bool CGenericWeapon::HasAmmo(const WeaponAtts::WABaseAttack* attackMode, int minCount, bool useClip) const
 {
-	switch ( fireMode.UsesAmmo() )
+	const WeaponAtts::WAAmmoBasedAttack* ammoAttack = dynamic_cast<const WeaponAtts::WAAmmoBasedAttack*>(attackMode);
+
+	if ( !ammoAttack )
 	{
-		case CGenericWeaponAtts_FireMode::AmmoType_e::Primary:
+		// Treat as an infinite pool.
+		return true;
+	}
+
+	switch ( ammoAttack->UsesAmmoPool )
+	{
+		case WeaponAtts::WAAmmoBasedAttack::AmmoPool::Primary:
 		{
 			return useClip
 				? (m_iClip >= minCount)
 				: (m_iPrimaryAmmoType >= 0 && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] >= minCount);
 		}
 
-		case CGenericWeaponAtts_FireMode::AmmoType_e::Secondary:
+		case WeaponAtts::WAAmmoBasedAttack::AmmoPool::Secondary:
 		{
 			return m_iSecondaryAmmoType >= 0 && m_pPlayer->m_rgAmmo[m_iSecondaryAmmoType] >= minCount;
 		}
@@ -516,11 +586,19 @@ bool CGenericWeapon::HasAmmo(const CGenericWeaponAtts_FireMode& fireMode, int mi
 	}
 }
 
-bool CGenericWeapon::DecrementAmmo(const CGenericWeaponAtts_FireMode& fireMode, int decrement)
+bool CGenericWeapon::DecrementAmmo(const WeaponAtts::WABaseAttack* attackMode, int decrement)
 {
-	switch ( fireMode.UsesAmmo() )
+	const WeaponAtts::WAAmmoBasedAttack* ammoAttack = dynamic_cast<const WeaponAtts::WAAmmoBasedAttack*>(attackMode);
+
+	if ( !ammoAttack )
 	{
-		case CGenericWeaponAtts_FireMode::AmmoType_e::Primary:
+		// Treat as an infinite pool.
+		return true;
+	}
+
+	switch ( ammoAttack->UsesAmmoPool )
+	{
+		case WeaponAtts::WAAmmoBasedAttack::AmmoPool::Primary:
 		{
 			if ( m_iClip < decrement )
 			{
@@ -531,7 +609,7 @@ bool CGenericWeapon::DecrementAmmo(const CGenericWeaponAtts_FireMode& fireMode, 
 			return true;
 		}
 
-		case CGenericWeaponAtts_FireMode::AmmoType_e::Secondary:
+		case WeaponAtts::WAAmmoBasedAttack::AmmoPool::Secondary:
 		{
 			if ( m_iSecondaryAmmoType < 0 || m_pPlayer->m_rgAmmo[m_iSecondaryAmmoType] < decrement )
 			{
@@ -563,7 +641,7 @@ void CGenericWeapon::FindWeaponSlotInfo()
 		return;
 	}
 
-	const int id = static_cast<const int>(WeaponAttributes().Core().Id());
+	const int id = static_cast<const int>(WeaponAttributes().Core.Id);
 
 	for ( int slot = 0; slot < MAX_WEAPON_SLOTS; ++slot )
 	{

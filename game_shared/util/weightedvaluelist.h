@@ -23,6 +23,7 @@ public:
 	WeightedValueList<T>& operator <<(const T& value)
 	{
 		Add(value, 1.0f, true);
+		return *this;
 	}
 
 	const T& Value(uint32_t index) const

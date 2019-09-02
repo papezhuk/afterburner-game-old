@@ -9,14 +9,13 @@ public:
 	CWeaponP99();
 	virtual const WeaponAtts::WACollection& WeaponAttributes() const override;
 
-	virtual void PrimaryAttack() override;
 	virtual void SecondaryAttack() override;
 
 	virtual bool ReadPredictionData(const weapon_data_t* from) override;
 	virtual bool WritePredictionData(weapon_data_t* to) override;
 
 #ifndef CLIENT_DLL
-	virtual float Bot_CalcDesireToUse(CGenericWeapon& weapon, CBaseBot& bot, CBaseEntity& enemy, float distanceToEnemy) const override;
+	virtual float Bot_CalcDesireToUse(CBaseBot& bot, CBaseEntity& enemy, float distanceToEnemy) const override;
 	virtual void Bot_SetFightStyle(CBaseBotFightStyle& fightStyle) const override;
 	virtual int Save(CSave &save) override;
 	virtual int Restore(CRestore &restore) override;
@@ -24,5 +23,7 @@ public:
 #endif
 
 private:
+	const WeaponAtts::WAHitscanAttack* m_pAttackUnsilenced;
+	const WeaponAtts::WAHitscanAttack* m_pAttackSilenced;
 	bool m_bSilenced;
 };

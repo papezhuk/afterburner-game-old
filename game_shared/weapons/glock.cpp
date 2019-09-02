@@ -59,7 +59,7 @@ void CGlock::Precache( void )
 int CGlock::GetItemInfo( ItemInfo *p )
 {
 	p->pszName = STRING( pev->classname );
-	p->pszAmmo1 = AmmoDef_9mm.Name;
+	p->pszAmmo1 = AmmoDef_9mm.AmmoName;
 	p->iMaxAmmo1 = AmmoDef_9mm.MaxCarry;
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
@@ -235,7 +235,7 @@ class CGlockAmmo : public CBasePlayerAmmo
 
 	BOOL AddAmmo( CBaseEntity *pOther )
 	{
-		if( pOther->GiveAmmo( AMMO_GLOCKCLIP_GIVE, AmmoDef_9mm.Name, AmmoDef_9mm.MaxCarry ) != -1 )
+		if( pOther->GiveAmmo( AMMO_GLOCKCLIP_GIVE, AmmoDef_9mm.AmmoName, AmmoDef_9mm.MaxCarry ) != -1 )
 		{
 			EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM );
 			return TRUE;

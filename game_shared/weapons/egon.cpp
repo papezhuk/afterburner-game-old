@@ -117,7 +117,7 @@ void CEgon::Holster( int skiplocal /* = 0 */ )
 int CEgon::GetItemInfo( ItemInfo *p )
 {
 	p->pszName = STRING( pev->classname );
-	p->pszAmmo1 = AmmoDef_Uranium.Name;
+	p->pszAmmo1 = AmmoDef_Uranium.AmmoName;
 	p->iMaxAmmo1 = AmmoDef_Uranium.MaxCarry;
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
@@ -567,7 +567,7 @@ class CEgonAmmo : public CBasePlayerAmmo
 
 	BOOL AddAmmo( CBaseEntity *pOther )
 	{
-		if( pOther->GiveAmmo( AMMO_URANIUMBOX_GIVE, AmmoDef_Uranium.Name, AmmoDef_Uranium.MaxCarry ) != -1 )
+		if( pOther->GiveAmmo( AMMO_URANIUMBOX_GIVE, AmmoDef_Uranium.AmmoName, AmmoDef_Uranium.MaxCarry ) != -1 )
 		{
 			EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM );
 			return TRUE;

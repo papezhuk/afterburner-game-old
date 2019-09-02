@@ -265,16 +265,10 @@ void CBaseBot::ActionChooseWeapon( void )
 				continue;
 			}
 
-			const CBotWeaponAttributes& attributes = genericWeapon->WeaponAttributes().BotWeaponAttributes();
-			if ( !attributes.CanBeUsed() )
-			{
-				continue;
-			}
-
 			// This randomizes what weapon a given bot will choose at any particular moment
 			// and yet maintains preferencial weapon bias.
-			float CheckWeaponDesire = attributes.ExecDesireToUse(*genericWeapon, *this, *currentEnemy, DistanceToEnemy);
-			CheckWeaponDesire *= (Stats.GetTraitWeaponPreference(genericWeapon->WeaponAttributes().Core().Id()) / 100.0f);
+			float CheckWeaponDesire = genericWeapon->Bot_CalcDesireToUse(*this, *currentEnemy, DistanceToEnemy);
+			CheckWeaponDesire *= (Stats.GetTraitWeaponPreference(genericWeapon->WeaponAttributes().Core.Id) / 100.0f);
 			CheckWeaponDesire *= RANDOM_FLOAT(0,1);
 
 			if ( CheckWeaponDesire > BestWeaponDesire )
@@ -986,4 +980,3 @@ void CBaseBot::ThinkValidateGoal( void )
 //		ActionSpeak( "Giving up on goal." );
 	}
 }
-

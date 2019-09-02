@@ -58,15 +58,8 @@ CBaseBotFightStyle::~CBaseBotFightStyle()
 
 void CBaseBotFightStyle::DispatchWeaponUse(CGenericWeapon& weapon)
 {
-	SetHoldDownAttack(FALSE); // unless the particular weapon sets this TRUE we want it false
-
-	const CBotWeaponAttributes& attributes = weapon.WeaponAttributes().BotWeaponAttributes();
-
-	if ( !attributes.ExecUseWeapon(weapon, *this) )
-	{
-		// No use function, so use default, dumb code.
-		UseWeaponDefault();
-	}
+	SetHoldDownAttack(FALSE); // unless the particular weapon sets this TRUE we want it false	
+	weapon.Bot_SetFightStyle(*this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

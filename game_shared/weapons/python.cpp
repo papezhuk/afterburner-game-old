@@ -29,7 +29,7 @@ LINK_ENTITY_TO_CLASS( weapon_357, CPython )
 int CPython::GetItemInfo( ItemInfo *p )
 {
 	p->pszName = STRING( pev->classname );
-	p->pszAmmo1 = AmmoDef_357.Name;
+	p->pszAmmo1 = AmmoDef_357.AmmoName;
 	p->iMaxAmmo1 = AmmoDef_357.MaxCarry;
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
@@ -285,7 +285,7 @@ class CPythonAmmo : public CBasePlayerAmmo
 	}
 	BOOL AddAmmo( CBaseEntity *pOther )
 	{
-		if( pOther->GiveAmmo( AMMO_357BOX_GIVE, AmmoDef_357.Name, AmmoDef_357.MaxCarry ) != -1 )
+		if( pOther->GiveAmmo( AMMO_357BOX_GIVE, AmmoDef_357.AmmoName, AmmoDef_357.MaxCarry ) != -1 )
 		{
 			EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM );
 			return TRUE;

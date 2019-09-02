@@ -440,7 +440,7 @@ void CSqueak::Precache( void )
 int CSqueak::GetItemInfo( ItemInfo *p )
 {
 	p->pszName = STRING( pev->classname );
-	p->pszAmmo1 = AmmoDef_Snark.Name;
+	p->pszAmmo1 = AmmoDef_Snark.AmmoName;
 	p->iMaxAmmo1 = AmmoDef_Snark.MaxCarry;
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;

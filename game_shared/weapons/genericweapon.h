@@ -5,6 +5,7 @@
 #include "genericweaponattributes.h"
 #include "utlvector.h"
 #include "weaponatts_collection.h"
+#include "weaponatts_ammobasedattack.h"
 
 // Build on top of CBasePlayerWeapon, because this is so tied into the engine
 // already it'd be a pain to replace it (at least at this stage).
@@ -31,8 +32,9 @@ public:
 	// Don't know if this is the best place to put these?
 	// Currently refactoring weapon attributes and didn't like putting
 	// non-static behaviour like this into static attributes.
-	// Evaluate whether this should be moved elsewhere.
-	virtual float Bot_CalcDesireToUse(CGenericWeapon& weapon, CBaseBot& bot, CBaseEntity& enemy, float distanceToEnemy) const = 0;
+	// Evaluate whether this should be moved elsewhere - possibly
+	// make bot weapon profiles local to bot code?
+	virtual float Bot_CalcDesireToUse(CBaseBot& bot, CBaseEntity& enemy, float distanceToEnemy) const = 0;
 	virtual void Bot_SetFightStyle(CBaseBotFightStyle& fightStyle) const = 0;
 #endif
 
@@ -40,23 +42,28 @@ public:
 	static void GetSharedCircularGaussianSpread(uint32_t shot, int shared_rand, float& x, float& y);
 
 protected:
+	enum class WeaponAttackType
+	{
+		None = -1,
+		Primary = 0,
+		Secondary = 1
+	};
+
+	// Overridable functions for attack modes:
+	virtual void PrecacheAttackMode(const WeaponAtts::WABaseAttack& attackMode, const uint32_t index);
+	virtual bool InvokeWithAttackMode(WeaponAttackType type, const WeaponAtts::WABaseAttack* attackMode);
+
 	void SetViewModelBody(int body, bool immediate = false);
 	float ViewModelAnimationDuration(int anim) const;
-	void PlaySound(const CGenericWeaponAttributes_Sound& sound, int channel = CHAN_WEAPON);
+	void PlaySound(const WeaponAtts::WASoundSet& sound, int channel = CHAN_WEAPON);
 
 	// Returns true if firing succeeded.
-	bool FireUsingMode(int index);
-	virtual bool SwitchFire(int index,
-							const CGenericWeaponAtts_FireMode& fireMode,
-							const CGenericWeaponAtts_BaseFireMechanic& mechanic) = 0;
-
-	virtual void SwitchPrecache(const CGenericWeaponAtts_BaseFireMechanic& mechanic) = 0;
-	void PrecacheSounds(const CGenericWeaponAttributes_Sound& sounds);
+	bool FireUsingMode(const WeaponAtts::WABaseAttack* attackMode);
 
 	void DelayPendingActions(float secs, bool allowIfEarlier = false);
-	void DelayFiring(float secs, bool allowIfEarlier = false, int mode = -1);
-	bool HasAmmo(const CGenericWeaponAtts_FireMode& fireMode, int minCount = 1, bool useClip = true) const;
-	bool DecrementAmmo(const CGenericWeaponAtts_FireMode& fireMode, int decrement);
+	void DelayFiring(float secs, bool allowIfEarlier = false, WeaponAttackType attackType = WeaponAttackType::None);
+	bool HasAmmo(const WeaponAtts::WABaseAttack* attackMode, int minCount = 1, bool useClip = true) const;
+	bool DecrementAmmo(const WeaponAtts::WABaseAttack* attackMode, int decrement);
 
 	// Return the value to set m_fInSpecialReload to next.
 	virtual int HandleSpecialReload(int currentState);
@@ -98,13 +105,19 @@ protected:
 #endif
 	}
 
-	unsigned short m_FireEvents[WEAPON_MAX_FIRE_MODES];
+	const WeaponAtts::WABaseAttack* m_pPrimaryAttackMode;
+	const WeaponAtts::WABaseAttack* m_pSecondaryAttackMode;
+	CUtlVector<int> m_AttackModeEvents;
 
 private:
-	void PrecacheFireMode(uint8_t fireModeIndex);
-	void PrecacheCore(const CGenericWeaponAtts_Core& core);
+	// TODO: Should these be delegated somewhere else, a la aggregate programming model?
+	void PrecacheCore(const WeaponAtts::WACore& core);
+	void PrecacheSoundSet(const WeaponAtts::WASoundSet& sounds);
+	void PrecacheViewModel(const WeaponAtts::WAViewModel& viewModel);
+	void PrecachePlayerModel(const WeaponAtts::WAPlayerModel& playerModel);
 
-	void SetFireOnEmptyState(uint8_t mode);
+	bool InvokeAttack(WeaponAttackType type);
+	void SetFireOnEmptyState(const WeaponAtts::WABaseAttack* attackMode);
 
 	// Return true if reload action occurred, or false otherwise.
 	bool IdleProcess_CheckReload();
@@ -132,7 +145,6 @@ public:
 		  m_szPickupSoundName(pickupSoundName)
 	{
 		ASSERT(m_szModelName);
-		ASSERT(m_iGiveAmount > 0);
 	}
 
 	void Spawn()

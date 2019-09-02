@@ -49,6 +49,13 @@ CWeaponFrinesi::CWeaponFrinesi()
 	  m_flPumpDuration(0.0f),
 	  m_flNextPumpTime(0.0f)
 {
+	ASSERT(WeaponAttributes().AttackModes.Count() == 2);
+
+	m_pPrimaryAttackMode = WeaponAttributes().AttackModes[0].get();
+	m_pSecondaryAttackMode = WeaponAttributes().AttackModes[1].get();
+
+	ASSERT(m_pPrimaryAttackMode);
+	ASSERT(m_pSecondaryAttackMode);
 }
 
 void CWeaponFrinesi::Precache()
@@ -69,7 +76,7 @@ void CWeaponFrinesi::PrimaryAttack()
 		return;
 	}
 
-	FireUsingMode(0);
+	FireUsingMode(m_pPrimaryAttackMode);
 }
 
 void CWeaponFrinesi::SecondaryAttack()
@@ -79,7 +86,7 @@ void CWeaponFrinesi::SecondaryAttack()
 		return;
 	}
 
-	if ( FireUsingMode(1) )
+	if ( FireUsingMode(m_pSecondaryAttackMode) )
 	{
 		m_flNextPumpTime = gpGlobals->time + FRINESI_PUMP_DELAY;
 	}
@@ -160,7 +167,7 @@ int CWeaponFrinesi::HandleSpecialReload(int currentState)
 				return NextReloadState(0, RELOAD_IDLE);
 			}
 
-			PlaySound(WeaponAttributes().ViewModel.ReloadSounds(), CHAN_ITEM);
+			PlaySound(WeaponAttributes().ViewModel.ReloadSounds, CHAN_ITEM);
 			SendWeaponAnim(FRINESI_RELOAD);
 
 			// Go into the increment clip state once this animation has finished.
@@ -232,7 +239,7 @@ TYPEDESCRIPTION	CWeaponFrinesi::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE(CWeaponFrinesi, CGenericWeapon)
 
-float CWeaponFrinesi::Bot_CalcDesireToUse(CGenericWeapon& weapon, CBaseBot& bot, CBaseEntity& enemy, float distanceToEnemy) const
+float CWeaponFrinesi::Bot_CalcDesireToUse(CBaseBot& bot, CBaseEntity& enemy, float distanceToEnemy) const
 {
 	return static_cast<float>(WeaponPref_Frinesi) / static_cast<float>(WeaponPref_Max);
 }

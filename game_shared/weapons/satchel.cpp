@@ -254,7 +254,7 @@ void CSatchel::Precache( void )
 int CSatchel::GetItemInfo( ItemInfo *p )
 {
 	p->pszName = STRING( pev->classname );
-	p->pszAmmo1 = AmmoDef_Satchel.Name;
+	p->pszAmmo1 = AmmoDef_Satchel.AmmoName;
 	p->iMaxAmmo1 = AmmoDef_Satchel.MaxCarry;
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;

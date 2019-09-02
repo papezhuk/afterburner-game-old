@@ -3,6 +3,7 @@
 #include <functional>
 #include "weaponatts_base.h"
 #include "weightedvaluelist.h"
+#include "weaponatts_soundset.h"
 
 namespace WeaponAtts
 {

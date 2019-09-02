@@ -1,88 +1,81 @@
 #include "generichitscanweapon.h"
-#include "weaponatts_hitscanfiremechanic.h"
+#include "weaponatts_hitscanattack.h"
 #include "skill.h"
 
 void CGenericHitscanWeapon::WeaponIdle()
 {
-	const CGenericWeaponAtts_BaseFireMechanic* const primaryMechanic = WeaponAttributes().FireMode(0).Mechanic();
-
-	if ( primaryMechanic && primaryMechanic->Id() == CGenericWeaponAtts_BaseFireMechanic::FireMechanic_e::Hitscan )
+	if ( m_pPrimaryAttackMode && m_pPrimaryAttackMode->Classify() == WeaponAtts::WABaseAttack::Classification::Hitscan )
 	{
-		m_pPlayer->GetAutoaimVector(primaryMechanic->AsType<CGenericWeaponAtts_HitscanFireMechanic>()->AutoAim());
+		m_pPlayer->GetAutoaimVector(static_cast<const WeaponAtts::WAHitscanAttack*>(m_pPrimaryAttackMode)->AutoAim);
 	}
 
 	CGenericWeapon::WeaponIdle();
 }
 
-void CGenericHitscanWeapon::SwitchPrecache(const CGenericWeaponAtts_BaseFireMechanic& mechanic)
+void CGenericHitscanWeapon::PrecacheAttackMode(const WeaponAtts::WABaseAttack& attackMode, const uint32_t index)
 {
-	if ( mechanic.Id() != CGenericWeaponAtts_BaseFireMechanic::FireMechanic_e::Hitscan )
+	CGenericWeapon::PrecacheAttackMode(attackMode, index);
+
+	if ( attackMode.Classify() != WeaponAtts::WABaseAttack::Classification::Hitscan )
 	{
+		ASSERT(false);
 		return;
 	}
 
-	Precache(static_cast<const CGenericWeaponAtts_HitscanFireMechanic&>(mechanic));
+	const WeaponAtts::WAHitscanAttack& hitscanAttack = static_cast<const WeaponAtts::WAHitscanAttack&>(attackMode);
+
+	PRECACHE_MODEL(hitscanAttack.ShellModelName);
 }
 
-void CGenericHitscanWeapon::Precache(const CGenericWeaponAtts_HitscanFireMechanic& mechanic)
+bool CGenericHitscanWeapon::InvokeWithAttackMode(const CGenericWeapon::WeaponAttackType type, const WeaponAtts::WABaseAttack* attackMode)
 {
-	PRECACHE_MODEL(mechanic.ShellModelName());
-}
-
-bool CGenericHitscanWeapon::SwitchFire(int index,
-									   const CGenericWeaponAtts_FireMode& fireMode,
-									   const CGenericWeaponAtts_BaseFireMechanic& mechanic)
-{
-	if ( mechanic.Id() != CGenericWeaponAtts_BaseFireMechanic::FireMechanic_e::Hitscan )
+	if ( attackMode->Classify() != WeaponAtts::WABaseAttack::Classification::Hitscan )
 	{
 		return false;
 	}
 
-	return HitscanFire(index, fireMode, static_cast<const CGenericWeaponAtts_HitscanFireMechanic&>(mechanic));
-}
+	const WeaponAtts::WAHitscanAttack* hitscanAttack = static_cast<const WeaponAtts::WAHitscanAttack*>(attackMode);
 
-bool CGenericHitscanWeapon::HitscanFire(int index,
-										const CGenericWeaponAtts_FireMode& fireMode,
-										const CGenericWeaponAtts_HitscanFireMechanic& mechanic)
-{
-	if ( index < 0 || index > 1 || fireMode.FireRate() <= 0.0f || mechanic.BulletsPerShot() < 1 )
+	if ( hitscanAttack->AttackRate <= 0.0f || hitscanAttack->BulletsPerShot < 1 )
 	{
 		return false;
 	}
 
-	DecrementAmmo(fireMode, 1);
+	// Check base class allows the attack:
+	if ( !CGenericWeapon::InvokeWithAttackMode(type, hitscanAttack) )
+	{
+		return false;
+	}
+
+	DecrementAmmo(hitscanAttack, 1);
 
 	m_pPlayer->pev->effects = (int)( m_pPlayer->pev->effects ) | EF_MUZZLEFLASH;
 
 	// player "shoot" animation
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
-	m_pPlayer->m_iWeaponVolume = fireMode.Volume();
-	m_pPlayer->m_iWeaponFlash = fireMode.MuzzleFlashBrightness();
+	m_pPlayer->m_iWeaponVolume = hitscanAttack->Volume;
+	m_pPlayer->m_iWeaponFlash = hitscanAttack->MuzzleFlashBrightness;
 
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	Vector vecAiming;
 
-	if( mechanic.AutoAim() > 0.0f )
+	if( hitscanAttack->AutoAim > 0.0f )
 	{
-		vecAiming = m_pPlayer->GetAutoaimVector(mechanic.AutoAim());
+		vecAiming = m_pPlayer->GetAutoaimVector(hitscanAttack->AutoAim);
 	}
 	else
 	{
 		vecAiming = gpGlobals->v_forward;
 	}
 
-	Vector vecDir;
-	const float spreadX = fireMode.SpreadX();
-	const float spreadY = fireMode.SpreadY();
+	Vector vecDir = FireBulletsPlayer(*hitscanAttack, vecSrc, vecAiming);
 
-	vecDir = FireBulletsPlayer(fireMode, mechanic, vecSrc, vecAiming);
-
-	if ( m_FireEvents[index] )
+	if ( m_AttackModeEvents[hitscanAttack->Signature().Index] )
 	{
 		PLAYBACK_EVENT_FULL(DefaultEventFlags(),
 							m_pPlayer->edict(),
-							m_FireEvents[index],
+							m_AttackModeEvents[hitscanAttack->Signature().Index],
 							0.0,
 							(float *)&g_vecZero,
 							(float *)&g_vecZero,
@@ -94,9 +87,9 @@ bool CGenericHitscanWeapon::HitscanFire(int index,
 							0);
 	}
 
-	DelayFiring(1.0f / fireMode.FireRate());
+	DelayFiring(1.0f / hitscanAttack->AttackRate);
 
-	if ( !HasAmmo(fireMode, 1, true) && !HasAmmo(fireMode, 1, false) )
+	if ( !HasAmmo(hitscanAttack, 1, true) && !HasAmmo(hitscanAttack, 1, false) )
 	{
 		// HEV suit - indicate out of ammo condition
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
@@ -106,15 +99,14 @@ bool CGenericHitscanWeapon::HitscanFire(int index,
 	return true;
 }
 
-Vector CGenericHitscanWeapon::FireBulletsPlayer(const CGenericWeaponAtts_FireMode& fireMode,
-												const CGenericWeaponAtts_HitscanFireMechanic& mechanic,
+Vector CGenericHitscanWeapon::FireBulletsPlayer(const WeaponAtts::WAHitscanAttack& hitscanAttack,
 												const Vector& vecSrc,
 										 		const Vector& vecDirShooting)
 {
 #ifdef CLIENT_DLL
 	// The client doesn't actually do any bullet simulation, we just make sure that
 	// the generated random vectors match up.
-	return FireBulletsPlayer_Client(fireMode, mechanic);
+	return FireBulletsPlayer_Client(hitscanAttack);
 #else
 	TraceResult tr;
 	Vector vecRight = gpGlobals->v_right;
@@ -128,11 +120,11 @@ Vector CGenericHitscanWeapon::FireBulletsPlayer(const CGenericWeaponAtts_FireMod
 	ClearMultiDamage();
 	gMultiDamage.type = DMG_BULLET | DMG_NEVERGIB;
 
-	const uint32_t numShots = mechanic.BulletsPerShot();
+	const uint32_t numShots = hitscanAttack.BulletsPerShot;
 	for( uint32_t shot = 1; shot <= numShots; shot++ )
 	{
 		float damagePerShot = 1.0f;
-		const CGenericWeaponAtts_HitscanFireMechanic::SkillBasedDamagePtr dmgPtr = mechanic.BaseDamagePerShot();
+		const WeaponAtts::WASkillRecord::SkillDataEntryPtr dmgPtr = hitscanAttack.BaseDamagePerShot;
 		if ( dmgPtr )
 		{
 			damagePerShot = gSkillData.*dmgPtr;
@@ -141,8 +133,8 @@ Vector CGenericHitscanWeapon::FireBulletsPlayer(const CGenericWeaponAtts_FireMod
 		GetSharedCircularGaussianSpread(shot, shared_rand, x, y);
 
 		Vector vecDir = vecDirShooting +
-						x * fireMode.SpreadX() * vecRight +
-						y * fireMode.SpreadY() * vecUp;
+						(x * hitscanAttack.SpreadX * vecRight) +
+						(y * hitscanAttack.SpreadY * vecUp);
 		Vector vecEnd;
 
 		vecEnd = vecSrc + vecDir * DEFAULT_BULLET_TRACE_DISTANCE;
@@ -163,22 +155,21 @@ Vector CGenericHitscanWeapon::FireBulletsPlayer(const CGenericWeaponAtts_FireMod
 
 	ApplyMultiDamage(pev, pevAttacker);
 
-	return Vector(x * fireMode.SpreadX(), y * fireMode.SpreadY(), 0.0);
+	return Vector(x * hitscanAttack.SpreadX, y * hitscanAttack.SpreadY, 0.0);
 #endif
 }
 
 #ifdef CLIENT_DLL
-Vector CGenericHitscanWeapon::FireBulletsPlayer_Client(const CGenericWeaponAtts_FireMode& fireMode,
-													   const CGenericWeaponAtts_HitscanFireMechanic& mechanic)
+Vector CGenericHitscanWeapon::FireBulletsPlayer_Client(const WeaponAtts::WAHitscanAttack& hitscanAttack)
 {
 	float x = 0, y = 0;
 
-	const uint32_t numShots = mechanic.BulletsPerShot();
+	const uint32_t numShots = hitscanAttack.BulletsPerShot;
 	for( uint32_t shot = 1; shot <= numShots; shot++ )
 	{
 		GetSharedCircularGaussianSpread(shot, m_pPlayer->random_seed, x, y);
 	}
 
-	return Vector(x * fireMode.SpreadX(), y * fireMode.SpreadY(), 0.0);
+	return Vector(x * hitscanAttack.SpreadX, y * hitscanAttack.SpreadY, 0.0);
 }
 #endif

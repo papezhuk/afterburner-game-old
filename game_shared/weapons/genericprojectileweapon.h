@@ -1,28 +1,18 @@
 #pragma once
 
 #include "genericweapon.h"
-
-class CGenericWeaponAtts_ProjectileFireMechanic;
+#include "weaponatts_projectileattack.h"
 
 class CGenericProjectileWeapon : public CGenericWeapon
 {
 public:
+	// Required so that derived classes can call through.
 	virtual void Precache() override;
+
 protected:
-	virtual bool SwitchFire(int index,
-							const CGenericWeaponAtts_FireMode& fireMode,
-							const CGenericWeaponAtts_BaseFireMechanic& mechanic) override;
-	virtual void SwitchPrecache(const CGenericWeaponAtts_BaseFireMechanic& mechanic) override;
+	virtual bool InvokeWithAttackMode(WeaponAttackType type, const WeaponAtts::WABaseAttack* attackMode) override;
 
 #ifndef CLIENT_DLL
-	virtual void CreateProjectile(int index,
-								  const CGenericWeaponAtts_FireMode& fireMode,
-								  const CGenericWeaponAtts_BaseFireMechanic& mechanic) = 0;
+	virtual void CreateProjectile(const WeaponAtts::WAProjectileAttack& projectileAttack) = 0;
 #endif
-
-private:
-	void Precache(const CGenericWeaponAtts_ProjectileFireMechanic& mechanic);
-	bool ProjectileFire(int index,
-						const CGenericWeaponAtts_FireMode& fireMode,
-						const CGenericWeaponAtts_ProjectileFireMechanic& mechanic);
 };

@@ -21,7 +21,7 @@ const WeaponAtts::WACollection& CWeaponRaptor::WeaponAttributes() const
 }
 
 #ifndef CLIENT_DLL
-float CWeaponRaptor::Bot_CalcDesireToUse(CGenericWeapon& weapon, CBaseBot& bot, CBaseEntity& enemy, float distanceToEnemy) const
+float CWeaponRaptor::Bot_CalcDesireToUse(CBaseBot& bot, CBaseEntity& enemy, float distanceToEnemy) const
 {
 	return static_cast<float>(WeaponPref_P99) / static_cast<float>(WeaponPref_Max);
 }

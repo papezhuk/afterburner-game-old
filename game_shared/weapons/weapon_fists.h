@@ -7,11 +7,10 @@ class CWeaponFists : public CGenericWeapon
 {
 public:
 	CWeaponFists();
-	virtual const CGenericWeaponAttributes& WeaponAttributes() const override;
+	virtual const WeaponAtts::WACollection& WeaponAttributes() const override;
 
-protected:
-	virtual bool SwitchFire(int index,
-							const CGenericWeaponAtts_FireMode& fireMode,
-							const CGenericWeaponAtts_BaseFireMechanic& mechanic) override;
-	virtual void SwitchPrecache(const CGenericWeaponAtts_BaseFireMechanic& mechanic) override;
+#ifndef CLIENT_DLL
+	virtual float Bot_CalcDesireToUse(CBaseBot& bot, CBaseEntity& enemy, float distanceToEnemy) const override;
+	virtual void Bot_SetFightStyle(CBaseBotFightStyle& fightStyle) const override;
+#endif
 };

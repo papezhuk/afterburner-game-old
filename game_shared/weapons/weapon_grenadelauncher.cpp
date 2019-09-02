@@ -29,6 +29,18 @@ LINK_ENTITY_TO_CLASS(weapon_ronin, CWeaponGrenadeLauncher)
 LINK_ENTITY_TO_CLASS(weapon_rocketlauncher, CWeaponGrenadeLauncher)
 #endif
 
+CWeaponGrenadeLauncher::CWeaponGrenadeLauncher() :
+	CGenericProjectileWeapon()
+{
+	ASSERT(WeaponAttributes().AttackModes.Count() == 2);
+
+	m_pPrimaryAttackMode = WeaponAttributes().AttackModes[0].get();
+	m_pSecondaryAttackMode = WeaponAttributes().AttackModes[1].get();
+
+	ASSERT(m_pPrimaryAttackMode);
+	ASSERT(m_pSecondaryAttackMode);
+}
+
 const WeaponAtts::WACollection& CWeaponGrenadeLauncher::WeaponAttributes() const
 {
 	return StaticWeaponAttributes;
@@ -42,7 +54,7 @@ void CWeaponGrenadeLauncher::Precache()
 }
 
 #ifndef CLIENT_DLL
-float CWeaponGrenadeLauncher::Bot_CalcDesireToUse(CGenericWeapon& weapon, CBaseBot& bot, CBaseEntity& enemy, float distanceToEnemy) const
+float CWeaponGrenadeLauncher::Bot_CalcDesireToUse(CBaseBot& bot, CBaseEntity& enemy, float distanceToEnemy) const
 {
 	const float explosionRadius = grenadelauncher_explosion_radius.value;
 
@@ -90,23 +102,23 @@ void CWeaponGrenadeLauncher::Bot_SetFightStyle(CBaseBotFightStyle& fightStyle) c
 								2.0f, 5.0f);
 }
 
-void CWeaponGrenadeLauncher::CreateProjectile(int index,
-											  const CGenericWeaponAtts_FireMode& fireMode,
-											  const CGenericWeaponAtts_BaseFireMechanic& mechanic)
+void CWeaponGrenadeLauncher::CreateProjectile(const WeaponAtts::WAProjectileAttack& projectileAttack)
 {
+	const bool isPrimaryAttack = projectileAttack.Signature().Index == 0;
+
 	UTIL_MakeVectors(GetGrenadeLaunchAngles());
 	const Vector forward = gpGlobals->v_forward;
 	const Vector location = m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs + forward * 16.0f;
 
 	CWeaponGrenadeLauncher_Grenade* grenade = CreateGrenade(m_pPlayer->pev, location, forward);
 
-	grenade->SetExplodeOnContact(index == 0);
+	grenade->SetExplodeOnContact(isPrimaryAttack);
 	grenade->SetRandomTumbleAngVel(GRENADELAUNCHER_TUMBLEVEL_MIN, GRENADELAUNCHER_TUMBLEVEL_MAX);
 	grenade->SetDamageOnExplode(gSkillData.plrDmgGrenadeLauncher);
 	grenade->SetPlayerContactDamageMultiplier(gSkillData.plrDmgMultGrenadelauncherHit);
 	grenade->SetOwnerDamageMultiplier(gSkillData.plrSelfDmgMultGrenadeLauncher);
 	grenade->SetSpeed(grenadelauncher_launch_speed.value);
-	grenade->SetFuseTime(index == 1 ? grenadelauncher_fuse_time.value : -1);
+	grenade->SetFuseTime(isPrimaryAttack ? -1 : grenadelauncher_fuse_time.value);
 }
 
 CWeaponGrenadeLauncher_Grenade* CWeaponGrenadeLauncher::CreateGrenade(entvars_t *pevOwner, const Vector& location, const Vector& launchDir)

@@ -1,68 +1,56 @@
 #include "genericprojectileweapon.h"
 #include "soundent.h"
-#include "weaponatts_projectilefiremechanic.h"
+#include "weaponatts_projectileattack.h"
 
 void CGenericProjectileWeapon::Precache()
 {
 	CGenericWeapon::Precache();
 }
 
-void CGenericProjectileWeapon::SwitchPrecache(const CGenericWeaponAtts_BaseFireMechanic& mechanic)
+bool CGenericProjectileWeapon::InvokeWithAttackMode(WeaponAttackType type, const WeaponAtts::WABaseAttack* attackMode)
 {
-	if ( mechanic.Id() != CGenericWeaponAtts_BaseFireMechanic::FireMechanic_e::Projectile )
-	{
-		return;
-	}
-
-	Precache(static_cast<const CGenericWeaponAtts_ProjectileFireMechanic&>(mechanic));
-}
-
-void CGenericProjectileWeapon::Precache(const CGenericWeaponAtts_ProjectileFireMechanic& mechanic)
-{
-	// Nothing at the moment.
-}
-
-bool CGenericProjectileWeapon::SwitchFire(int index,
-									   const CGenericWeaponAtts_FireMode& fireMode,
-									   const CGenericWeaponAtts_BaseFireMechanic& mechanic)
-{
-	if ( mechanic.Id() != CGenericWeaponAtts_BaseFireMechanic::FireMechanic_e::Projectile )
+	if ( attackMode->Classify() != WeaponAtts::WABaseAttack::Classification::Projectile )
 	{
 		return false;
 	}
 
-	return ProjectileFire(index, fireMode, static_cast<const CGenericWeaponAtts_ProjectileFireMechanic&>(mechanic));
-}
+	const WeaponAtts::WAProjectileAttack* projectileAttack = static_cast<const WeaponAtts::WAProjectileAttack*>(attackMode);
 
-bool CGenericProjectileWeapon::ProjectileFire(int index, const CGenericWeaponAtts_FireMode& fireMode, const CGenericWeaponAtts_ProjectileFireMechanic& mechanic)
-{
-	if ( index < 0 || index > 1 || fireMode.FireRate() <= 0.0f )
+	if ( projectileAttack->AttackRate <= 0.0f )
 	{
 		return false;
 	}
 
-	m_pPlayer->m_iWeaponVolume = fireMode.Volume();
-	m_pPlayer->m_iWeaponFlash = fireMode.MuzzleFlashBrightness();
+	if ( !CGenericWeapon::InvokeWithAttackMode(type, projectileAttack) )
+	{
+		return false;
+	}
+
+	m_pPlayer->m_iWeaponVolume = projectileAttack->Volume;
+	m_pPlayer->m_iWeaponFlash = projectileAttack->MuzzleFlashBrightness;
 
 	m_pPlayer->m_iExtraSoundTypes = bits_SOUND_DANGER;
 	m_pPlayer->m_flStopExtraSoundTime = UTIL_WeaponTimeBase() + 0.2;
 
-	DecrementAmmo(fireMode, 1);
+	DecrementAmmo(projectileAttack, 1);
 
 	// player "shoot" animation
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
 #ifndef CLIENT_DLL
 	// Only create the actual projectile on the server.
-	CreateProjectile(index, fireMode, mechanic);
+	CreateProjectile(*projectileAttack);
 #endif
 
-	PLAYBACK_EVENT(DefaultEventFlags(), m_pPlayer->edict(), m_FireEvents[index]);
+	if ( m_AttackModeEvents[projectileAttack->Signature().Index] )
+	{
+		PLAYBACK_EVENT(DefaultEventFlags(), m_pPlayer->edict(), m_AttackModeEvents[projectileAttack->Signature().Index]);
+	}
 
-	DelayFiring(1.0f / fireMode.FireRate());
+	DelayFiring(1.0f / projectileAttack->AttackRate);
 	SetNextIdleTime(5, true);
 
-	if ( !HasAmmo(fireMode, 1, true) && !HasAmmo(fireMode, 1, false) )
+	if ( !HasAmmo(projectileAttack, 1, true) && !HasAmmo(projectileAttack, 1, false) )
 	{
 		// HEV suit - indicate out of ammo condition
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);

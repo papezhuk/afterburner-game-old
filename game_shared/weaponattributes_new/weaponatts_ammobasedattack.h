@@ -23,6 +23,8 @@ namespace WeaponAtts
         int MuzzleFlashBrightness = NORMAL_GUN_FLASH;
         float ViewPunchY = 0.0f;
         const char* ShellModelName = nullptr;
+        bool AutoReload = true;
+        bool SpecialReload = false;
 
         inline void SetUniformSpread(float spread)
         {
