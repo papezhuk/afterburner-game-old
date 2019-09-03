@@ -20,10 +20,6 @@ enum P99Animations_e
     P99_SHOOT_SILENCER_EMPTY,
 };
 
-#ifdef CLIENT_DLL
-static CWeaponP99 PredictionWeapon;
-#endif
-
 static constexpr float P99_FIRE_RATE = 6.0f;
 
 static const CAmmoDef Ammo_P99 =
@@ -59,11 +55,6 @@ static const WeaponAtts::WACollection StaticWeaponAttributes([](WeaponAtts::WACo
     pm.PlayerModelName = "models/weapon_p99/p_p99.mdl";
     pm.WorldModelName = "models/weapon_p99/w_p99.mdl";
     pm.PlayerAnimExtension = "onehanded";
-
-#ifdef CLIENT_DLL
-    WAClient& client = obj.Client;
-    client.PredictionWeapon = &PredictionWeapon;
-#endif
 
     obj.SkillRecords.AddToTail(WASkillRecord("sk_plr_dmg_p99", &skilldata_t::plrDmgP99));
 

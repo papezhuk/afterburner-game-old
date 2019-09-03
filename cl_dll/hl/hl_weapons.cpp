@@ -635,8 +635,8 @@ void HUD_InitClientWeapons( void )
 
 	CWeaponRegistry::StaticInstance().ForEach([](const WeaponAtts::WACollection& atts)
 	{
-		ASSERTSZ(atts.Client.PredictionWeapon, "Expected a valid prediction weapon.");
-		HUD_PrepEntity(atts.Client.PredictionWeapon, &player);
+		CBaseEntity* predictionWeapon = CBaseEntity::Create(atts.Core.Classname, vec3_t(), vec3_t());
+		HUD_PrepEntity(predictionWeapon, &player);
 	});
 
 	// Allocate slot(s) for each weapon that we are going to be predicting
@@ -716,7 +716,7 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	const WeaponAtts::WACollection* atts = CWeaponRegistry::StaticInstance().Get(from->client.m_iId);
 	if ( atts )
 	{
-		pWeapon = atts->Client.PredictionWeapon;
+		pWeapon = g_pWpns[static_cast<uint32_t>(atts->Core.Id)];
 	}
 
 	if ( !pWeapon )

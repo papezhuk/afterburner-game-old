@@ -12,10 +12,6 @@
 #include "weaponatts_baseattack.h"
 #include "utlvector.h"
 
-#ifdef CLIENT_DLL
-#include "weaponatts_client.h"
-#endif
-
 namespace WeaponAtts
 {
 	// Weapon attributes are designed to comprise a sort of static database of useful
@@ -33,10 +29,6 @@ namespace WeaponAtts
 
 		WAViewModel ViewModel;
 		WAPlayerModel PlayerModel;
-
-#ifdef CLIENT_DLL
-		WAClient Client;
-#endif
 
 		WACollection(const std::function<void(WACollection&)>& initialiser);
 		void RegisterCvars() const;

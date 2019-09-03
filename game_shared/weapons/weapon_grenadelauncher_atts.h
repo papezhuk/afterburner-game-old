@@ -13,10 +13,6 @@ enum GrenadeLauncherAnimations_e
 	GRENADELAUNCHER_HOLSTER
 };
 
-#ifdef CLIENT_DLL
-static CWeaponGrenadeLauncher PredictionWeapon;
-#endif
-
 static constexpr float GRENADELAUNCHER_FIRE_RATE = 1.0f / 0.8f;
 
 // Dynamic attributes for tuning purposes
@@ -59,11 +55,6 @@ static const WeaponAtts::WACollection StaticWeaponAttributes([](WeaponAtts::WACo
     pm.PlayerModelName = "models/weapon_grenadelauncher/p_grenadelauncher.mdl";
     pm.WorldModelName = "models/weapon_grenadelauncher/w_grenadelauncher.mdl";
     pm.PlayerAnimExtension = "gauss";
-
-#ifdef CLIENT_DLL
-    WAClient& client = obj.Client;
-    client.PredictionWeapon = &PredictionWeapon;
-#endif
 
     obj.SkillRecords.AddToTail(WASkillRecord("sk_plr_dmg_grenadelauncher", &skilldata_t::plrDmgGrenadeLauncher));
     obj.SkillRecords.AddToTail(WASkillRecord("sk_plr_selfdmg_mult_grenadelauncher", &skilldata_t::plrSelfDmgMultGrenadeLauncher));

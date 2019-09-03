@@ -21,10 +21,6 @@ enum RaptorAnimations_e
     RAPTOR_HOLSTER
 };
 
-#ifdef CLIENT_DLL
-static CWeaponRaptor PredictionWeapon;
-#endif
-
 static constexpr float RAPTOR_FIRE_RATE = 1.0f / 0.4f;
 
 static const CAmmoDef Ammo_Raptor =
@@ -60,11 +56,6 @@ static const WeaponAtts::WACollection StaticWeaponAttributes([](WeaponAtts::WACo
     pm.PlayerModelName = "models/weapon_raptor/p_raptor.mdl";
     pm.WorldModelName = "models/weapon_raptor/w_raptor.mdl";
     pm.PlayerAnimExtension = "python";
-
-#ifdef CLIENT_DLL
-    WAClient& client = obj.Client;
-    client.PredictionWeapon = &PredictionWeapon;
-#endif
 
     obj.SkillRecords.AddToTail(WASkillRecord("sk_plr_dmg_raptor", &skilldata_t::plrDmgRaptor));
 

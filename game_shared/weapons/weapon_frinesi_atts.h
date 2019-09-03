@@ -20,10 +20,6 @@ enum FrinesiAnimations_e
     FRINESI_IDLE4
 };
 
-#ifdef CLIENT_DLL
-static CWeaponFrinesi PredictionWeapon;
-#endif
-
 static constexpr float FRINESI_FIRE_RATE_PUMP = 1.0f;
 static constexpr float FRINESI_FIRE_RATE_AUTO = 4.0f;
 static constexpr uint8_t FRINESI_PELLETS_PER_SHOT = 6;
@@ -60,11 +56,6 @@ static const WeaponAtts::WACollection StaticWeaponAttributes([](WeaponAtts::WACo
     pm.PlayerModelName = "models/weapon_frinesi/p_frinesi.mdl";
     pm.WorldModelName = "models/weapon_frinesi/w_frinesi.mdl";
     pm.PlayerAnimExtension = "shotgun";
-
-#ifdef CLIENT_DLL
-    WAClient& client = obj.Client;
-    client.PredictionWeapon = &PredictionWeapon;
-#endif
 
     obj.SkillRecords.AddToTail(WASkillRecord("sk_plr_dmg_frinesi_auto", &skilldata_t::plrDmgFrinesiAuto));
     obj.SkillRecords.AddToTail(WASkillRecord("sk_plr_dmg_frinesi_pump", &skilldata_t::plrDmgFrinesiPump));
