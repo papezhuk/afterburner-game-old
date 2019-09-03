@@ -12,9 +12,9 @@ void CGenericHitscanWeapon::WeaponIdle()
 	CGenericWeapon::WeaponIdle();
 }
 
-void CGenericHitscanWeapon::PrecacheAttackMode(const WeaponAtts::WABaseAttack& attackMode, const uint32_t index)
+void CGenericHitscanWeapon::PrecacheAttackMode(const WeaponAtts::WABaseAttack& attackMode)
 {
-	CGenericWeapon::PrecacheAttackMode(attackMode, index);
+	CGenericWeapon::PrecacheAttackMode(attackMode);
 
 	if ( attackMode.Classify() != WeaponAtts::WABaseAttack::Classification::Hitscan )
 	{

@@ -25,40 +25,40 @@ DEV_CVAR(grenadelauncher_launch_pitch_adjust, "5");
 
 static const CAmmoDef Ammo_GrenadeLauncher =
 {
-    .ClassName = "ammo_grenadelauncher",
-    .AmmoName = "ammodef_grenadelauncher",
-    .MaxCarry = 12,
-    .AmmoBoxGive = 6
+	.ClassName = "ammo_grenadelauncher",
+	.AmmoName = "ammodef_grenadelauncher",
+	.MaxCarry = 12,
+	.AmmoBoxGive = 6
 };
 
 static const WeaponAtts::WACollection StaticWeaponAttributes([](WeaponAtts::WACollection& obj)
 {
-    using namespace WeaponAtts;
+	using namespace WeaponAtts;
 
-    WACore& core = obj.Core;
-    core.Classname = "weapon_grenadelauncher";
-    core.Id = WeaponId_e::WeaponGrenadeLauncher;
-    core.SwitchWeight = WeaponPref_GrenadeLauncher;
+	WACore& core = obj.Core;
+	core.Classname = "weapon_grenadelauncher";
+	core.Id = WeaponId_e::WeaponGrenadeLauncher;
+	core.SwitchWeight = WeaponPref_GrenadeLauncher;
 
-    WAAmmoDef& ammo = obj.Ammo;
-    ammo.PrimaryAmmo = &Ammo_GrenadeLauncher;
-    ammo.MaxClip = 6;
-    ammo.PrimaryAmmoOnFirstPickup = ammo.MaxClip;
+	WAAmmoDef& ammo = obj.Ammo;
+	ammo.PrimaryAmmo = &Ammo_GrenadeLauncher;
+	ammo.MaxClip = 6;
+	ammo.PrimaryAmmoOnFirstPickup = ammo.MaxClip;
 
-    WAViewModel& vm = obj.ViewModel;
-    vm.ModelName = "models/weapon_grenadelauncher/v_grenadelauncher.mdl";
-    vm.Anim_Draw = GRENADELAUNCHER_DRAW;
-    vm.AnimList_Idle << GRENADELAUNCHER_IDLE1 << GRENADELAUNCHER_IDLE2;
-    vm.AnimList_Reload << GRENADELAUNCHER_RELOAD;
+	WAViewModel& vm = obj.ViewModel;
+	vm.ModelName = "models/weapon_grenadelauncher/v_grenadelauncher.mdl";
+	vm.Anim_Draw = GRENADELAUNCHER_DRAW;
+	vm.AnimList_Idle << GRENADELAUNCHER_IDLE1 << GRENADELAUNCHER_IDLE2;
+	vm.AnimList_Reload << GRENADELAUNCHER_RELOAD;
 
-    WAPlayerModel& pm = obj.PlayerModel;
-    pm.PlayerModelName = "models/weapon_grenadelauncher/p_grenadelauncher.mdl";
-    pm.WorldModelName = "models/weapon_grenadelauncher/w_grenadelauncher.mdl";
-    pm.PlayerAnimExtension = "gauss";
+	WAPlayerModel& pm = obj.PlayerModel;
+	pm.PlayerModelName = "models/weapon_grenadelauncher/p_grenadelauncher.mdl";
+	pm.WorldModelName = "models/weapon_grenadelauncher/w_grenadelauncher.mdl";
+	pm.PlayerAnimExtension = "gauss";
 
-    obj.SkillRecords.AddToTail(WASkillRecord("sk_plr_dmg_grenadelauncher", &skilldata_t::plrDmgGrenadeLauncher));
-    obj.SkillRecords.AddToTail(WASkillRecord("sk_plr_selfdmg_mult_grenadelauncher", &skilldata_t::plrSelfDmgMultGrenadeLauncher));
-    obj.SkillRecords.AddToTail(WASkillRecord("sk_plr_dmg_mult_grenadelauncher_hit", &skilldata_t::plrDmgMultGrenadelauncherHit));
+	obj.SkillRecords.AddToTail(WASkillRecord("sk_plr_dmg_grenadelauncher", &skilldata_t::plrDmgGrenadeLauncher));
+	obj.SkillRecords.AddToTail(WASkillRecord("sk_plr_selfdmg_mult_grenadelauncher", &skilldata_t::plrSelfDmgMultGrenadeLauncher));
+	obj.SkillRecords.AddToTail(WASkillRecord("sk_plr_dmg_mult_grenadelauncher_hit", &skilldata_t::plrDmgMultGrenadelauncherHit));
 
 	obj.CustomCvars.AddToTail(&grenadelauncher_explosion_radius);
 	obj.CustomCvars.AddToTail(&grenadelauncher_fuse_time);
@@ -66,30 +66,30 @@ static const WeaponAtts::WACollection StaticWeaponAttributes([](WeaponAtts::WACo
 	obj.CustomCvars.AddToTail(&grenadelauncher_launch_pitch_adjust);
 
 	// Explode on contact
-    WAProjectileAttack* priAttack = new WAProjectileAttack();
-    obj.AttackModes.AddToTail(std::shared_ptr<WABaseAttack>(priAttack));
+	WAProjectileAttack* priAttack = new WAProjectileAttack();
+	obj.AttackModes.AddToTail(std::shared_ptr<WABaseAttack>(priAttack));
 
-    priAttack->EventScript = "events/weapon_grenadelauncher/fire01.sc";
-    priAttack->FunctionsUnderwater = true;
-    priAttack->IsContinuous = false;
-    priAttack->UsesAmmoPool = WAAmmoBasedAttack::AmmoPool::Primary;
-    priAttack->SetUniformSpread(1.0f);
-    priAttack->AttackRate = GRENADELAUNCHER_FIRE_RATE;
-    priAttack->Volume = LOUD_GUN_VOLUME;
-    priAttack->MuzzleFlashBrightness = BRIGHT_GUN_FLASH;
-    priAttack->ViewPunchY = -4.0f;
+	priAttack->EventScript = "events/weapon_grenadelauncher/fire01.sc";
+	priAttack->FunctionsUnderwater = true;
+	priAttack->IsContinuous = false;
+	priAttack->UsesAmmoPool = WAAmmoBasedAttack::AmmoPool::Primary;
+	priAttack->SetUniformSpread(1.0f);
+	priAttack->AttackRate = GRENADELAUNCHER_FIRE_RATE;
+	priAttack->Volume = LOUD_GUN_VOLUME;
+	priAttack->MuzzleFlashBrightness = BRIGHT_GUN_FLASH;
+	priAttack->ViewPunchY = -4.0f;
 
-    priAttack->ViewModelAnimList_Attack << GRENADELAUNCHER_FIRE;
+	priAttack->ViewModelAnimList_Attack << GRENADELAUNCHER_FIRE;
 
-    priAttack->AttackSounds.MinPitch = 96;
-    priAttack->AttackSounds.MaxPitch = 100;
-    priAttack->AttackSounds.SoundNames << "weapons/weapon_grenadelauncher/grenade_launcher_fire.wav";
+	priAttack->AttackSounds.MinPitch = 96;
+	priAttack->AttackSounds.MaxPitch = 100;
+	priAttack->AttackSounds.SoundNames << "weapons/weapon_grenadelauncher/grenade_launcher_fire.wav";
 
 	// Explode after delay
 	WAProjectileAttack* secAttack = new WAProjectileAttack();
-    obj.AttackModes.AddToTail(std::shared_ptr<WABaseAttack>(secAttack));
+	obj.AttackModes.AddToTail(std::shared_ptr<WABaseAttack>(secAttack));
 
 	// Base off primary attack
 	*secAttack = *priAttack;
-    secAttack->EventScript = "events/weapon_grenadelauncher/fire02.sc";
+	secAttack->EventScript = "events/weapon_grenadelauncher/fire02.sc";
 });

@@ -31,6 +31,7 @@ namespace WeaponAtts
 		WAPlayerModel PlayerModel;
 
 		WACollection(const std::function<void(WACollection&)>& initialiser);
+
 		void RegisterCvars() const;
 
 	private:

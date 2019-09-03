@@ -12,21 +12,21 @@ enum FistsAnimations_e
 
 static const WeaponAtts::WACollection StaticWeaponAttributes([](WeaponAtts::WACollection& obj)
 {
-    using namespace WeaponAtts;
+	using namespace WeaponAtts;
 
-    WACore& core = obj.Core;
-    core.Classname = "weapon_fists";
-    core.Id = WeaponId_e::WeaponFists;
-    core.SwitchWeight = WeaponPref_Fists;
+	WACore& core = obj.Core;
+	core.Classname = "weapon_fists";
+	core.Id = WeaponId_e::WeaponFists;
+	core.SwitchWeight = WeaponPref_Fists;
 
-    WAViewModel& vm = obj.ViewModel;
-    vm.ModelName = "models/weapon_fists/v_fists.mdl";
+	WAViewModel& vm = obj.ViewModel;
+	vm.ModelName = "models/weapon_fists/v_fists.mdl";
 	vm.Anim_Draw = FISTS_IDLE1;
-    vm.AnimList_Idle << FISTS_IDLE1;
+	vm.AnimList_Idle << FISTS_IDLE1;
 
-    WAPlayerModel& pm = obj.PlayerModel;
-    pm.PlayerAnimExtension = "crowbar";
+	WAPlayerModel& pm = obj.PlayerModel;
+	pm.PlayerAnimExtension = "crowbar";
 
-    obj.SkillRecords.AddToTail(WASkillRecord("sk_plr_dmg_fists", &skilldata_t::plrDmgFists));
-    obj.SkillRecords.AddToTail(WASkillRecord("sk_plr_dmg_fists_alt", &skilldata_t::plrDmgFistsAlt));
+	obj.SkillRecords.AddToTail(WASkillRecord("sk_plr_dmg_fists", &skilldata_t::plrDmgFists));
+	obj.SkillRecords.AddToTail(WASkillRecord("sk_plr_dmg_fists_alt", &skilldata_t::plrDmgFistsAlt));
 });

@@ -52,7 +52,7 @@ protected:
 	};
 
 	// Overridable functions for attack modes:
-	virtual void PrecacheAttackMode(const WeaponAtts::WABaseAttack& attackMode, const uint32_t index);
+	virtual void PrecacheAttackMode(const WeaponAtts::WABaseAttack& attackMode);
 	virtual bool InvokeWithAttackMode(WeaponAttackType type, const WeaponAtts::WABaseAttack* attackMode);
 
 	void SetViewModelBody(int body, bool immediate = false);

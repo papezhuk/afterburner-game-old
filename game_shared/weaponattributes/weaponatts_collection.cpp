@@ -14,8 +14,7 @@ namespace WeaponAtts
 
 	void WACollection::Register() const
 	{
-		// TODO: Update weapon registry with new attribute class support!
-		//CWeaponRegistry::StaticInstance().Add(this);
+		CWeaponRegistry::StaticInstance().Add(this);
 	}
 
 	void WACollection::Validate() const

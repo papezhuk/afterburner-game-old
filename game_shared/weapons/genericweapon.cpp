@@ -64,13 +64,15 @@ void CGenericWeapon::Precache()
 	FOR_EACH_VEC(atts.AttackModes, index)
 	{
 		ASSERT(atts.AttackModes[index].get());
-		PrecacheAttackMode(*atts.AttackModes[index], index);
+		PrecacheAttackMode(*atts.AttackModes[index]);
 	}
 }
 
-void CGenericWeapon::PrecacheAttackMode(const WeaponAtts::WABaseAttack& attackMode, const uint32_t index)
+void CGenericWeapon::PrecacheAttackMode(const WeaponAtts::WABaseAttack& attackMode)
 {
 	PrecacheSoundSet(attackMode.AttackSounds);
+
+	const uint32_t index = attackMode.Signature()->Index;
 
 	if ( m_AttackModeEvents.Count() < index + 1 )
 	{
@@ -92,10 +94,7 @@ void CGenericWeapon::PrecacheSoundSet(const WeaponAtts::WASoundSet& sounds)
 
 void CGenericWeapon::PrecacheCore(const WeaponAtts::WACore& core)
 {
-	if ( core.PickupSoundOverride )
-	{
-		PRECACHE_SOUND(core.PickupSoundOverride);
-	}
+	PRECACHE_SOUND(core.PickupSoundOverride ? core.PickupSoundOverride : DEFAULT_WEAPON_PICKUP_SOUND);
 }
 
 void CGenericWeapon::PrecacheViewModel(const WeaponAtts::WAViewModel& viewModel)

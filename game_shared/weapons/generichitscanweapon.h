@@ -9,7 +9,7 @@ public:
 	virtual void WeaponIdle() override;
 
 protected:
-	virtual void PrecacheAttackMode(const WeaponAtts::WABaseAttack& attackMode, const uint32_t index) override;
+	virtual void PrecacheAttackMode(const WeaponAtts::WABaseAttack& attackMode) override;
 	virtual bool InvokeWithAttackMode(const CGenericWeapon::WeaponAttackType type, const WeaponAtts::WABaseAttack* attackMode) override;
 
 private:

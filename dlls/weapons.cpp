@@ -301,12 +301,12 @@ void W_Precache( void )
 	{
 		UTIL_PrecacheOtherWeapon(atts.Core.Classname);
 
-		if ( atts.Ammo.PrimaryAmmo->ClassName )
+		if ( atts.Ammo.PrimaryAmmo && atts.Ammo.PrimaryAmmo->ClassName )
 		{
 			UTIL_PrecacheOther(atts.Ammo.PrimaryAmmo->ClassName);
 		}
 
-		if ( atts.Ammo.SecondaryAmmo->ClassName )
+		if ( atts.Ammo.SecondaryAmmo && atts.Ammo.SecondaryAmmo->ClassName )
 		{
 			UTIL_PrecacheOther(atts.Ammo.SecondaryAmmo->ClassName);
 		}
@@ -330,8 +330,6 @@ void W_Precache( void )
 	// glock
 	UTIL_PrecacheOtherWeapon( "weapon_9mmhandgun" );
 	UTIL_PrecacheOther( "ammo_9mmclip" );
-
-	UTIL_PrecacheOtherWeapon("weapon_p99");
 
 	// mp5
 	UTIL_PrecacheOtherWeapon( "weapon_9mmAR" );

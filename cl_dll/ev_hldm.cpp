@@ -77,8 +77,13 @@ void EV_HLDM_Init()
 		const uint32_t index = static_cast<uint32_t>(atts.Core.Id);
 		ASSERT(index < MAX_WEAPONS);
 
-		for ( uint8_t index = 0; index < WeaponAtts::WACollection::MAX_ATTACK_MODES; ++index )
+		FOR_EACH_VEC(atts.AttackModes, index)
 		{
+			if ( index >= WeaponAtts::WACollection::MAX_ATTACK_MODES )
+			{
+				break;
+			}
+
 			const WeaponAtts::WABaseAttack* baseAttack = atts.AttackModes[index].get();
 
 			if ( !baseAttack->EventScript )

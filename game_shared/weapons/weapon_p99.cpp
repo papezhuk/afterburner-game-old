@@ -38,6 +38,8 @@ CWeaponP99::CWeaponP99()
 
 	ASSERT(m_pAttackUnsilenced);
 	ASSERT(m_pAttackSilenced);
+
+	m_pPrimaryAttackMode = m_pAttackUnsilenced;
 }
 
 const WeaponAtts::WACollection& CWeaponP99::WeaponAttributes() const
