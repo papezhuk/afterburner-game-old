@@ -33,8 +33,8 @@
 #include "../demo.h"
 
 #include "weaponregistry.h"
-#include "genericweaponattributes.h"
 #include "genericweapon.h"
+#include "weaponatts_collection.h"
 
 extern globalvars_t *gpGlobals;
 extern int g_iUser1;
@@ -633,10 +633,10 @@ void HUD_InitClientWeapons( void )
 	// Allocate a slot for the local player
 	HUD_PrepEntity( &player, NULL );
 
-	CWeaponRegistry::StaticInstance().ForEach([](const CGenericWeaponAttributes& atts)
+	CWeaponRegistry::StaticInstance().ForEach([](const WeaponAtts::WACollection& atts)
 	{
-		ASSERTSZ(atts.Core().ClientPredictionWeapon(), "Expected a valid prediction weapon.");
-		HUD_PrepEntity(atts.Core().ClientPredictionWeapon(), &player);
+		ASSERTSZ(atts.Client.PredictionWeapon, "Expected a valid prediction weapon.");
+		HUD_PrepEntity(atts.Client.PredictionWeapon, &player);
 	});
 
 	// Allocate slot(s) for each weapon that we are going to be predicting
@@ -713,10 +713,10 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	// Get current clock
 	gpGlobals->time = time;
 
-	const CGenericWeaponAttributes* atts = CWeaponRegistry::StaticInstance().Get(from->client.m_iId);
+	const WeaponAtts::WACollection* atts = CWeaponRegistry::StaticInstance().Get(from->client.m_iId);
 	if ( atts )
 	{
-		pWeapon = atts->Core().ClientPredictionWeapon();
+		pWeapon = atts->Client.PredictionWeapon;
 	}
 
 	if ( !pWeapon )

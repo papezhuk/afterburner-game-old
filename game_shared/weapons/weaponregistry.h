@@ -1,9 +1,14 @@
 #pragma once
+
 #include <cstdint>
 #include "weaponids.h"
 #include "cdll_dll.h"
 
-class CGenericWeaponAttributes;
+namespace WeaponAtts
+{
+	struct WACollection;
+}
+
 class CGenericWeapon;
 
 class CWeaponRegistry
@@ -11,9 +16,9 @@ class CWeaponRegistry
 public:
 	CWeaponRegistry();
 
-	void Add(const CGenericWeaponAttributes* atts);
-	const CGenericWeaponAttributes* Get(int index) const;
-	const CGenericWeaponAttributes* Get(WeaponId_e id) const;
+	void Add(const WeaponAtts::WACollection* atts);
+	const WeaponAtts::WACollection* Get(int index) const;
+	const WeaponAtts::WACollection* Get(WeaponId_e id) const;
 	void RegisterCvars();
 
 	template<typename T>
@@ -21,7 +26,7 @@ public:
 	{
 		for ( uint32_t index = 0; index < MAX_WEAPONS; ++index )
 		{
-			const CGenericWeaponAttributes* atts = m_AttributesList[index];
+			const WeaponAtts::WACollection* atts = m_AttributesList[index];
 
 			// Note that index 0 (Weapon_None) will not have a valid pointer.
 			if ( atts )
@@ -34,5 +39,5 @@ public:
 	static CWeaponRegistry& StaticInstance();
 
 private:
-	const CGenericWeaponAttributes* m_AttributesList[MAX_WEAPONS];
+	const WeaponAtts::WACollection* m_AttributesList[MAX_WEAPONS];
 };

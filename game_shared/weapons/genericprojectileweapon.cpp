@@ -42,9 +42,9 @@ bool CGenericProjectileWeapon::InvokeWithAttackMode(WeaponAttackType type, const
 	CreateProjectile(*projectileAttack);
 #endif
 
-	if ( m_AttackModeEvents[projectileAttack->Signature().Index] )
+	if ( m_AttackModeEvents[projectileAttack->Signature()->Index] )
 	{
-		PLAYBACK_EVENT(DefaultEventFlags(), m_pPlayer->edict(), m_AttackModeEvents[projectileAttack->Signature().Index]);
+		PLAYBACK_EVENT(DefaultEventFlags(), m_pPlayer->edict(), m_AttackModeEvents[projectileAttack->Signature()->Index]);
 	}
 
 	DelayFiring(1.0f / projectileAttack->AttackRate);

@@ -2,10 +2,12 @@
 
 #include "standard_includes.h"
 #include "weapons.h"
-#include "genericweaponattributes.h"
 #include "utlvector.h"
 #include "weaponatts_collection.h"
 #include "weaponatts_ammobasedattack.h"
+
+class CBaseBot;
+class CBaseBotFightStyle;
 
 // Build on top of CBasePlayerWeapon, because this is so tied into the engine
 // already it'd be a pain to replace it (at least at this stage).

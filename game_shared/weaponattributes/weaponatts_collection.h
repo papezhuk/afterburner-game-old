@@ -23,6 +23,8 @@ namespace WeaponAtts
 	// properties to establish the behaviour of each weapon.
 	struct WACollection
 	{
+		static constexpr size_t MAX_ATTACK_MODES = 8;
+
 		WACore Core;
 		WAAmmoDef Ammo;
 		CUtlVector<WASkillRecord> SkillRecords;

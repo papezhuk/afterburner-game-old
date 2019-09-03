@@ -13,7 +13,6 @@
 #include "ev_hldm.h"
 #include "rapidjson/document.h"
 #include "rapidjson_helpers/rapidjson_helpers.h"
-#include "weaponatts_hitscanfiremechanic.h"
 
 void HitscanWeaponEventPlayer::EventStart()
 {
@@ -21,16 +20,17 @@ void HitscanWeaponEventPlayer::EventStart()
 	{
 		EV_MuzzleFlash();
 		AnimateViewModel();
+		V_PunchAxis(0, m_pHitscanAttack->ViewPunchY);
 	}
 
-	EjectShellFromViewModel();
+	EjectShellFromViewModel(m_iShellModelIndex);
 	PlayFireSound();
 	CreateBulletTracers();
 }
 
 void HitscanWeaponEventPlayer::CreateBulletTracers()
 {
-	const uint32_t numShots = m_pMechanic->BulletsPerShot();
+	const uint32_t numShots = m_pHitscanAttack->BulletsPerShot;
 
 	for ( uint32_t shot = 0; shot < numShots; ++shot )
 	{
@@ -54,8 +54,8 @@ void HitscanWeaponEventPlayer::CreateBulletTracers()
 			for ( uint8_t axis = 0; axis < 3; ++axis )
 			{
 				shotDir[axis] = m_vecFwd[axis] +
-					(spreadX * m_pFireMode->SpreadX() * m_vecRight[axis]) +
-					(spreadY * m_pFireMode->SpreadY() * m_vecUp[axis]);
+					(spreadX * m_pHitscanAttack->SpreadX * m_vecRight[axis]) +
+					(spreadY * m_pHitscanAttack->SpreadY * m_vecUp[axis]);
 			}
 		}
 
@@ -103,6 +103,13 @@ bool HitscanWeaponEventPlayer::Initialise()
 		return false;
 	}
 
+	m_pHitscanAttack = dynamic_cast<const WeaponAtts::WAHitscanAttack*>(m_pAttackMode);
+	if ( !m_pHitscanAttack )
+	{
+		return false;
+	}
+
+	m_iShellModelIndex = gEngfuncs.pEventAPI->EV_FindModelIndex(m_pHitscanAttack->ShellModelName);
 	m_flSpreadX = m_pEventArgs->fparam1;
 	m_flSpreadY = m_pEventArgs->fparam2;
 	m_iRandomSeed = m_pEventArgs->iparam1;

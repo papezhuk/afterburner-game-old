@@ -38,7 +38,6 @@
 #include "r_studioint.h"
 #include "com_model.h"
 
-#include "genericweaponattributes.h"
 #include "weaponregistry.h"
 #include "genericweapon.h"
 
@@ -47,7 +46,7 @@
 #include "hitscanweaponeventplayer.h"
 #include "projectileweaponeventplayer.h"
 
-static std::unique_ptr<BaseWeaponEventPlayer> EventPlayers[MAX_WEAPONS][WEAPON_MAX_FIRE_MODES];
+static std::unique_ptr<BaseWeaponEventPlayer> EventPlayers[MAX_WEAPONS][WeaponAtts::WACollection::MAX_ATTACK_MODES];
 
 extern engine_studio_api_t IEngineStudio;
 
@@ -73,40 +72,35 @@ extern cvar_t *cl_lw;
 
 void EV_HLDM_Init()
 {
-	CWeaponRegistry::StaticInstance().ForEach([](const CGenericWeaponAttributes& atts)
+	CWeaponRegistry::StaticInstance().ForEach([](const WeaponAtts::WACollection& atts)
 	{
-		const uint32_t index = static_cast<uint32_t>(atts.Core().Id());
+		const uint32_t index = static_cast<uint32_t>(atts.Core.Id);
 		ASSERT(index < MAX_WEAPONS);
 
-		for ( uint8_t fireModeIndex = 0; fireModeIndex < WEAPON_MAX_FIRE_MODES; ++fireModeIndex )
+		for ( uint8_t index = 0; index < WeaponAtts::WACollection::MAX_ATTACK_MODES; ++index )
 		{
-			const CGenericWeaponAtts_FireMode& fireMode = atts.FireMode(fireModeIndex);
+			const WeaponAtts::WABaseAttack* baseAttack = atts.AttackModes[index].get();
 
-			if ( !fireMode.HasMechanic() )
+			if ( !baseAttack->EventScript )
 			{
-				continue;
-			}
-
-			if ( !fireMode.Event() )
-			{
-				ALERT(at_error, "EV_HLDM_Init: Weapon '%s' does not specify an event script for fire mode %u!\n",
-					  atts.Core().Classname(),
-					  fireModeIndex);
+				ALERT(at_error, "EV_HLDM_Init: Weapon '%s' does not specify an event script for attack mode %u!\n",
+					  atts.Core.Classname,
+					  index);
 				
 				continue;
 			}
 
 			BaseWeaponEventPlayer* eventPlayer = nullptr;
 
-			switch ( fireMode.Mechanic()->Id() )
+			switch ( baseAttack->Classify() )
 			{
-				case CGenericWeaponAtts_BaseFireMechanic::Hitscan:
+				case WeaponAtts::WABaseAttack::Classification::Hitscan:
 				{
 					eventPlayer = new HitscanWeaponEventPlayer();
 					break;
 				}
 				
-				case CGenericWeaponAtts_BaseFireMechanic::Projectile:
+				case WeaponAtts::WABaseAttack::Classification::Projectile:
 				{
 					eventPlayer = new ProjectileWeaponEventPlayer();
 					break;
@@ -115,8 +109,8 @@ void EV_HLDM_Init()
 				default:
 				{
 					gEngfuncs.Con_Printf("EV_HLDM_Init: No event handler for fire mode mechanic ID %u!\n",
-										 atts.Core().Classname(),
-					 					 static_cast<uint32_t>(fireMode.Mechanic()->Id()));
+										 atts.Core.Classname,
+					 					 static_cast<uint32_t>(baseAttack->Classify()));
 
 					break;
 				}
@@ -127,26 +121,26 @@ void EV_HLDM_Init()
 				continue;
 			}
 
-			EventPlayers[index][fireModeIndex].reset(eventPlayer);
-			eventPlayer->LoadEventScript(fireMode.Event());
+			EventPlayers[index][index].reset(eventPlayer);
+			eventPlayer->LoadEventScript(baseAttack->EventScript);
 		}
 	});
 }
 
 void EV_HandleGenericWeaponFire(event_args_t* args)
 {
-	const CGenericWeaponAtts_FireMode::FireModeSignature* signature =
-		(CGenericWeaponAtts_FireMode::FireModeSignature*)args->localUserData;
+	const WeaponAtts::WABaseAttack::AttackModeSignature* signature =
+		static_cast<const WeaponAtts::WABaseAttack::AttackModeSignature*>(args->localUserData);
 
-	const uint32_t weaponId = static_cast<const uint32_t>(signature->m_iWeaponId);
-	const uint8_t fireModeIndex = static_cast<const uint8_t>(signature->m_iFireMode);
+	const uint32_t weaponId = static_cast<const uint32_t>(signature->WeaponId);
+	const uint32_t attackModeIndex = signature->Index;
 
-	if ( weaponId >= MAX_WEAPONS || fireModeIndex >= WEAPON_MAX_FIRE_MODES )
+	if ( weaponId >= MAX_WEAPONS || attackModeIndex >= WeaponAtts::WACollection::MAX_ATTACK_MODES )
 	{
 		return;
 	}
 
-	std::unique_ptr<BaseWeaponEventPlayer>& eventPlayer = EventPlayers[weaponId][fireModeIndex];
+	std::unique_ptr<BaseWeaponEventPlayer>& eventPlayer = EventPlayers[weaponId][attackModeIndex];
 
 	if ( !eventPlayer )
 	{

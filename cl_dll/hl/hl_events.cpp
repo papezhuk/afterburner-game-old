@@ -18,7 +18,6 @@
 #include "event_api.h"
 #include "ev_hldm.h"
 #include "weaponregistry.h"
-#include "genericweaponattributes.h"
 #include "genericweapon.h"
 
 /*
@@ -59,17 +58,12 @@ void Game_HookEvents( void )
 	gEngfuncs.pfnHookEvent( "events/snarkfire.sc", EV_SnarkFire, NULL );
 
 	// Hook up all registered weapons to generic event handlers for firing.
-	CWeaponRegistry::StaticInstance().ForEach([](const CGenericWeaponAttributes& atts)
+	CWeaponRegistry::StaticInstance().ForEach([](const WeaponAtts::WACollection& atts)
 	{
-		for ( uint8_t fireModeIndex = 0; fireModeIndex < WEAPON_MAX_FIRE_MODES; ++fireModeIndex )
+		FOR_EACH_VEC(atts.AttackModes, index)
 		{
-			const CGenericWeaponAtts_FireMode& fireMode = atts.FireMode(fireModeIndex);
-			if ( !fireMode.HasMechanic() )
-			{
-				continue;
-			}
-
-			gEngfuncs.pfnHookEvent(fireMode.Event(), EV_HandleGenericWeaponFire, (void*)fireMode.Signature());
+			const WeaponAtts::WABaseAttack* attackMode = atts.AttackModes[index].get();
+			gEngfuncs.pfnHookEvent(attackMode->EventScript, EV_HandleGenericWeaponFire, (void*)attackMode->Signature());
 		}
 	});
 }

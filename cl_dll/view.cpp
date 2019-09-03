@@ -26,7 +26,7 @@
 #include "shake.h"
 #include "hltv.h"
 #include "weaponregistry.h"
-#include "genericweaponattributes.h"
+#include "weaponatts_collection.h"
 
 // Spectator Mode
 extern "C"
@@ -1345,16 +1345,16 @@ int V_FindViewModelByWeaponModel( int weaponindex )
 	CWeaponRegistry weaponRegistry = CWeaponRegistry::StaticInstance();
 	for ( int index = 0; index < MAX_WEAPONS; ++index )
 	{
-		const CGenericWeaponAttributes* atts = weaponRegistry.Get(index);
+		const WeaponAtts::WACollection* atts = weaponRegistry.Get(index);
 		if ( !atts )
 		{
 			continue;
 		}
 
-		const char* name = atts->Core().PlayerModelName();
-		if ( strnicmp(weaponModel->name, name, len) )
+		const char* name = atts->PlayerModel.PlayerModelName;
+		if ( name && strnicmp(weaponModel->name, name, len) )
 		{
-			return gEngfuncs.pEventAPI->EV_FindModelIndex(atts->Core().ViewModelName());
+			return gEngfuncs.pEventAPI->EV_FindModelIndex(atts->ViewModel.ModelName);
 		}
 	}
 

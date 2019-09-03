@@ -104,7 +104,7 @@ void CWeaponGrenadeLauncher::Bot_SetFightStyle(CBaseBotFightStyle& fightStyle) c
 
 void CWeaponGrenadeLauncher::CreateProjectile(const WeaponAtts::WAProjectileAttack& projectileAttack)
 {
-	const bool isPrimaryAttack = projectileAttack.Signature().Index == 0;
+	const bool isPrimaryAttack = projectileAttack.Signature()->Index == 0;
 
 	UTIL_MakeVectors(GetGrenadeLaunchAngles());
 	const Vector forward = gpGlobals->v_forward;

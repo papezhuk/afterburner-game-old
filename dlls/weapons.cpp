@@ -30,9 +30,9 @@
 #include "soundent.h"
 #include "decals.h"
 #include "gamerules.h"
-#include "genericweaponattributes.h"
 #include "weaponregistry.h"
 #include "weaponinfo.h"
+#include "weaponatts_collection.h"
 
 extern CGraph WorldGraph;
 extern int gEvilImpulse101;
@@ -297,19 +297,18 @@ void W_Precache( void )
 
 	// custom items...
 
-	CWeaponRegistry::StaticInstance().ForEach([](const CGenericWeaponAttributes& atts)
+	CWeaponRegistry::StaticInstance().ForEach([](const WeaponAtts::WACollection& atts)
 	{
-		const CGenericWeaponAtts_Core& core = atts.Core();
-		UTIL_PrecacheOtherWeapon(core.Classname());
+		UTIL_PrecacheOtherWeapon(atts.Core.Classname);
 
-		if ( core.PrimaryAmmoClassname() )
+		if ( atts.Ammo.PrimaryAmmo->ClassName )
 		{
-			UTIL_PrecacheOther(core.PrimaryAmmoClassname());
+			UTIL_PrecacheOther(atts.Ammo.PrimaryAmmo->ClassName);
 		}
 
-		if ( core.SecondaryAmmoClassname() )
+		if ( atts.Ammo.SecondaryAmmo->ClassName )
 		{
-			UTIL_PrecacheOther(core.SecondaryAmmoClassname());
+			UTIL_PrecacheOther(atts.Ammo.SecondaryAmmo->ClassName);
 		}
 	});
 

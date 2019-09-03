@@ -1,8 +1,8 @@
 #pragma once
 
 #include <cstring>
+#include "standard_includes.h"
 #include "weaponatts_base.h"
-#include "const.h"
 #include "weightedvaluelist.h"
 
 namespace WeaponAtts

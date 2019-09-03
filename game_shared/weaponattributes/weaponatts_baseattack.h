@@ -44,9 +44,9 @@ namespace WeaponAtts
 			ASSERTSZ_Q(AttackRate > 0.0f, "Attack rate must be positive.");
 		}
 
-		const AttackModeSignature& Signature() const
+		const AttackModeSignature* Signature() const
 		{
-			return m_Signature;
+			return &m_Signature;
 		}
 
 		void SetSignature(WeaponId_e id, uint32_t index)

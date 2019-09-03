@@ -13,7 +13,7 @@
 #include "in_defs.h"
 #include "rapidjson/document.h"
 #include "rapidjson_helpers/rapidjson_helpers.h"
-#include "weaponatts_hitscanfiremechanic.h"
+#include "weaponatts_collection.h"
 
 namespace
 {
@@ -44,7 +44,7 @@ void BaseWeaponEventPlayer::LoadEventScript(const CUtlString& path)
 }
 
 void BaseWeaponEventPlayer::PlayEvent(const event_args_t* eventArgs,
-				   					  const CGenericWeaponAtts_FireMode::FireModeSignature* signature)
+				   					  const WeaponAtts::WABaseAttack::AttackModeSignature* signature)
 {
 	m_pEventArgs = eventArgs;
 	m_pSignature = signature;
@@ -71,32 +71,19 @@ bool BaseWeaponEventPlayer::Initialise()
 		return false;
 	}
 
-	const uint8_t fireModeIndex = static_cast<const uint8_t>(m_pSignature->m_iFireMode);
-	if ( fireModeIndex >= 2 )
+	const uint32_t attackModeIndex = static_cast<const uint8_t>(m_pSignature->Index);
+	const WeaponId_e weaponId = static_cast<const WeaponId_e>(m_pSignature->WeaponId);
+	const WeaponAtts::WACollection* atts = CWeaponRegistry::StaticInstance().Get(weaponId);
+
+	if ( !atts || attackModeIndex >= atts->AttackModes.Count() )
 	{
 		return false;
 	}
 
-	const WeaponId_e weaponId = static_cast<const WeaponId_e>(m_pSignature->m_iWeaponId);
-	const CGenericWeaponAttributes* atts = CWeaponRegistry::StaticInstance().Get(weaponId);
+	m_pAttackMode = atts->AttackModes[attackModeIndex].get();
 
-	if ( !atts )
-	{
-		return false;
-	}
-
-	m_pFireMode = &atts->FireMode(fireModeIndex);
-	const CGenericWeaponAtts_BaseFireMechanic* mechanic = m_pFireMode->Mechanic();
-
-	if ( !mechanic || mechanic->Id() != CGenericWeaponAtts_BaseFireMechanic::FireMechanic_e::Hitscan )
-	{
-		return false;
-	}
-
-	m_pMechanic = m_pFireMode->Mechanic()->AsType<const CGenericWeaponAtts_HitscanFireMechanic>();
 	m_iEntIndex = m_pEventArgs->entindex;
 	m_bWeaponIsEmpty = m_pEventArgs->bparam1;
-	m_iShellModelIndex = gEngfuncs.pEventAPI->EV_FindModelIndex(m_pMechanic->ShellModelName());
 
 	// We make local copies of the event vectors so that they can be operated on as objects instead of arrays.
 	VectorCopy(m_pEventArgs->angles, m_vecEntAngles);
@@ -111,16 +98,20 @@ bool BaseWeaponEventPlayer::Initialise()
 
 void BaseWeaponEventPlayer::AnimateViewModel()
 {
-	int animIndex = m_bWeaponIsEmpty ? m_pFireMode->AnimIndex_FireEmpty() : m_pFireMode->AnimIndex_FireNotEmpty();
+	const WeightedValueList<int>* animList = m_bWeaponIsEmpty
+		? &m_pAttackMode->ViewModelAnimList_AttackEmpty
+		: &m_pAttackMode->ViewModelAnimList_Attack;
 
-	if ( m_bWeaponIsEmpty && animIndex < 0 )
+	if ( m_bWeaponIsEmpty && animList->Count() < 1 )
 	{
 		// If the weapon doesn't have an animation for firing on empty,
 		// fall back to the normal animation.
-		animIndex = m_pFireMode->AnimIndex_FireNotEmpty();
+		animList = &m_pAttackMode->ViewModelAnimList_Attack;
 	}
 
-	int body = m_pFireMode->ViewModelBodyOverride();
+	const int animIndex = animList->ItemByProbabilisticValue(gEngfuncs.pfnRandomFloat(0.0f, 1.0f));
+
+	int body = m_pAttackMode->ViewModelBodyOverride;
 
 	if ( body < 0 )
 	{
@@ -138,10 +129,9 @@ void BaseWeaponEventPlayer::AnimateViewModel()
 	}
 
 	gEngfuncs.pEventAPI->EV_WeaponAnimation(animIndex, body);
-	V_PunchAxis(0, m_pFireMode->ViewPunchY());
 }
 
-void BaseWeaponEventPlayer::EjectShellFromViewModel()
+void BaseWeaponEventPlayer::EjectShellFromViewModel(int shellIndex)
 {
 	vec3_t ShellVelocity;
 	vec3_t ShellOrigin;
@@ -159,24 +149,25 @@ void BaseWeaponEventPlayer::EjectShellFromViewModel()
 						   SHELLEJECT_RIGHT_SCALE,
 						   SHELLEJECT_UP_SCALE);
 
-	EV_EjectBrass(ShellOrigin, ShellVelocity, m_vecEntAngles[YAW], m_iShellModelIndex, TE_BOUNCE_SHELL);
+	EV_EjectBrass(ShellOrigin, ShellVelocity, m_vecEntAngles[YAW], shellIndex, TE_BOUNCE_SHELL);
 }
 
 void BaseWeaponEventPlayer::PlayFireSound()
 {
-	if ( m_pFireMode->HasSounds() )
+	if ( m_pAttackMode->AttackSounds.SoundNames.Count() > 0 )
 	{
-		const CGenericWeaponAttributes_Sound& fireSound = m_pFireMode->Sounds();
+		const WeaponAtts::WASoundSet& soundSet = m_pAttackMode->AttackSounds;
+		const WeightedValueList<const char*>& soundNames = soundSet.SoundNames;
 
-		const float volume = (fireSound.MinVolume() < fireSound.MaxVolume())
-			? gEngfuncs.pfnRandomFloat(fireSound.MinVolume(), fireSound.MaxVolume())
-			: fireSound.MaxVolume();
+		const float volume = (soundSet.MinVolume < soundSet.MaxVolume)
+			? gEngfuncs.pfnRandomFloat(soundSet.MinVolume, soundSet.MaxVolume)
+			: soundSet.MaxVolume;
 
-		const int pitch = (fireSound.MinPitch() < fireSound.MaxPitch())
-			? gEngfuncs.pfnRandomLong(fireSound.MinPitch(), fireSound.MaxPitch())
-			: fireSound.MaxPitch();
+		const int pitch = (soundSet.MinPitch < soundSet.MaxPitch)
+			? gEngfuncs.pfnRandomLong(soundSet.MinPitch, soundSet.MaxPitch)
+			: soundSet.MaxPitch;
 
-		const char* const soundName = fireSound.SoundList().ItemByProbabilisticValue(gEngfuncs.pfnRandomFloat(0.0f, 1.0f));
+		const char* const soundName = soundNames.ItemByProbabilisticValue(gEngfuncs.pfnRandomFloat(0.0f, 1.0f));
 
 		gEngfuncs.pEventAPI->EV_PlaySound(m_iEntIndex,
 										  m_vecEntOrigin,

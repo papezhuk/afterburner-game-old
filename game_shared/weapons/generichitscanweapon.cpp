@@ -71,11 +71,11 @@ bool CGenericHitscanWeapon::InvokeWithAttackMode(const CGenericWeapon::WeaponAtt
 
 	Vector vecDir = FireBulletsPlayer(*hitscanAttack, vecSrc, vecAiming);
 
-	if ( m_AttackModeEvents[hitscanAttack->Signature().Index] )
+	if ( m_AttackModeEvents[hitscanAttack->Signature()->Index] )
 	{
 		PLAYBACK_EVENT_FULL(DefaultEventFlags(),
 							m_pPlayer->edict(),
-							m_AttackModeEvents[hitscanAttack->Signature().Index],
+							m_AttackModeEvents[hitscanAttack->Signature()->Index],
 							0.0,
 							(float *)&g_vecZero,
 							(float *)&g_vecZero,

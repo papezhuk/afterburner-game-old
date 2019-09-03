@@ -26,7 +26,7 @@
 #include	"skill.h"
 #include	"game.h"
 #include	"weaponregistry.h"
-#include	"genericweaponattributes.h"
+#include	"weaponatts_collection.h"
 
 extern edict_t *EntSelectSpawnPoint( CBaseEntity *pPlayer );
 
@@ -305,9 +305,12 @@ void CGameRules::RefreshSkillData ( void )
 	gSkillData.plrArm = GetSkillCvar( "sk_player_arm" );
 
 	// Nightfire weapons
-	CWeaponRegistry::StaticInstance().ForEach([](const CGenericWeaponAttributes& atts)
+	CWeaponRegistry::StaticInstance().ForEach([](const WeaponAtts::WACollection& atts)
 	{
-		atts.Skill().UpdateSkillValues(&gSkillData);
+		FOR_EACH_VEC(atts.SkillRecords, index)
+		{
+			atts.SkillRecords[index].UpdateSkillValue(&gSkillData);
+		}
 	});
 }
 
