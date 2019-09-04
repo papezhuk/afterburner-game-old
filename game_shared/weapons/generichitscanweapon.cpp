@@ -29,7 +29,7 @@ void CGenericHitscanWeapon::PrecacheAttackMode(const WeaponAtts::WABaseAttack& a
 
 bool CGenericHitscanWeapon::InvokeWithAttackMode(const CGenericWeapon::WeaponAttackType type, const WeaponAtts::WABaseAttack* attackMode)
 {
-	if ( attackMode->Classify() != WeaponAtts::WABaseAttack::Classification::Hitscan )
+	if ( !attackMode || attackMode->Classify() != WeaponAtts::WABaseAttack::Classification::Hitscan )
 	{
 		return false;
 	}

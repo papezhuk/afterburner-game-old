@@ -9,7 +9,7 @@ void CGenericProjectileWeapon::Precache()
 
 bool CGenericProjectileWeapon::InvokeWithAttackMode(WeaponAttackType type, const WeaponAtts::WABaseAttack* attackMode)
 {
-	if ( attackMode->Classify() != WeaponAtts::WABaseAttack::Classification::Projectile )
+	if ( !attackMode || attackMode->Classify() != WeaponAtts::WABaseAttack::Classification::Projectile )
 	{
 		return false;
 	}

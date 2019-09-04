@@ -74,23 +74,23 @@ void EV_HLDM_Init()
 {
 	CWeaponRegistry::StaticInstance().ForEach([](const WeaponAtts::WACollection& atts)
 	{
-		const uint32_t index = static_cast<uint32_t>(atts.Core.Id);
-		ASSERT(index < MAX_WEAPONS);
+		const uint32_t weaponIndex = static_cast<uint32_t>(atts.Core.Id);
+		ASSERT(weaponIndex < MAX_WEAPONS);
 
-		FOR_EACH_VEC(atts.AttackModes, index)
+		FOR_EACH_VEC(atts.AttackModes, attackModeIndex)
 		{
-			if ( index >= WeaponAtts::WACollection::MAX_ATTACK_MODES )
+			if ( attackModeIndex >= WeaponAtts::WACollection::MAX_ATTACK_MODES )
 			{
 				break;
 			}
 
-			const WeaponAtts::WABaseAttack* baseAttack = atts.AttackModes[index].get();
+			const WeaponAtts::WABaseAttack* baseAttack = atts.AttackModes[attackModeIndex].get();
 
 			if ( !baseAttack->EventScript )
 			{
 				ALERT(at_error, "EV_HLDM_Init: Weapon '%s' does not specify an event script for attack mode %u!\n",
 					  atts.Core.Classname,
-					  index);
+					  attackModeIndex);
 				
 				continue;
 			}
@@ -126,7 +126,7 @@ void EV_HLDM_Init()
 				continue;
 			}
 
-			EventPlayers[index][index].reset(eventPlayer);
+			EventPlayers[weaponIndex][attackModeIndex].reset(eventPlayer);
 			eventPlayer->LoadEventScript(baseAttack->EventScript);
 		}
 	});

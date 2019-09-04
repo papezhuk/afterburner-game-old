@@ -207,7 +207,7 @@ bool CGenericWeapon::InvokeAttack(WeaponAttackType type)
 
 bool CGenericWeapon::InvokeWithAttackMode(WeaponAttackType type, const WeaponAtts::WABaseAttack* attackMode)
 {
-	if ( type == WeaponAttackType::None )
+	if ( type == WeaponAttackType::None || !attackMode )
 	{
 		return false;
 	}
@@ -310,17 +310,20 @@ void CGenericWeapon::ItemPostFrame()
 		m_bSecondaryAttackHeldDown = false;
 	}
 
-	if( m_pSecondaryAttackMode && (m_pPlayer->pev->button & IN_ATTACK2) &&
+	const bool priAttackIsContinuous = m_pPrimaryAttackMode && m_pPrimaryAttackMode->IsContinuous;
+	const bool secAttackIsContinuous = m_pSecondaryAttackMode && m_pSecondaryAttackMode->IsContinuous;
+
+	if( (m_pPlayer->pev->button & IN_ATTACK2) &&
 		CanAttack(m_flNextSecondaryAttack, gpGlobals->time, UseDecrement()) &&
-		(m_pSecondaryAttackMode->IsContinuous || !m_bSecondaryAttackHeldDown) )
+		(secAttackIsContinuous || !m_bSecondaryAttackHeldDown) )
 	{
 		SetFireOnEmptyState(m_pSecondaryAttackMode);
 		SecondaryAttack();
 		m_bSecondaryAttackHeldDown = true;
 	}
-	else if( m_pPrimaryAttackMode && (m_pPlayer->pev->button & IN_ATTACK) &&
+	else if( (m_pPlayer->pev->button & IN_ATTACK) &&
 			 CanAttack(m_flNextPrimaryAttack, gpGlobals->time, UseDecrement()) &&
-			 (m_pPrimaryAttackMode->IsContinuous || !m_bPrimaryAttackHeldDown) )
+			 (priAttackIsContinuous || !m_bPrimaryAttackHeldDown) )
 	{
 		SetFireOnEmptyState(m_pPrimaryAttackMode);
 		PrimaryAttack();
@@ -370,6 +373,11 @@ void CGenericWeapon::ItemPostFrame()
 
 void CGenericWeapon::SetFireOnEmptyState(const WeaponAtts::WABaseAttack* attackMode)
 {
+	if ( !attackMode )
+	{
+		return;
+	}
+
 	const WeaponAtts::WAAmmoBasedAttack* ammoAttack = dynamic_cast<const WeaponAtts::WAAmmoBasedAttack*>(attackMode);
 
 	if ( !ammoAttack )
