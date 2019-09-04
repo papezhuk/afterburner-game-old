@@ -101,7 +101,8 @@ void CGenericWeapon::PrecacheViewModel(const WeaponAtts::WAViewModel& viewModel)
 {
 	if ( viewModel.ModelName )
 	{
-		PRECACHE_MODEL(viewModel.ModelName);
+		m_iViewModelIndex = PRECACHE_MODEL(viewModel.ModelName);
+		StudioGetAnimationDurations(m_iViewModelIndex, m_ViewAnimDurations);
 	}
 
 	PrecacheSoundSet(viewModel.ReloadSounds);
