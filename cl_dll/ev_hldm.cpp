@@ -45,6 +45,7 @@
 #include "baseweaponeventplayer.h"
 #include "hitscanweaponeventplayer.h"
 #include "projectileweaponeventplayer.h"
+#include "meleeweaponeventplayer.h"
 
 static std::unique_ptr<BaseWeaponEventPlayer> EventPlayers[MAX_WEAPONS][WeaponAtts::WACollection::MAX_ATTACK_MODES];
 
@@ -91,7 +92,7 @@ void EV_HLDM_Init()
 				ALERT(at_error, "EV_HLDM_Init: Weapon '%s' does not specify an event script for attack mode %u!\n",
 					  atts.Core.Classname,
 					  attackModeIndex);
-				
+
 				continue;
 			}
 
@@ -104,10 +105,16 @@ void EV_HLDM_Init()
 					eventPlayer = new HitscanWeaponEventPlayer();
 					break;
 				}
-				
+
 				case WeaponAtts::WABaseAttack::Classification::Projectile:
 				{
 					eventPlayer = new ProjectileWeaponEventPlayer();
+					break;
+				}
+
+				case WeaponAtts::WABaseAttack::Classification::Melee:
+				{
+					eventPlayer = new MeleeWeaponEventPlayer();
 					break;
 				}
 

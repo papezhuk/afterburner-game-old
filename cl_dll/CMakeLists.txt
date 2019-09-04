@@ -65,6 +65,7 @@ set (CLDLL_SOURCES
 	../game_shared/weapons/genericweapon.cpp
 	../game_shared/weapons/generichitscanweapon.cpp
 	../game_shared/weapons/genericprojectileweapon.cpp
+	../game_shared/weapons/genericmeleeweapon.cpp
 	../game_shared/weaponattributes/weaponatts_collection.cpp
 	../game_shared/weaponattributes/weaponatts_skillrecord.cpp
 	../game_shared/weapons/ammodefs.cpp
@@ -88,6 +89,7 @@ set (CLDLL_SOURCES
 	events/baseweaponeventplayer.cpp
 	events/hitscanweaponeventplayer.cpp
 	events/projectileweaponeventplayer.cpp
+	events/meleeweaponeventplayer.cpp
 	hl/hl_baseentity.cpp
 	hl/hl_events.cpp
 	hl/hl_objects.cpp

@@ -4,6 +4,7 @@
 #include "weightedvaluelist.h"
 #include "weaponatts_soundset.h"
 #include "weaponids.h"
+#include "weapons.h"
 
 namespace WeaponAtts
 {
@@ -32,6 +33,7 @@ namespace WeaponAtts
 		WeightedValueList<int> ViewModelAnimList_Attack;
 		WeightedValueList<int> ViewModelAnimList_AttackEmpty;
 		WASoundSet AttackSounds;
+		int Volume = NORMAL_GUN_VOLUME;
 
 		// If specified, attack uses this body index for the view model.
 		int ViewModelBodyOverride = -1;

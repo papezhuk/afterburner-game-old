@@ -5,8 +5,9 @@
 LINK_ENTITY_TO_CLASS(weapon_fists, CWeaponFists);
 LINK_ENTITY_TO_CLASS(weapon_dukes, CWeaponFists);	// For NF compatibility
 
-CWeaponFists::CWeaponFists() : CGenericWeapon()
+CWeaponFists::CWeaponFists() : CGenericMeleeWeapon()
 {
+	m_pPrimaryAttackMode = GetAttackModeFromAttributes<WeaponAtts::WAMeleeAttack>(ATTACKMODE_TEST);
 }
 
 const WeaponAtts::WACollection& CWeaponFists::WeaponAttributes() const

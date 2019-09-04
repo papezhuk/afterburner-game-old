@@ -19,7 +19,6 @@ namespace WeaponAtts
         AmmoPool UsesAmmoPool = AmmoPool::None;
         float SpreadX = 0.0f;
         float SpreadY = 0.0f;
-        int Volume = NORMAL_GUN_VOLUME;
         int MuzzleFlashBrightness = NORMAL_GUN_FLASH;
         float ViewPunchY = 0.0f;
         const char* ShellModelName = nullptr;

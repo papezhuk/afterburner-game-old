@@ -157,6 +157,7 @@ set (SVDLL_SOURCES
 	../game_shared/weapons/genericweapon.cpp
 	../game_shared/weapons/generichitscanweapon.cpp
 	../game_shared/weapons/genericprojectileweapon.cpp
+	../game_shared/weapons/genericmeleeweapon.cpp
 	../game_shared/weapons/ammodefs.cpp
 	../game_shared/weapons/weaponslots.cpp
 	../game_shared/studio_utils_shared.cpp

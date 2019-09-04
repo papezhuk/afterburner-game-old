@@ -492,9 +492,9 @@ void CGenericWeapon::IdleProcess_PlayIdleAnimation()
 	SendWeaponAnim(anim, m_iViewModelBody);
 }
 
-void CGenericWeapon::PlaySound(const WeaponAtts::WASoundSet& sound, int channel)
+void CGenericWeapon::PlaySound(const WeaponAtts::WASoundSet& sound, int channel, float volModifier)
 {
-		if ( sound.SoundNames.Count() < 1 )
+	if ( sound.SoundNames.Count() < 1 )
 	{
 		return;
 	}
@@ -511,7 +511,7 @@ void CGenericWeapon::PlaySound(const WeaponAtts::WASoundSet& sound, int channel)
 	EMIT_SOUND_DYN(ENT(m_pPlayer->pev),
 				   channel,
 				   soundName,
-				   volume,
+				   volume * volModifier,
 				   sound.Attenuation,
 				   sound.Flags,
 				   pitch);
