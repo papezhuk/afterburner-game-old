@@ -32,13 +32,8 @@ LINK_ENTITY_TO_CLASS(weapon_rocketlauncher, CWeaponGrenadeLauncher)
 CWeaponGrenadeLauncher::CWeaponGrenadeLauncher() :
 	CGenericProjectileWeapon()
 {
-	ASSERT(WeaponAttributes().AttackModes.Count() == 2);
-
-	m_pPrimaryAttackMode = WeaponAttributes().AttackModes[0].get();
-	m_pSecondaryAttackMode = WeaponAttributes().AttackModes[1].get();
-
-	ASSERT(m_pPrimaryAttackMode);
-	ASSERT(m_pSecondaryAttackMode);
+	m_pPrimaryAttackMode = GetAttackModeFromAttributes<WeaponAtts::WAProjectileAttack>(ATTACKMODE_CONTACT);
+	m_pSecondaryAttackMode = GetAttackModeFromAttributes<WeaponAtts::WAProjectileAttack>(ATTACKMODE_TIMED);
 }
 
 const WeaponAtts::WACollection& CWeaponGrenadeLauncher::WeaponAttributes() const

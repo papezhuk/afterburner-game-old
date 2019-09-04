@@ -13,6 +13,12 @@ enum GrenadeLauncherAnimations_e
 	GRENADELAUNCHER_HOLSTER
 };
 
+enum GrenadeLauncherAttackMode_e
+{
+	ATTACKMODE_CONTACT,
+	ATTACKMODE_TIMED
+};
+
 static constexpr float GRENADELAUNCHER_FIRE_RATE = 1.0f / 0.8f;
 
 // Dynamic attributes for tuning purposes

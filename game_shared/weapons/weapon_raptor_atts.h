@@ -21,6 +21,11 @@ enum RaptorAnimations_e
 	RAPTOR_HOLSTER
 };
 
+enum RaptorAttackMode_e
+{
+	ATTACKMODE_NORMAL = 0
+};	
+
 static constexpr float RAPTOR_FIRE_RATE = 1.0f / 0.4f;
 
 static const CAmmoDef Ammo_Raptor =

@@ -10,12 +10,6 @@
 #include "bot.h"
 #endif
 
-enum P99Body_e
-{
-	P99BODY_UNSILENCED = 0,
-	P99BODY_SILENCED
-};
-
 LINK_ENTITY_TO_CLASS(weapon_p99, CWeaponP99)
 LINK_ENTITY_TO_CLASS(weapon_pp9, CWeaponP99)	// NF devs called it "PP9" for some reason.
 
@@ -31,13 +25,8 @@ CWeaponP99::CWeaponP99()
 	  m_pAttackSilenced(nullptr),
 	  m_bSilenced(false)
 {
-	ASSERT(WeaponAttributes().AttackModes.Count() == 2);
-
-	m_pAttackUnsilenced = dynamic_cast<const WeaponAtts::WAHitscanAttack*>(WeaponAttributes().AttackModes[0].get());
-	m_pAttackSilenced = dynamic_cast<const WeaponAtts::WAHitscanAttack*>(WeaponAttributes().AttackModes[1].get());
-
-	ASSERT(m_pAttackUnsilenced);
-	ASSERT(m_pAttackSilenced);
+	m_pAttackSilenced = GetAttackModeFromAttributes<WeaponAtts::WAHitscanAttack>(ATTACKMODE_SILENCED);
+	m_pAttackUnsilenced = GetAttackModeFromAttributes<WeaponAtts::WAHitscanAttack>(ATTACKMODE_UNSILENCED);
 
 	m_pPrimaryAttackMode = m_pAttackUnsilenced;
 }

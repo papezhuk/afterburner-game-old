@@ -51,16 +51,30 @@ protected:
 		Secondary = 1
 	};
 
+	template<typename T>
+	const T* GetAttackModeFromAttributes(uint32_t index)
+	{
+		const WeaponAtts::WACollection& atts = WeaponAttributes();
+		ASSERT(index < atts.AttackModes.Count());
+
+		if ( index >= atts.AttackModes.Count() )
+		{
+			return NULL;
+		}
+
+		const T* attackMode = dynamic_cast<const T*>(atts.AttackModes[index].get());
+		ASSERT(attackMode);
+
+		return attackMode;
+	}
+
 	// Overridable functions for attack modes:
 	virtual void PrecacheAttackMode(const WeaponAtts::WABaseAttack& attackMode);
 	virtual bool InvokeWithAttackMode(WeaponAttackType type, const WeaponAtts::WABaseAttack* attackMode);
 
 	void SetViewModelBody(int body, bool immediate = false);
 	float ViewModelAnimationDuration(int anim) const;
-	void PlaySound(const WeaponAtts::WASoundSet& sound, int channel = CHAN_WEAPON);
-
-	// Returns true if firing succeeded.
-	bool FireUsingMode(const WeaponAtts::WABaseAttack* attackMode);
+	void PlaySound(const WeaponAtts::WASoundSet& sound, int channel = CHAN_WEAPON);;
 
 	void DelayPendingActions(float secs, bool allowIfEarlier = false);
 	void DelayFiring(float secs, bool allowIfEarlier = false, WeaponAttackType attackType = WeaponAttackType::None);

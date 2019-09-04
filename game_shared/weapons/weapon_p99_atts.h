@@ -20,7 +20,21 @@ enum P99Animations_e
 	P99_SHOOT_SILENCER_EMPTY,
 };
 
+enum P99Body_e
+{
+	P99BODY_UNSILENCED = 0,
+	P99BODY_SILENCED
+};
+
+enum P99AttackMode_e
+{
+	ATTACKMODE_UNSILENCED = 0,
+	ATTACKMODE_SILENCED
+};
+
 static constexpr float P99_FIRE_RATE = 6.0f;
+static constexpr uint32_t ATTACKINDEX_UNSILENCED = 0;
+static constexpr uint32_t ATTACKINDEX_SILENCED = 0;
 
 static const CAmmoDef Ammo_P99 =
 {
@@ -77,6 +91,7 @@ static const WeaponAtts::WACollection StaticWeaponAttributes([](WeaponAtts::WACo
 
 	priAttack->ViewModelAnimList_Attack << P99_SHOOT;
 	priAttack->ViewModelAnimList_AttackEmpty << P99_SHOOT_EMPTY;
+	priAttack->ViewModelBodyOverride = P99BODY_UNSILENCED;
 
 	priAttack->AttackSounds.MinVolume = 0.92f;
 	priAttack->AttackSounds.MaxVolume = 1.0f;
@@ -93,6 +108,8 @@ static const WeaponAtts::WACollection StaticWeaponAttributes([](WeaponAtts::WACo
 	secAttack->EventScript = "events/weapon_p99/fire02.sc";
 	secAttack->Volume = QUIET_GUN_VOLUME;
 	secAttack->MuzzleFlashBrightness = DIM_GUN_FLASH;
+
+	secAttack->ViewModelBodyOverride = P99BODY_SILENCED;
 
 	secAttack->AttackSounds.SoundNames.Clear();
 	secAttack->AttackSounds.SoundNames << "weapons/weapon_p99/p99_fire_sil1.wav";

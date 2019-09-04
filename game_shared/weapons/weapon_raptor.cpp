@@ -15,6 +15,12 @@ LINK_ENTITY_TO_CLASS(weapon_pdw90, CWeaponRaptor)
 LINK_ENTITY_TO_CLASS(weapon_l96a1, CWeaponRaptor)
 #endif
 
+CWeaponRaptor::CWeaponRaptor() :
+	CGenericHitscanWeapon()
+{
+	m_pPrimaryAttackMode = GetAttackModeFromAttributes<WeaponAtts::WAHitscanAttack>(ATTACKMODE_NORMAL);
+}
+
 const WeaponAtts::WACollection& CWeaponRaptor::WeaponAttributes() const
 {
 	return StaticWeaponAttributes;

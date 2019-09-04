@@ -20,6 +20,12 @@ enum FrinesiAnimations_e
 	FRINESI_IDLE4
 };
 
+enum FrinesiAttackMode_e
+{
+	ATTACKMODE_AUTO = 0,
+	ATTACKMODE_PUMP
+};
+
 static constexpr float FRINESI_FIRE_RATE_PUMP = 1.0f;
 static constexpr float FRINESI_FIRE_RATE_AUTO = 4.0f;
 static constexpr uint8_t FRINESI_PELLETS_PER_SHOT = 6;
@@ -51,6 +57,13 @@ static const WeaponAtts::WACollection StaticWeaponAttributes([](WeaponAtts::WACo
 	vm.Anim_Draw = FRINESI_DRAW;
 	vm.AnimList_Idle << FRINESI_IDLE1 << FRINESI_IDLE2 << FRINESI_IDLE3 << FRINESI_IDLE4;
 	vm.AnimList_Reload << FRINESI_START_RELOAD;
+
+	vm.ReloadSounds.MinVolume = 1.0f;
+	vm.ReloadSounds.MaxVolume = 1.0f;
+	vm.ReloadSounds.MinPitch = 98;
+	vm.ReloadSounds.MaxPitch = 102;
+	vm.ReloadSounds.SoundNames << "weapons/weapon_frinesi/frinesi_reload1.wav"
+							   << "weapons/weapon_frinesi/frinesi_reload2.wav";
 
 	WAPlayerModel& pm = obj.PlayerModel;
 	pm.PlayerModelName = "models/weapon_frinesi/p_frinesi.mdl";
@@ -100,13 +113,13 @@ static const WeaponAtts::WACollection StaticWeaponAttributes([](WeaponAtts::WACo
 	*secAttack = *priAttack;
 	secAttack->EventScript = "events/weapon_frinesi/fire02.sc";
 	secAttack->AttackRate = FRINESI_FIRE_RATE_PUMP;
-	priAttack->BaseDamagePerShot = &skilldata_t::plrDmgFrinesiPump;
+	secAttack->BaseDamagePerShot = &skilldata_t::plrDmgFrinesiPump;
 	secAttack->SetUniformSpread(0.1f);
 	secAttack->ViewPunchY = -10.0f;
 
-	priAttack->ViewModelAnimList_Attack.Clear();
-	priAttack->ViewModelAnimList_Attack << FRINESI_SHOOT_BIG;
+	secAttack->ViewModelAnimList_Attack.Clear();
+	secAttack->ViewModelAnimList_Attack << FRINESI_SHOOT_BIG;
 
 	secAttack->AttackSounds.SoundNames.Clear();
-	priAttack->AttackSounds.SoundNames << "weapons/weapon_frinesi/frinesi_altfire.wav";
+	secAttack->AttackSounds.SoundNames << "weapons/weapon_frinesi/frinesi_altfire.wav";
 });

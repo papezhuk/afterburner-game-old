@@ -6,6 +6,8 @@
 class CWeaponRaptor : public CGenericHitscanWeapon
 {
 public:
+	CWeaponRaptor();
+
 	virtual const WeaponAtts::WACollection& WeaponAttributes() const override;
 
 #ifndef CLIENT_DLL
