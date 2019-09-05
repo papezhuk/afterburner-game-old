@@ -38,3 +38,9 @@ private:
 	float m_flPumpDuration;
 	float m_flNextPumpTime;
 };
+
+namespace WeaponAtts
+{
+	template<>
+	const struct WACollection& StaticWeaponAttributes<CWeaponFrinesi>();
+}

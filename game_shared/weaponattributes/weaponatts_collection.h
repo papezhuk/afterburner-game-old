@@ -39,4 +39,7 @@ namespace WeaponAtts
 		void Validate() const;
 		void GenerateAttackModeSignatures() const;
 	};
+
+	template<typename T>
+	const struct WACollection& StaticWeaponAttributes();
 }

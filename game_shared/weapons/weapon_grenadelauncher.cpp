@@ -38,7 +38,7 @@ CWeaponGrenadeLauncher::CWeaponGrenadeLauncher() :
 
 const WeaponAtts::WACollection& CWeaponGrenadeLauncher::WeaponAttributes() const
 {
-	return StaticWeaponAttributes;
+	return WeaponAtts::StaticWeaponAttributes<CWeaponGrenadeLauncher>();
 }
 
 void CWeaponGrenadeLauncher::Precache()
@@ -218,6 +218,15 @@ void CWeaponGrenadeLauncher_Grenade::SetFuseTime(float fuseTime)
 	}
 }
 #endif
+
+namespace WeaponAtts
+{
+	template<>
+	const struct WACollection& StaticWeaponAttributes<CWeaponGrenadeLauncher>()
+	{
+		return ::StaticWeaponAttributes;
+	}
+}
 
 class CAmmoGrenadeLauncher : public CGenericAmmo
 {

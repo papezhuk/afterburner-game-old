@@ -23,7 +23,7 @@ CWeaponRaptor::CWeaponRaptor() :
 
 const WeaponAtts::WACollection& CWeaponRaptor::WeaponAttributes() const
 {
-	return StaticWeaponAttributes;
+	return WeaponAtts::StaticWeaponAttributes<CWeaponRaptor>();
 }
 
 #ifndef CLIENT_DLL
@@ -41,6 +41,15 @@ void CWeaponRaptor::Bot_SetFightStyle(CBaseBotFightStyle& fightStyle) const
 	fightStyle.SetNextShootTime(1.0f / RAPTOR_FIRE_RATE, BOT_REFIRE_DELAY, 0.2f, 1.0f);
 }
 #endif
+
+namespace WeaponAtts
+{
+	template<>
+	const struct WACollection& StaticWeaponAttributes<CWeaponRaptor>()
+	{
+		return ::StaticWeaponAttributes;
+	}
+}
 
 class CAmmoRaptor : public CGenericAmmo
 {

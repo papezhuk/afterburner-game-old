@@ -12,7 +12,7 @@ CWeaponFists::CWeaponFists() : CGenericMeleeWeapon()
 
 const WeaponAtts::WACollection& CWeaponFists::WeaponAttributes() const
 {
-	return StaticWeaponAttributes;
+	return WeaponAtts::StaticWeaponAttributes<CWeaponFists>();
 }
 
 #ifndef CLIENT_DLL
@@ -27,3 +27,12 @@ void CWeaponFists::Bot_SetFightStyle(CBaseBotFightStyle& fightStyle) const
 	// TODO
 }
 #endif
+
+namespace WeaponAtts
+{
+	template<>
+	const struct WACollection& StaticWeaponAttributes<CWeaponFists>()
+	{
+		return ::StaticWeaponAttributes;
+	}
+}

@@ -27,3 +27,9 @@ private:
 	const WeaponAtts::WAHitscanAttack* m_pAttackSilenced;
 	bool m_bSilenced;
 };
+
+namespace WeaponAtts
+{
+	template<>
+	const struct WACollection& StaticWeaponAttributes<CWeaponP99>();
+}

@@ -55,6 +55,22 @@ void CGenericMeleeWeapon::Precache()
 	CGenericWeapon::Precache();
 }
 
+void CGenericMeleeWeapon::PrecacheAttackMode(const WeaponAtts::WABaseAttack& attackMode)
+{
+	CGenericWeapon::PrecacheAttackMode(attackMode);
+
+	if ( attackMode.Classify() != WeaponAtts::WABaseAttack::Classification::Melee )
+	{
+		ASSERT(false);
+		return;
+	}
+
+	const WeaponAtts::WAMeleeAttack& hitscanAttack = static_cast<const WeaponAtts::WAMeleeAttack&>(attackMode);
+
+	PrecacheSoundSet(hitscanAttack.BodyHitSounds);
+	PrecacheSoundSet(hitscanAttack.WorldHitSounds);
+}
+
 bool CGenericMeleeWeapon::InvokeWithAttackMode(WeaponAttackType type, const WeaponAtts::WABaseAttack* attackMode)
 {
 	if ( !attackMode || attackMode->Classify() != WeaponAtts::WABaseAttack::Classification::Melee )
@@ -75,6 +91,14 @@ bool CGenericMeleeWeapon::InvokeWithAttackMode(WeaponAttackType type, const Weap
 
 	FireEvent(meleeAttack);
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
+
+	const WeaponAtts::WASoundSet* bodyHitSounds = &meleeAttack->BodyHitSounds;
+	const WeaponAtts::WASoundSet* worldHitSounds = &meleeAttack->WorldHitSounds;
+
+	if ( bodyHitSounds->SoundNames.Count() < 1 )
+	{
+		bodyHitSounds = worldHitSounds;
+	}
 
 	if ( madeContact )
 	{
@@ -102,13 +126,13 @@ bool CGenericMeleeWeapon::InvokeWithAttackMode(WeaponAttackType type, const Weap
 
 		if ( hitBody )
 		{
-			PlaySound(meleeAttack->BodyHitSounds, CHAN_ITEM);
+			PlaySound(*bodyHitSounds, CHAN_ITEM);
 			m_pPlayer->m_iWeaponVolume = meleeAttack->Volume;
 		}
 		else
 		{
 			TraceResult texTraceResult;
-			vec3_t traceEnd = m_vecAttackTraceStart + ((m_vecAttackTraceEnd - m_vecAttackTraceStart) * 2);
+			vec3_t traceEnd = m_vecAttackTraceStart + ((m_vecContactPointOnSurface - m_vecAttackTraceStart) * 2);
 
 			float texSoundVolume = TEXTURETYPE_PlaySound(&texTraceResult, m_vecAttackTraceStart, traceEnd, BULLET_MELEE);
 
@@ -120,7 +144,7 @@ bool CGenericMeleeWeapon::InvokeWithAttackMode(WeaponAttackType type, const Weap
 				texSoundVolume = 1.0f;
 			}
 
-			PlaySound(meleeAttack->WorldHitSounds, CHAN_ITEM, texSoundVolume);
+			PlaySound(*worldHitSounds, CHAN_ITEM, texSoundVolume);
 			m_pPlayer->m_iWeaponVolume = static_cast<int>(static_cast<float>(meleeAttack->Volume) * texSoundVolume);
 		}
 #endif
@@ -153,7 +177,7 @@ bool CGenericMeleeWeapon::CheckForContact(const WeaponAtts::WAMeleeAttack* melee
 				FindHullIntersection(m_vecAttackTraceStart, tr, VEC_DUCK_HULL_MIN, VEC_DUCK_HULL_MAX, m_pPlayer->edict());
 			}
 
-			m_vecAttackTraceEnd = tr.vecEndPos;	// This is the point on the actual surface (the hull could have hit space)
+			m_vecContactPointOnSurface = tr.vecEndPos;	// This is the point on the actual surface (the hull could have hit space)
 		}
 	}
 #endif
@@ -180,6 +204,7 @@ void CGenericMeleeWeapon::FireEvent(const WeaponAtts::WAMeleeAttack* meleeAttack
 void CGenericMeleeWeapon::InitTraceVecs(const WeaponAtts::WAMeleeAttack* meleeAttack)
 {
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle);
-	Vector vecSrc = m_pPlayer->GetGunPosition();
-	Vector vecEnd = vecSrc + (gpGlobals->v_forward * meleeAttack->Reach);
+	m_vecAttackTraceStart = m_pPlayer->GetGunPosition();
+	m_vecAttackTraceEnd = m_vecAttackTraceStart + (gpGlobals->v_forward * meleeAttack->Reach);
+	m_vecContactPointOnSurface = vec3_t();
 }

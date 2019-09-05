@@ -72,6 +72,7 @@ protected:
 	virtual void PrecacheAttackMode(const WeaponAtts::WABaseAttack& attackMode);
 	virtual bool InvokeWithAttackMode(WeaponAttackType type, const WeaponAtts::WABaseAttack* attackMode);
 
+	void PrecacheSoundSet(const WeaponAtts::WASoundSet& sounds);
 	void SetViewModelBody(int body, bool immediate = false);
 	float ViewModelAnimationDuration(int anim) const;
 	void PlaySound(const WeaponAtts::WASoundSet& sound, int channel = CHAN_WEAPON, float volModifier = 1.0f);
@@ -128,7 +129,6 @@ protected:
 private:
 	// TODO: Should these be delegated somewhere else, a la aggregate programming model?
 	void PrecacheCore(const WeaponAtts::WACore& core);
-	void PrecacheSoundSet(const WeaponAtts::WASoundSet& sounds);
 	void PrecacheViewModel(const WeaponAtts::WAViewModel& viewModel);
 	void PrecachePlayerModel(const WeaponAtts::WAPlayerModel& playerModel);
 

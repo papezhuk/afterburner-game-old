@@ -14,3 +14,9 @@ public:
 	virtual void Bot_SetFightStyle(CBaseBotFightStyle& fightStyle) const override;
 #endif
 };
+
+namespace WeaponAtts
+{
+	template<>
+	const struct WACollection& StaticWeaponAttributes<CWeaponFists>();
+}

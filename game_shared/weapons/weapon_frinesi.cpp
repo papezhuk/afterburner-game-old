@@ -222,7 +222,7 @@ bool CWeaponFrinesi::WritePredictionData(weapon_data_t* to)
 
 const WeaponAtts::WACollection& CWeaponFrinesi::WeaponAttributes() const
 {
-	return StaticWeaponAttributes;
+	return WeaponAtts::StaticWeaponAttributes<CWeaponFrinesi>();
 }
 
 #ifndef CLIENT_DLL
@@ -268,6 +268,15 @@ void CWeaponFrinesi::Bot_SetFightStyle(CBaseBotFightStyle& fightStyle) const
 								0.8f, 2.0f);
 }
 #endif
+
+namespace WeaponAtts
+{
+	template<>
+	const struct WACollection& StaticWeaponAttributes<CWeaponFrinesi>()
+	{
+		return ::StaticWeaponAttributes;
+	}
+}
 
 class CAmmoFrinesi : public CGenericAmmo
 {

@@ -33,7 +33,7 @@ CWeaponP99::CWeaponP99()
 
 const WeaponAtts::WACollection& CWeaponP99::WeaponAttributes() const
 {
-	return StaticWeaponAttributes;
+	return WeaponAtts::StaticWeaponAttributes<CWeaponP99>();
 }
 
 void CWeaponP99::SecondaryAttack()
@@ -102,6 +102,15 @@ void CWeaponP99::Bot_SetFightStyle(CBaseBotFightStyle& fightStyle) const
 	fightStyle.SetNextShootTime(1.0f / P99_FIRE_RATE, BOT_REFIRE_DELAY, 0.4f, 0.7f);
 }
 #endif
+
+namespace WeaponAtts
+{
+	template<>
+	const struct WACollection& StaticWeaponAttributes<CWeaponP99>()
+	{
+		return ::StaticWeaponAttributes;
+	}
+}
 
 class CAmmoP99 : public CGenericAmmo
 {

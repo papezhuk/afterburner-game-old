@@ -16,7 +16,7 @@ enum FistsAttackMode_e
 	ATTACKMODE_TEST = 0
 };
 
-static constexpr float FISTS_PUNCH_RATE_SINGLE = 0.5f;
+static constexpr float FISTS_PUNCH_RATE_SINGLE = 2.0f;
 
 static const WeaponAtts::WACollection StaticWeaponAttributes([](WeaponAtts::WACollection& obj)
 {
@@ -46,6 +46,19 @@ static const WeaponAtts::WACollection StaticWeaponAttributes([](WeaponAtts::WACo
 	priAttack->IsContinuous = false;
 	priAttack->AttackRate = FISTS_PUNCH_RATE_SINGLE;
 	priAttack->BaseDamagePerHit = &skilldata_t::plrDmgFists;
+	priAttack->DecalOnImpact = false;
 	priAttack->Volume = 128;
 	priAttack->ViewModelAnimList_Attack << FISTS_JAB;
+
+	priAttack->WorldHitSounds.MinPitch = 97;
+	priAttack->WorldHitSounds.MaxPitch = 103;
+	priAttack->WorldHitSounds.SoundNames << "weapons/weapon_fists/impact1.wav"
+										 << "weapons/weapon_fists/impact2.wav"
+										 << "weapons/weapon_fists/impact3.wav";
+
+	priAttack->AttackSounds.MinPitch = 97;
+	priAttack->AttackSounds.MaxPitch = 103;
+	priAttack->AttackSounds.SoundNames << "weapons/weapon_fists/swing1.wav"
+									   << "weapons/weapon_fists/swing2.wav"
+									   << "weapons/weapon_fists/swing3.wav";
 });

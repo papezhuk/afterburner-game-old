@@ -15,6 +15,7 @@ public:
 	virtual void Precache() override;
 
 protected:
+	virtual void PrecacheAttackMode(const WeaponAtts::WABaseAttack& attackMode) override;
 	virtual bool InvokeWithAttackMode(WeaponAttackType type, const WeaponAtts::WABaseAttack* attackMode) override;
 
 private:
@@ -24,4 +25,5 @@ private:
 
 	vec3_t m_vecAttackTraceStart;
 	vec3_t m_vecAttackTraceEnd;
+	vec3_t m_vecContactPointOnSurface;
 };

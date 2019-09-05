@@ -12,8 +12,11 @@ namespace WeaponAtts
 
 		float Reach = 32.0f;	// Defaults to crowbar's reach
 		SkillDataEntryPtr BaseDamagePerHit = nullptr;
-		WASoundSet BodyHitSounds;
+		bool DecalOnImpact = true;
+
+		// If no body hitsounds provided, world hitsounds are used for bodies too.
 		WASoundSet WorldHitSounds;
+		WASoundSet BodyHitSounds;
 
 		virtual WABaseAttack::Classification Classify() const override
 		{

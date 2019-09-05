@@ -42,3 +42,9 @@ public:
 	void SetFuseTime(float fuseTime);
 #endif
 };
+
+namespace WeaponAtts
+{
+	template<>
+	const struct WACollection& StaticWeaponAttributes<CWeaponGrenadeLauncher>();
+}
