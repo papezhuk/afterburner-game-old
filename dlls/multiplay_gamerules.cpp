@@ -35,6 +35,7 @@
 #include	"bot_misc.h"
 #include	"nodes.h"
 #include "botgamerulesinterface.h"
+#include "weapon_p99.h"
 
 extern DLL_GLOBAL CGameRules *g_pGameRules;
 extern DLL_GLOBAL BOOL	g_fGameOver;
@@ -597,6 +598,7 @@ void CHalfLifeMultiplay::PlayerSpawn( CBasePlayer *pPlayer )
 	CBaseEntity	*pWeaponEntity = NULL;
 
 	pPlayer->pev->weapons |= ( 1 << WEAPON_SUIT );
+	pPlayer->GiveNamedItem("weapon_fists");
 
 	addDefault = TRUE;
 
@@ -608,9 +610,15 @@ void CHalfLifeMultiplay::PlayerSpawn( CBasePlayer *pPlayer )
 
 	if( addDefault )
 	{
-		pPlayer->GiveNamedItem( "weapon_crowbar" );
-		pPlayer->GiveNamedItem( "weapon_9mmhandgun" );
-		pPlayer->GiveAmmo( 68, AmmoDef_9mm.AmmoName, AmmoDef_9mm.MaxCarry );// 4 full reloads
+		const WeaponAtts::WACollection& atts = WeaponAtts::StaticWeaponAttributes<CWeaponP99>();
+		const CAmmoDef* ammoDef = atts.Ammo.PrimaryAmmo;
+
+		pPlayer->GiveNamedItem(atts.Core.Classname);
+
+		if ( ammoDef && ammoDef->ClassName )
+		{
+			pPlayer->GiveAmmo(ammoDef->AmmoBoxGive, ammoDef->AmmoName, ammoDef->MaxCarry);
+		}
 	}
 }
 

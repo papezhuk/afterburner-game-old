@@ -50,6 +50,11 @@ namespace
 	}
 }
 
+CGenericMeleeWeapon::CGenericMeleeWeapon() : CGenericWeapon(),
+	m_pCachedAttack(nullptr)
+{
+}
+
 void CGenericMeleeWeapon::Precache()
 {
 	CGenericWeapon::Precache();
@@ -84,16 +89,42 @@ bool CGenericMeleeWeapon::InvokeWithAttackMode(WeaponAttackType type, const Weap
 	}
 
 	const WeaponAtts::WAMeleeAttack* meleeAttack = static_cast<const WeaponAtts::WAMeleeAttack*>(attackMode);
-	InitTraceVecs(meleeAttack);
-
-	TraceResult tr;
-	bool madeContact = CheckForContact(meleeAttack, tr);
 
 	FireEvent(meleeAttack);
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
-	const WeaponAtts::WASoundSet* bodyHitSounds = &meleeAttack->BodyHitSounds;
-	const WeaponAtts::WASoundSet* worldHitSounds = &meleeAttack->WorldHitSounds;
+	DelayFiring(1.0f / meleeAttack->AttackRate);
+	SetNextIdleTime(5, true);
+
+	m_pCachedAttack = meleeAttack;
+
+	if ( meleeAttack->StrikeDelay <= 0.0f )
+	{
+		AttackStrike();
+	}
+	else
+	{
+		SetThink(&CGenericMeleeWeapon::AttackStrike);
+		pev->nextthink = gpGlobals->time + meleeAttack->StrikeDelay;
+	}
+
+	return true;
+}
+
+void CGenericMeleeWeapon::AttackStrike()
+{
+	if ( !m_pCachedAttack )
+	{
+		return;
+	}
+
+	InitTraceVecs(m_pCachedAttack);
+
+	TraceResult tr;
+	bool madeContact = CheckForContact(m_pCachedAttack, tr);
+
+	const WeaponAtts::WASoundSet* bodyHitSounds = &m_pCachedAttack->BodyHitSounds;
+	const WeaponAtts::WASoundSet* worldHitSounds = &m_pCachedAttack->WorldHitSounds;
 
 	if ( bodyHitSounds->SoundNames.Count() < 1 )
 	{
@@ -111,7 +142,7 @@ bool CGenericMeleeWeapon::InvokeWithAttackMode(WeaponAttackType type, const Weap
 			ClearMultiDamage();
 
 			float damagePerShot = 1.0f;
-			const WeaponAtts::WASkillRecord::SkillDataEntryPtr dmgPtr = meleeAttack->BaseDamagePerHit;
+			const WeaponAtts::WASkillRecord::SkillDataEntryPtr dmgPtr = m_pCachedAttack->BaseDamagePerHit;
 
 			if ( dmgPtr )
 			{
@@ -127,14 +158,13 @@ bool CGenericMeleeWeapon::InvokeWithAttackMode(WeaponAttackType type, const Weap
 		if ( hitBody )
 		{
 			PlaySound(*bodyHitSounds, CHAN_ITEM);
-			m_pPlayer->m_iWeaponVolume = meleeAttack->Volume;
+			m_pPlayer->m_iWeaponVolume = m_pCachedAttack->Volume;
 		}
 		else
 		{
-			TraceResult texTraceResult;
 			vec3_t traceEnd = m_vecAttackTraceStart + ((m_vecContactPointOnSurface - m_vecAttackTraceStart) * 2);
 
-			float texSoundVolume = TEXTURETYPE_PlaySound(&texTraceResult, m_vecAttackTraceStart, traceEnd, BULLET_MELEE);
+			float texSoundVolume = TEXTURETYPE_PlaySound(&tr, m_vecAttackTraceStart, traceEnd, BULLET_MELEE);
 
 			if( g_pGameRules->IsMultiplayer() )
 			{
@@ -145,15 +175,17 @@ bool CGenericMeleeWeapon::InvokeWithAttackMode(WeaponAttackType type, const Weap
 			}
 
 			PlaySound(*worldHitSounds, CHAN_ITEM, texSoundVolume);
-			m_pPlayer->m_iWeaponVolume = static_cast<int>(static_cast<float>(meleeAttack->Volume) * texSoundVolume);
+			m_pPlayer->m_iWeaponVolume = static_cast<int>(static_cast<float>(m_pCachedAttack->Volume) * texSoundVolume);
+		}
+
+		if ( m_pCachedAttack->DecalOnImpact )
+		{
+			DecalGunshot(&tr, BULLET_MELEE);
 		}
 #endif
 	}
 
-	DelayFiring(1.0f / meleeAttack->AttackRate);
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
-
-	return true;
+	m_pCachedAttack = nullptr;
 }
 
 bool CGenericMeleeWeapon::CheckForContact(const WeaponAtts::WAMeleeAttack* meleeAttack, TraceResult& tr)

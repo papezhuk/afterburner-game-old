@@ -182,6 +182,7 @@ void DecalGunshot( TraceResult *pTrace, int iBulletType )
 			UTIL_GunshotDecalTrace( pTrace, DamageDecal( pEntity, DMG_BULLET ) );
 			break;
 		case BULLET_PLAYER_CROWBAR:
+		case BULLET_MELEE:
 			// wall decal
 			UTIL_DecalTrace( pTrace, DamageDecal( pEntity, DMG_CLUB ) );
 			break;

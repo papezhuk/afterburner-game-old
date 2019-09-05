@@ -16,7 +16,7 @@ enum FistsAttackMode_e
 	ATTACKMODE_TEST = 0
 };
 
-static constexpr float FISTS_PUNCH_RATE_SINGLE = 2.0f;
+static constexpr float FISTS_PUNCH_RATE_SINGLE = 2.5f;
 
 static const WeaponAtts::WACollection StaticWeaponAttributes([](WeaponAtts::WACollection& obj)
 {
@@ -43,10 +43,11 @@ static const WeaponAtts::WACollection StaticWeaponAttributes([](WeaponAtts::WACo
 
 	priAttack->EventScript = "events/weapon_fists/punch.sc";
 	priAttack->FunctionsUnderwater = true;
-	priAttack->IsContinuous = false;
+	priAttack->IsContinuous = true;
 	priAttack->AttackRate = FISTS_PUNCH_RATE_SINGLE;
 	priAttack->BaseDamagePerHit = &skilldata_t::plrDmgFists;
 	priAttack->DecalOnImpact = false;
+	priAttack->StrikeDelay = 0.1f;
 	priAttack->Volume = 128;
 	priAttack->ViewModelAnimList_Attack << FISTS_JAB;
 

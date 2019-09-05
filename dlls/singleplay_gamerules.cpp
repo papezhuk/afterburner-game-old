@@ -24,6 +24,7 @@
 #include	"gamerules.h"
 #include	"skill.h"
 #include	"items.h"
+#include "weapon_fists.h"
 
 extern DLL_GLOBAL CGameRules	*g_pGameRules;
 extern DLL_GLOBAL BOOL	g_fGameOver;
@@ -125,6 +126,8 @@ float CHalfLifeRules::FlPlayerFallDamage( CBasePlayer *pPlayer )
 //=========================================================
 void CHalfLifeRules::PlayerSpawn( CBasePlayer *pPlayer )
 {
+	const WeaponAtts::WACollection& atts = WeaponAtts::StaticWeaponAttributes<CWeaponFists>();
+	pPlayer->GiveNamedItem(atts.Core.Classname);
 }
 
 //=========================================================
