@@ -19,6 +19,7 @@ enum GrenadeLauncherAttackMode_e
 	ATTACKMODE_TIMED
 };
 
+// Grenades per second:
 static constexpr float GRENADELAUNCHER_FIRE_RATE = 1.0f / 0.8f;
 
 // Dynamic attributes for tuning purposes

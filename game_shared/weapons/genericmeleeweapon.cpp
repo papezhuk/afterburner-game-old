@@ -51,7 +51,8 @@ namespace
 }
 
 CGenericMeleeWeapon::CGenericMeleeWeapon() : CGenericWeapon(),
-	m_pCachedAttack(nullptr)
+	m_pCachedAttack(nullptr),
+	m_iStrikeIndex(0)
 {
 }
 
@@ -97,15 +98,20 @@ bool CGenericMeleeWeapon::InvokeWithAttackMode(WeaponAttackType type, const Weap
 	SetNextIdleTime(5, true);
 
 	m_pCachedAttack = meleeAttack;
+	m_iStrikeIndex = 0;
 
-	if ( meleeAttack->StrikeDelay <= 0.0f )
+	float strikeTime = meleeAttack->Strikes.Count() > 0
+		? meleeAttack->Strikes[m_iStrikeIndex]
+		: 0.0f;
+
+	if ( strikeTime <= 0.0f )
 	{
 		AttackStrike();
 	}
 	else
 	{
 		SetThink(&CGenericMeleeWeapon::AttackStrike);
-		pev->nextthink = gpGlobals->time + meleeAttack->StrikeDelay;
+		pev->nextthink = gpGlobals->time + strikeTime;
 	}
 
 	return true;
@@ -185,7 +191,21 @@ void CGenericMeleeWeapon::AttackStrike()
 #endif
 	}
 
-	m_pCachedAttack = nullptr;
+	if ( m_iStrikeIndex >= m_pCachedAttack->Strikes.Count() - 1 )
+	{
+		// End of strike sequence.
+		m_pCachedAttack = nullptr;
+		m_iStrikeIndex = 0;
+	}
+	else
+	{
+		++m_iStrikeIndex;
+		float nextStrikeTime = m_pCachedAttack->Strikes[m_iStrikeIndex];
+
+		SetThink(&CGenericMeleeWeapon::AttackStrike);
+		pev->nextthink = gpGlobals->time + nextStrikeTime;
+	}
+
 }
 
 bool CGenericMeleeWeapon::CheckForContact(const WeaponAtts::WAMeleeAttack* meleeAttack, TraceResult& tr)

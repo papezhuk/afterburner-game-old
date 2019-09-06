@@ -13,10 +13,15 @@ enum FistsAnimations_e
 
 enum FistsAttackMode_e
 {
-	ATTACKMODE_TEST = 0
+	ATTACKMODE_PUNCH = 0,
+	ATTACKMODE_PUNCH_COMBO,
+	ATTACKMODE_KARATE_CHOP
 };
 
-static constexpr float FISTS_PUNCH_RATE_SINGLE = 2.5f;
+// Cycles per second:
+static constexpr float FISTS_PUNCH_RATE_SINGLE = 2.0f;
+static constexpr float FISTS_PUNCH_RATE_DOUBLE = 1.0f;
+static constexpr float FISTS_KARATE_CHOP_RATE = 1.0f / 1.2f;
 
 static const WeaponAtts::WACollection StaticWeaponAttributes([](WeaponAtts::WACollection& obj)
 {
@@ -46,8 +51,8 @@ static const WeaponAtts::WACollection StaticWeaponAttributes([](WeaponAtts::WACo
 	priAttack->IsContinuous = true;
 	priAttack->AttackRate = FISTS_PUNCH_RATE_SINGLE;
 	priAttack->BaseDamagePerHit = &skilldata_t::plrDmgFists;
-	priAttack->DecalOnImpact = false;
-	priAttack->StrikeDelay = 0.1f;
+	priAttack->DecalOnImpact = true;
+	priAttack->Strikes.AddToTail(0.1f);
 	priAttack->Volume = 128;
 	priAttack->ViewModelAnimList_Attack << FISTS_JAB;
 
@@ -62,4 +67,32 @@ static const WeaponAtts::WACollection StaticWeaponAttributes([](WeaponAtts::WACo
 	priAttack->AttackSounds.SoundNames << "weapons/weapon_fists/swing1.wav"
 									   << "weapons/weapon_fists/swing2.wav"
 									   << "weapons/weapon_fists/swing3.wav";
+
+	WAMeleeAttack* priDoubleAttack = new WAMeleeAttack();
+	obj.AttackModes.AddToTail(std::shared_ptr<WABaseAttack>(priDoubleAttack));
+
+	*priDoubleAttack = *priAttack;
+	priDoubleAttack->EventScript = "events/weapon_fists/punch_double.sc";
+	priDoubleAttack->AttackRate = FISTS_PUNCH_RATE_DOUBLE;
+
+	priDoubleAttack->Strikes.Purge();
+	priDoubleAttack->Strikes.AddToTail(0.1f);
+	priDoubleAttack->Strikes.AddToTail(0.4f);
+
+	priDoubleAttack->ViewModelAnimList_Attack.Clear();
+	priDoubleAttack->ViewModelAnimList_Attack << FISTS_COMBO;
+
+	WAMeleeAttack* secAttack = new WAMeleeAttack();
+	obj.AttackModes.AddToTail(std::shared_ptr<WABaseAttack>(secAttack));
+
+	*secAttack = *priAttack;
+	secAttack->EventScript = "events/weapon_fists/karate_chop.sc";
+	secAttack->AttackRate = FISTS_KARATE_CHOP_RATE;
+	secAttack->BaseDamagePerHit = &skilldata_t::plrDmgFistsAlt;
+
+	secAttack->Strikes.Purge();
+	secAttack->Strikes.AddToTail(0.5f);
+
+	secAttack->ViewModelAnimList_Attack.Clear();
+	secAttack->ViewModelAnimList_Attack << FISTS_KARATE_CHOP;
 });

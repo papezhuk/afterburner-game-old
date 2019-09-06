@@ -24,8 +24,9 @@ enum RaptorAnimations_e
 enum RaptorAttackMode_e
 {
 	ATTACKMODE_NORMAL = 0
-};	
+};
 
+// Rounds per second:
 static constexpr float RAPTOR_FIRE_RATE = 1.0f / 0.4f;
 
 static const CAmmoDef Ammo_Raptor =

@@ -13,6 +13,13 @@ public:
 	virtual float Bot_CalcDesireToUse(CBaseBot& bot, CBaseEntity& enemy, float distanceToEnemy) const override;
 	virtual void Bot_SetFightStyle(CBaseBotFightStyle& fightStyle) const override;
 #endif
+
+protected:
+	virtual bool InvokeWithAttackMode(WeaponAttackType type, const WeaponAtts::WABaseAttack* attackMode) override;
+
+private:
+	const WeaponAtts::WAMeleeAttack* m_pPunchAttack;
+	const WeaponAtts::WAMeleeAttack* m_pPunchComboAttack;
 };
 
 namespace WeaponAtts

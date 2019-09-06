@@ -32,9 +32,8 @@ enum P99AttackMode_e
 	ATTACKMODE_SILENCED
 };
 
+// Rounds per second:
 static constexpr float P99_FIRE_RATE = 6.0f;
-static constexpr uint32_t ATTACKINDEX_UNSILENCED = 0;
-static constexpr uint32_t ATTACKINDEX_SILENCED = 0;
 
 static const CAmmoDef Ammo_P99 =
 {
