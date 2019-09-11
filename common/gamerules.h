@@ -172,6 +172,8 @@ public:
 
 	// Immediately end a multiplayer game
 	virtual void EndMultiplayerGame( void ) {}
+
+	virtual CBotGameRulesInterface* BotGameRulesInterface() { return NULL; }
 };
 
 extern CGameRules *InstallGameRules( void );
@@ -367,6 +369,8 @@ public:
 
 	// Immediately end a multiplayer game
 	virtual void EndMultiplayerGame( void ) { GoToIntermission(); }
+
+	virtual CBotGameRulesInterface* BotGameRulesInterface() override { return m_pBotGameRulesInterface; }
 
 protected:
 	virtual void ChangeLevel( void );

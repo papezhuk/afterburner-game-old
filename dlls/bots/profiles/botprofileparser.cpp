@@ -52,7 +52,7 @@ CBotProfileParser::CBotProfileParser(CBotProfileTable& table) :
 bool CBotProfileParser::Parse(const CUtlString& filePath)
 {
 	m_Table.Clear();
-	
+
 	rapidjson::Document document;
 
 	if ( !rapidjson::LoadFileFromServer(filePath, document, "BotProfileParser") )
@@ -110,6 +110,16 @@ void CBotProfileParser::ReadProfileEntry(rapidjson::SizeType index, const rapidj
 	{
 		LOG(at_warning, "Bot profile %u name '%s' began with a digit, which is not allowed.\n", index, name.String());
 		return;
+	}
+
+	// Reject if profile name contains any spaces.
+	for ( uint32_t index = 0; index < name.Length(); ++index )
+	{
+		if ( V_isspace(name.String()[index]) )
+		{
+			LOG(at_warning, "Bot profile %u name '%s' contains whitespace, which is not allowed.\n", index, name.String());
+			return;
+		}
 	}
 
 	if ( !PropertyExistsOnObject(index, object, "skin", rapidjson::kStringType) )

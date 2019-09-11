@@ -18,6 +18,7 @@
 #include "game.h"
 #include "weaponregistry.h"
 #include "bot_cvars.h"
+#include "bot_commands.h"
 
 cvar_t displaysoundlist = {"displaysoundlist","0"};
 
@@ -866,6 +867,7 @@ void GameDLLInit( void )
 // END REGISTER CVARS FOR SKILL LEVEL STUFF
 
 	Bot_RegisterCVars();
+	BotCommands::Initialise();
 
 	SERVER_COMMAND( "exec skill.cfg\n" );
 }
