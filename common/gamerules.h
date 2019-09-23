@@ -86,6 +86,8 @@ public:
 	virtual BOOL IsTeamplay( void ) { return FALSE; };// is this deathmatch game being played with team rules?
 	virtual BOOL IsCoOp( void ) = 0;// is this a coop game?
 	virtual const char *GetGameDescription( void ) { return "Afterburner"; }  // this is the game name that gets seen in the server browser
+	virtual void ServerActivate(void) = 0;	// All clients have been activated by the time this is called.
+	virtual void ServerDeactivate(void) = 0;
 
 	// Client connection/disconnection
 	virtual BOOL ClientConnected( edict_t *pEntity, const char *pszName, const char *pszAddress, char szRejectReason[128] ) = 0;// a client just connected to the server (player hasn't spawned yet)
@@ -201,6 +203,8 @@ public:
 	virtual BOOL IsMultiplayer( void );
 	virtual BOOL IsDeathmatch( void );
 	virtual BOOL IsCoOp( void );
+	virtual void ServerActivate(void) override {}
+	virtual void ServerDeactivate(void) override {}
 
 	// Client connection/disconnection
 	virtual BOOL ClientConnected( edict_t *pEntity, const char *pszName, const char *pszAddress, char szRejectReason[ 128 ] );
@@ -290,6 +294,8 @@ public:
 	virtual BOOL IsMultiplayer( void );
 	virtual BOOL IsDeathmatch( void );
 	virtual BOOL IsCoOp( void );
+	virtual void ServerActivate(void) override;
+	virtual void ServerDeactivate(void) override;
 
 	// Client connection/disconnection
 	// If ClientConnected returns FALSE, the connection is rejected and the user is provided the reason specified in

@@ -15,8 +15,6 @@ namespace BotCommands
 
 	void Bot_Add(void)
 	{
-		ALERT(at_console, "BOT_ADD INVOKED\n");
-
 		CHalfLifeMultiplay* mpGameRules = dynamic_cast<CHalfLifeMultiplay*>(g_pGameRules);
 
 		if ( !mpGameRules )

@@ -134,6 +134,16 @@ CHalfLifeMultiplay::~CHalfLifeMultiplay()
 	delete m_pBotGameRulesInterface;
 }
 
+void CHalfLifeMultiplay::ServerActivate(void)
+{
+
+}
+
+void CHalfLifeMultiplay::ServerDeactivate(void)
+{
+
+}
+
 BOOL CHalfLifeMultiplay::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 {
 #ifndef NO_VOICEGAMEMGR

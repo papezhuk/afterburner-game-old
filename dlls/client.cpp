@@ -719,8 +719,10 @@ void ServerDeactivate( void )
 
 	g_serveractive = 0;
 
-	// Peform any shutdown operations here...
-	//
+	if ( g_pGameRules )
+	{
+		g_pGameRules->ServerDeactivate();
+	}
 }
 
 void ServerActivate( edict_t *pEdictList, int edictCount, int clientMax )
@@ -757,6 +759,11 @@ void ServerActivate( edict_t *pEdictList, int edictCount, int clientMax )
 
 	// Link user messages here to make sure first client can get them...
 	LinkUserMessages();
+
+	if ( g_pGameRules )
+	{
+		g_pGameRules->ServerActivate();
+	}
 }
 
 /*
