@@ -4,6 +4,7 @@
 #include "eiface.h"
 #include "gamerules.h"
 #include "botgamerulesinterface.h"
+#include "botregister.h"
 
 namespace BotCommands
 {
@@ -11,6 +12,10 @@ namespace BotCommands
 	{
 		g_engfuncs.pfnAddServerCommand("bot_add", &Bot_Add);
 		g_engfuncs.pfnAddServerCommand("bot_removeall", &Bot_RemoveAll);
+
+		g_engfuncs.pfnAddServerCommand("bot_register_add", &Bot_Register_Add);
+		g_engfuncs.pfnAddServerCommand("bot_register_clear", &Bot_Register_Clear);
+		g_engfuncs.pfnAddServerCommand("bot_register_list", &Bot_Register_List);
 	}
 
 	void Bot_Add(void)
@@ -101,6 +106,60 @@ namespace BotCommands
 		if ( !kickCommands.IsEmpty() )
 		{
 			SERVER_COMMAND(kickCommands.String());
+		}
+	}
+
+	void Bot_Register_Add()
+	{
+		int numArgs = CMD_ARGC();
+
+		if ( numArgs < 2 )
+		{
+			ALERT(at_console, "Usage: bot_register_add <profile name> [player name]\n");
+			return;
+		}
+
+		const char* profileName = CMD_ARGV(1);
+		const char* customName = CMD_ARGC() >= 3 ? CMD_ARGV(2) : nullptr;
+
+		CBotRegister& reg = CBotRegister::StaticInstance();
+
+		if ( !reg.Add(CUtlString(profileName), CUtlString(customName)) )
+		{
+			ALERT(at_error, "Could not add bot: register was full.\n");
+		}
+	}
+
+	void Bot_Register_Clear()
+	{
+		CBotRegister::StaticInstance().Clear();
+	}
+
+	void Bot_Register_List()
+	{
+		CBotRegister& reg = CBotRegister::StaticInstance();
+
+		if ( reg.Count() < 1 )
+		{
+			ALERT(at_console, "Bot register contains 0 entries.\n");
+			return;
+		}
+
+		ALERT(at_console, "Bot register contains %u entries:\n", reg.Count());
+
+		for ( uint32_t index = 0; index < reg.Count(); ++index )
+		{
+			const CUtlString profileName = reg.ProfileName(index);
+			const CUtlString customName = reg.CustomName(index);
+
+			if ( customName.IsValid() )
+			{
+				ALERT(at_console, "  %u: %s (\"%s\")\n", index + 1, profileName.String(), customName.String());
+			}
+			else
+			{
+				ALERT(at_console, "  %u: %s\n", index + 1, profileName.String());
+			}
 		}
 	}
 }

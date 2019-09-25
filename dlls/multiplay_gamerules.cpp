@@ -136,12 +136,12 @@ CHalfLifeMultiplay::~CHalfLifeMultiplay()
 
 void CHalfLifeMultiplay::ServerActivate(void)
 {
-
+	m_pBotGameRulesInterface->ServerActivate();
 }
 
 void CHalfLifeMultiplay::ServerDeactivate(void)
 {
-
+	m_pBotGameRulesInterface->ServerDeactivate();
 }
 
 BOOL CHalfLifeMultiplay::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )

@@ -13,10 +13,12 @@
 #include "botprofileparser.h"
 #include "botprofiletable.h"
 #include "bot_misc.h"
+#include "botregister.h"
 
 CBotGameRulesInterface::CBotGameRulesInterface(CGameRules* parent) :
 	m_pParent(parent),
-	m_BotFactory()
+	m_BotFactory(),
+	m_bSpawnedRegisterBots(false)
 {
 	ASSERT(m_pParent);
 
@@ -25,9 +27,16 @@ CBotGameRulesInterface::CBotGameRulesInterface(CGameRules* parent) :
 	m_BotFactory.LoadBotProfiles();
 }
 
+void CBotGameRulesInterface::ServerActivate()
+{
+}
+
+void CBotGameRulesInterface::ServerDeactivate()
+{
+}
+
 void CBotGameRulesInterface::ClientDisconnect(edict_t* entity)
 {
-
 }
 
 void CBotGameRulesInterface::ClientPutInServer(edict_t* entity)
@@ -72,6 +81,15 @@ void CBotGameRulesInterface::Think()
 		}
 		else if ( player->IsNetClient() && player->IsAlive() )
 		{
+			// We do this here for now, as if a real player is in the game then we know it's safe
+			// to spawn bots. If we find a way of determining when it's safe otherwise, move this
+			// logic there instead.
+			if ( !m_bSpawnedRegisterBots )
+			{
+				SpawnBotsInRegister();
+				m_bSpawnedRegisterBots = true;
+			}
+
 			WorldGraph.MarkLocationFavorable(player->pev->origin);
 		}
 	}
@@ -87,4 +105,17 @@ CBotFactory& CBotGameRulesInterface::BotFactory()
 const CBotFactory& CBotGameRulesInterface::BotFactory() const
 {
 	return m_BotFactory;
+}
+
+void CBotGameRulesInterface::SpawnBotsInRegister()
+{
+	CBotRegister& reg = CBotRegister::StaticInstance();
+
+	for ( uint32_t index = 0; index < reg.Count(); ++index )
+	{
+		const CUtlString profileName = reg.ProfileName(index);
+		const CUtlString customName = reg.CustomName(index);
+
+		m_BotFactory.TryCreateBot(profileName, customName);
+	}
 }

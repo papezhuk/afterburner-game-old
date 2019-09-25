@@ -195,7 +195,10 @@ called each time a player is spawned
 */
 void ClientPutInServer( edict_t *pEntity )
 {
-	g_pGameRules->ClientPutInServer(pEntity);
+	if ( g_pGameRules )
+	{
+		g_pGameRules->ClientPutInServer(pEntity);
+	}
 
 	CBasePlayer *pPlayer;
 

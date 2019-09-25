@@ -50,7 +50,7 @@ void CBotFactory::CreateBots(uint32_t num)
 	}
 }
 
-bool CBotFactory::TryCreateBot(const CUtlString& profileName)
+bool CBotFactory::TryCreateBot(const CUtlString& profileName, const CUtlString& playerName)
 {
 	if ( !m_ProfileTable.ProfileExists(profileName) )
 	{
@@ -58,14 +58,18 @@ bool CBotFactory::TryCreateBot(const CUtlString& profileName)
 		return false;
 	}
 
-	return CreateBot(m_ProfileTable.GetProfile(profileName));
+	return CreateBot(m_ProfileTable.GetProfile(profileName), playerName);
 }
 
-bool CBotFactory::CreateBot(const CBotProfileTable::ProfileData* profile)
+bool CBotFactory::CreateBot(const CBotProfileTable::ProfileData* profile, const CUtlString& playerName)
 {
 	CUtlString name("Bot");
 
-	if ( profile )
+	if ( playerName.IsValid() )
+	{
+		name = playerName;
+	}
+	else if ( profile )
 	{
 		name = profile->playerName;
 	}

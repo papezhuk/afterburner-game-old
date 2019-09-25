@@ -136,6 +136,7 @@ set (SVDLL_SOURCES
 	bots/botfactory.cpp
 	bots/profiles/botprofiletable.cpp
 	bots/profiles/botprofileparser.cpp
+	bots/botregister.cpp
 	../pm_shared/pm_debug.c
 	../pm_shared/pm_math.c
 	../pm_shared/pm_shared.c

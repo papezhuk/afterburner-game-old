@@ -18,10 +18,10 @@ public:
 	void CreateBots(uint32_t num);
 
 	// Try to create a bot with a specific profile name.
-	bool TryCreateBot(const CUtlString& profileName);
+	bool TryCreateBot(const CUtlString& profileName, const CUtlString& playerName = CUtlString());
 
 private:
-	bool CreateBot(const CBotProfileTable::ProfileData* profile = NULL);
+	bool CreateBot(const CBotProfileTable::ProfileData* profile = NULL, const CUtlString& playerName = CUtlString());
 
 	void SetBotAttributesViaProfile(CBaseBot* bot, const CBotProfileTable::ProfileData* profile);
 	void SetBotSkin(CBaseBot* bot, const CUtlString& skin);
