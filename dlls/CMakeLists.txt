@@ -169,7 +169,6 @@ set (SVDLL_SOURCES
 	../game_shared/weapons/weapon_grenadelauncher.cpp
 	../game_shared/weapons/weapon_raptor.cpp
 	../game_shared/weapons/weapon_fists.cpp
-	../game_shared/rapidjson_helpers/rapidjson_helpers.cpp
 	../game_shared/gameplay/radialdamage.cpp
 	../miniutl/bitstring.cpp
 	../miniutl/generichash.cpp
@@ -178,6 +177,8 @@ set (SVDLL_SOURCES
 	../miniutl/utlbuffer.cpp
 	../miniutl/utlmemory.cpp
 	../miniutl/utlstring.cpp
+	../shared_utils/cpp/rapidjson_helpers/rapidjson_helpers.cpp
+	../shared_utils/cpp/rapidjson_helpers/gamelib/rapidjson_helpers_gamelib.cpp
 )
 
 include_directories (
@@ -194,7 +195,8 @@ include_directories (
 	../miniutl
 	bots
 	bots/profiles
-	bots/itemattributes)
+	bots/itemattributes
+	../shared_utils/cpp)
 
 if(USE_VOICEMGR)
 	set(SVDLL_SOURCES

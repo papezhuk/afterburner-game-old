@@ -106,6 +106,9 @@ else()
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--no-undefined")
 endif()
 
+# Used to distinguish between game libraries and engine in code.
+add_definitions(-DGAME_LIBRARIES)
+
 if(BUILD_CLIENT)
 	add_subdirectory(cl_dll)
 endif()

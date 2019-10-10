@@ -76,7 +76,6 @@ set (CLDLL_SOURCES
 	../game_shared/weapons/weapon_grenadelauncher.cpp
 	../game_shared/weapons/weapon_raptor.cpp
 	../game_shared/weapons/weapon_fists.cpp
-	../game_shared/rapidjson_helpers/rapidjson_helpers.cpp
 	../game_shared/gameplay/radialdamage.cpp
 	../miniutl/bitstring.cpp
 	../miniutl/generichash.cpp
@@ -85,6 +84,8 @@ set (CLDLL_SOURCES
 	../miniutl/utlbuffer.cpp
 	../miniutl/utlmemory.cpp
 	../miniutl/utlstring.cpp
+	../shared_utils/cpp/rapidjson_helpers/rapidjson_helpers.cpp
+	../shared_utils/cpp/rapidjson_helpers/gamelib/rapidjson_helpers_gamelib.cpp
 	ev_hldm.cpp
 	events/baseweaponeventplayer.cpp
 	events/hitscanweaponeventplayer.cpp
@@ -153,7 +154,8 @@ include_directories (
 	../game_shared/weapons
 	../game_shared/weaponattributes
 	../game_shared/util
-	../game_shared/gameplay)
+	../game_shared/gameplay
+	../shared_utils/cpp)
 
 if(USE_VOICEMGR)
 	#set(CLDLL_SOURCES

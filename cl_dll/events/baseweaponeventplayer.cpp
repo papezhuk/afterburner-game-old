@@ -12,7 +12,7 @@
 #include "view.h"
 #include "in_defs.h"
 #include "rapidjson/document.h"
-#include "rapidjson_helpers/rapidjson_helpers.h"
+#include "rapidjson_helpers/gamelib/rapidjson_helpers_gamelib.h"
 #include "weaponatts_collection.h"
 
 namespace

@@ -1,4 +1,4 @@
-#include "rapidjson_helpers.h"
+#include "rapidjson_helpers_gamelib.h"
 #include "standard_includes.h"
 #include "utlstring.h"
 #include "eiface.h"
@@ -10,52 +10,6 @@
 #endif
 
 RAPIDJSON_NAMESPACE_BEGIN
-
-const char* ValueTypeAsString(Type valueType)
-{
-	switch ( valueType )
-	{
-		case kNullType:
-		{
-			return "Null";
-		}
-
-		case kFalseType:
-		{
-			return "False";
-		}
-
-		case kTrueType:
-		{
-			return "True";
-		}
-
-		case kObjectType:
-		{
-			return "Object";
-		}
-
-		case kArrayType:
-		{
-			return "Array";
-		}
-
-		case kStringType:
-		{
-			return "String";
-		}
-
-		case kNumberType:
-		{
-			return "Number";
-		}
-
-		default:
-		{
-			return "Unknown";
-		}
-	}
-}
 
 bool LoadFileFromServer(const CUtlString& path, Document& document, const char* moduleName)
 {
@@ -72,7 +26,7 @@ bool LoadFileFromServer(const CUtlString& path, Document& document, const char* 
 		{
 			ALERT(at_error, "Could not load file %s.\n", path.String());
 		}
-		
+
 		return false;
 	}
 
@@ -119,7 +73,7 @@ bool LoadFileFromClient(const CUtlString& path, Document& document, const char* 
 		{
 			gEngfuncs.Con_Printf("^1Error:^7 Could not load file %s.\n", path.String());
 		}
-		
+
 		return false;
 	}
 
