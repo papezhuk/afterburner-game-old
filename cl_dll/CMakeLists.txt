@@ -84,8 +84,10 @@ set (CLDLL_SOURCES
 	../miniutl/utlbuffer.cpp
 	../miniutl/utlmemory.cpp
 	../miniutl/utlstring.cpp
+	../shared_utils/cpp/gamelib/fileLoaders_gamelib.cpp
+	../shared_utils/cpp/gamelib/logInterface_gamelib.cpp
+	../shared_utils/cpp/gamelib/projectInterface_gamelib.cpp
 	../shared_utils/cpp/rapidjson_helpers/rapidjson_helpers.cpp
-	../shared_utils/cpp/rapidjson_helpers/gamelib/rapidjson_helpers_gamelib.cpp
 	ev_hldm.cpp
 	events/baseweaponeventplayer.cpp
 	events/hitscanweaponeventplayer.cpp

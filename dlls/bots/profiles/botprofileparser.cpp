@@ -7,7 +7,7 @@
 #include "botprofileparser.h"
 #include "botprofiletable.h"
 #include "rapidjson/document.h"
-#include "rapidjson_helpers/gamelib/rapidjson_helpers_gamelib.h"
+#include "gamelib/rapidjson_helpers_gamelib.h"
 #include "rapidjson_helpers/rapidjson_helpers.h"
 #include "utlstring.h"
 
@@ -56,7 +56,7 @@ bool CBotProfileParser::Parse(const CUtlString& filePath)
 
 	rapidjson::Document document;
 
-	if ( !rapidjson::LoadFileFromServer(filePath, document, "BotProfileParser") )
+	if ( !rapidjson::LoadJsonFileOnServer(filePath, document, "BotProfileParser") )
 	{
 		return false;
 	}

@@ -12,7 +12,7 @@
 #include "view.h"
 #include "in_defs.h"
 #include "rapidjson/document.h"
-#include "rapidjson_helpers/gamelib/rapidjson_helpers_gamelib.h"
+#include "gamelib/rapidjson_helpers_gamelib.h"
 #include "weaponatts_collection.h"
 
 namespace
@@ -27,7 +27,7 @@ void BaseWeaponEventPlayer::LoadEventScript(const CUtlString& path)
 {
 	rapidjson::Document document;
 
-	if ( !rapidjson::LoadFileFromClient(path, document, "BaseWeaponEventPlayer") )
+	if ( !rapidjson::LoadJsonFileOnClient(path, document, "BaseWeaponEventPlayer") )
 	{
 		return;
 	}

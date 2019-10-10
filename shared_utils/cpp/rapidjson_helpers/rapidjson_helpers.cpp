@@ -1,4 +1,9 @@
 #include "rapidjson_helpers.h"
+#include "projectInterface/IProjectInterface.h"
+#include "projectInterface/IFileLoader.h"
+#include "projectInterface/ILogInterface.h"
+#include "utlstring.h"
+#include "rapidjson/error/en.h"
 
 RAPIDJSON_NAMESPACE_BEGIN
 
@@ -46,6 +51,49 @@ const char* ValueTypeAsString(Type valueType)
 			return "Unknown";
 		}
 	}
+}
+
+bool LoadJsonFile(const CUtlString& path, Document& document, IProjectInterface& pIfc, const char* moduleName)
+{
+	size_t length = 0;
+	uint8_t* fileData = pIfc.FileLoader().Load(path, length);
+
+	if ( !fileData )
+	{
+		CUtlString log;
+
+		if ( moduleName )
+		{
+			log.AppendFormat("%s: ", moduleName);
+		}
+
+		log.AppendFormat("Could not load file %s.\n", path.String());
+		pIfc.LogInterface().Error(log);
+		return false;
+	}
+
+	rapidjson::ParseResult parseResult = document.Parse(reinterpret_cast<char*>(fileData));
+	pIfc.FileLoader().Free(fileData);
+
+	if ( parseResult.IsError() )
+	{
+		CUtlString log;
+
+		if ( moduleName )
+		{
+			log.AppendFormat("%s: ", moduleName);
+		}
+
+		log.AppendFormat("JSON document %s could not be parsed. Error at offset %u: %s\n",
+						 path.String(),
+						 parseResult.Offset(),
+						 rapidjson::GetParseError_En(parseResult.Code()));
+
+		pIfc.LogInterface().Error(log);
+		return false;
+	}
+
+	return true;
 }
 
 RAPIDJSON_NAMESPACE_END
