@@ -10,8 +10,8 @@
 #include "client.h"
 #include "nodes.h"
 #include "bot.h"
-#include "botprofileparser.h"
-#include "botprofiletable.h"
+#include "botprofiles/botprofileparser.h"
+#include "botprofiles/botprofiletable.h"
 #include "bot_misc.h"
 #include "botregister.h"
 

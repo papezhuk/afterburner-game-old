@@ -1,5 +1,10 @@
 #include "projectInterface_mainui.h"
 
+IProjectInterface&  IProjectInterface::ProjectInterfaceImpl()
+{
+	return ProjectInterface_MainUI::StaticInstance();
+}
+
 IProjectInterface& ProjectInterface_MainUI::StaticInstance()
 {
 	static ProjectInterface_MainUI instance;

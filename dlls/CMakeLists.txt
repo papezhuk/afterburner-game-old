@@ -134,8 +134,6 @@ set (SVDLL_SOURCES
 	bots/bot_commands.cpp
 	bots/botgamerulesinterface.cpp
 	bots/botfactory.cpp
-	bots/profiles/botprofiletable.cpp
-	bots/profiles/botprofileparser.cpp
 	bots/botregister.cpp
 	../pm_shared/pm_debug.c
 	../pm_shared/pm_math.c
@@ -181,6 +179,8 @@ set (SVDLL_SOURCES
 	../shared_utils/cpp/gamelib/logInterface_gamelib.cpp
 	../shared_utils/cpp/gamelib/projectInterface_gamelib.cpp
 	../shared_utils/cpp/rapidjson_helpers/rapidjson_helpers.cpp
+	../shared_utils/cpp/botprofiles/botprofileparser.cpp
+	../shared_utils/cpp/botprofiles/botprofiletable.cpp
 )
 
 include_directories (

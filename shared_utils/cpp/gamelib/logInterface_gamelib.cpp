@@ -7,6 +7,8 @@
 #include "cl_dll.h"
 #endif
 
+#ifndef CLIENT_DLL
+
 // Ick. Engine functions don't take const char* pointers...
 
 void LogInterface_Server::Debug(const CUtlString& message)
@@ -29,7 +31,8 @@ void LogInterface_Server::Error(const CUtlString& message)
 	ALERT(at_error, const_cast<char*>(message.String()));
 }
 
-#ifdef CLIENT_DLL
+#else
+
 void LogInterface_Client::Debug(const CUtlString& message)
 {
 	gEngfuncs.Con_DPrintf(message.String());
@@ -49,4 +52,5 @@ void LogInterface_Client::Error(const CUtlString& message)
 {
 	gEngfuncs.Con_Printf("^1Error:^7 %s", message.String());
 }
+
 #endif

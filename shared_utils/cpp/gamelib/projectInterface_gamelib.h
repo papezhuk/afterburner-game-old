@@ -4,6 +4,8 @@
 #include "logInterface_gamelib.h"
 #include "fileLoaders_gamelib.h"
 
+#ifndef CLIENT_DLL
+
 class ProjectInterface_Server : public IProjectInterface
 {
 public:
@@ -19,7 +21,8 @@ private:
 	LogInterface_Server m_LogInterface;
 };
 
-#ifdef CLIENT_DLL
+#else
+
 class ProjectInterface_Client : public IProjectInterface
 {
 public:
@@ -34,4 +37,5 @@ private:
 	FileLoader_Client m_FileLoader;
 	LogInterface_Client m_LogInterface;
 };
+
 #endif

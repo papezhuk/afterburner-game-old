@@ -3,7 +3,7 @@
 #include <cstdint>
 #include "mathlib.h"
 #include "const.h"
-#include "botprofiletable.h"
+#include "botprofiles/botprofiletable.h"
 #include "utlstring.h"
 #include "botfactory.h"
 

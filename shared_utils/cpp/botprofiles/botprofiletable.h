@@ -1,6 +1,5 @@
 #pragma once
 
-#include <vector>
 #include "utlstring.h"
 #include "utlhashmap.h"
 
@@ -9,6 +8,7 @@ class CBotProfileTable
 public:
 	struct ProfileData
 	{
+		CUtlString profileName;
 		CUtlString skin;
 		CUtlString playerName;
 	};
@@ -19,8 +19,12 @@ public:
 	size_t Count() const;
 
 	bool ProfileExists(const CUtlString& name) const;
+
 	ProfileData* GetProfile(const CUtlString& name);
 	const ProfileData* GetProfile(const CUtlString& name) const;
+
+	ProfileData* GetProfile(uint32_t index);
+	const ProfileData* GetProfile(uint32_t index) const;
 
 	ProfileData& CreateProfile(const CUtlString& name);
 	void RemoveProfile(const CUtlString& name);

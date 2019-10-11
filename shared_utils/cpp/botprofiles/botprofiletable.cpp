@@ -23,7 +23,11 @@ CBotProfileTable::ProfileData& CBotProfileTable::CreateProfile(const CUtlString&
 {
 	m_Table.Remove(name);
 	HashTable::IndexType_t index = m_Table.Insert(name);
-	return m_Table.Element(index);
+
+	ProfileData& data = m_Table.Element(index);
+	data.profileName = name;
+
+	return data;
 }
 
 CBotProfileTable::ProfileData* CBotProfileTable::GetProfile(const CUtlString& name)
@@ -36,6 +40,20 @@ const CBotProfileTable::ProfileData* CBotProfileTable::GetProfile(const CUtlStri
 {
 	HashTable::IndexType_t index = m_Table.Find(name);
 	return index != m_Table.InvalidIndex() ? &m_Table.Element(index) : NULL;
+}
+
+CBotProfileTable::ProfileData* CBotProfileTable::GetProfile(uint32_t index)
+{
+	return (index != m_Table.InvalidIndex() && index < m_Table.Count())
+		? &m_Table.Element(index)
+		: nullptr;
+}
+
+const CBotProfileTable::ProfileData* CBotProfileTable::GetProfile(uint32_t index) const
+{
+	return (index != m_Table.InvalidIndex() && index < m_Table.Count())
+		? &m_Table.Element(index)
+		: nullptr;
 }
 
 void CBotProfileTable::RemoveProfile(const CUtlString& name)

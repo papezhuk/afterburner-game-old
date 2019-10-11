@@ -2,6 +2,8 @@
 
 #include "projectInterface/ILogInterface.h"
 
+#ifndef CLIENT_DLL
+
 class LogInterface_Server : public ILogInterface
 {
 public:
@@ -13,7 +15,8 @@ public:
 	virtual void Error(const CUtlString& message) override;
 };
 
-#ifdef CLIENT_DLL
+#else
+
 class LogInterface_Client : public ILogInterface
 {
 public:
@@ -24,4 +27,5 @@ public:
 	virtual void Warning(const CUtlString& message) override;
 	virtual void Error(const CUtlString& message) override;
 };
+
 #endif

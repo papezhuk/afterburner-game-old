@@ -18,6 +18,6 @@ inline T GetProperty(const Value& value, const char* name, Type type, const T& d
 		: defaultValue;
 }
 
-bool LoadJsonFile(const CUtlString& path, Document& document, IProjectInterface& pIfc, const char* moduleName = nullptr);
+bool LoadJsonFile(const CUtlString& path, Document& document, const char* moduleName = nullptr);
 
 RAPIDJSON_NAMESPACE_END

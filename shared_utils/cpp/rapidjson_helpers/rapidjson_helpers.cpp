@@ -53,8 +53,10 @@ const char* ValueTypeAsString(Type valueType)
 	}
 }
 
-bool LoadJsonFile(const CUtlString& path, Document& document, IProjectInterface& pIfc, const char* moduleName)
+bool LoadJsonFile(const CUtlString& path, Document& document, const char* moduleName)
 {
+	IProjectInterface& pIfc = IProjectInterface::ProjectInterfaceImpl();
+
 	size_t length = 0;
 	uint8_t* fileData = pIfc.FileLoader().Load(path, length);
 

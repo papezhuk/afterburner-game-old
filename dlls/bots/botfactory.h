@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstdint>
-#include "botprofiletable.h"
+#include "botprofiles/botprofiletable.h"
 
 class CBaseBot;
 class CUtlString;

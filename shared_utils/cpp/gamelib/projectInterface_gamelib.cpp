@@ -1,5 +1,16 @@
 #include "projectInterface_gamelib.h"
 
+IProjectInterface&  IProjectInterface::ProjectInterfaceImpl()
+{
+#ifdef CLIENT_DLL
+	return ProjectInterface_Client::StaticInstance();
+#else
+	return ProjectInterface_Server::StaticInstance();
+#endif
+}
+
+#ifndef CLIENT_DLL
+
 IProjectInterface& ProjectInterface_Server::StaticInstance()
 {
 	static ProjectInterface_Server instance;
@@ -16,7 +27,8 @@ ILogInterface& ProjectInterface_Server::LogInterface()
 	return m_LogInterface;
 }
 
-#ifdef CLIENT_DLL
+#else
+
 IProjectInterface& ProjectInterface_Client::StaticInstance()
 {
 	static ProjectInterface_Client instance;

@@ -5,7 +5,7 @@
 #include "eiface.h"
 #include "cbase.h"
 #include "client.h"
-#include "botprofileparser.h"
+#include "botprofiles/botprofileparser.h"
 
 void CBotFactory::LoadBotProfiles()
 {
